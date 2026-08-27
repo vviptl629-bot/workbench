@@ -58,6 +58,7 @@
   .side-btn:hover{color:var(--text);border-color:var(--accent)}
   .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
   .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
+  .side-hint{font-size:11px;color:var(--muted);line-height:1.4;padding:2px 4px 6px;margin-top:-4px;opacity:.85;}
 
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:24px 28px 96px;display:flex;flex-direction:column;gap:20px}
@@ -290,6 +291,13 @@
   .stats-summary .sbox .l{font-size:11.5px;color:var(--muted);margin-top:4px}
   .stats-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
   .stats-card .card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px}
+  .ovr-item{background:var(--card-2);border:1px solid var(--border);border-left:3px solid #f43f5e;border-radius:10px;padding:10px 12px;margin-bottom:10px}
+  .ovr-item.chronic{border-left-color:#b91c1c;background:rgba(244,63,94,.07)}
+  .ovr-main{display:flex;align-items:center;gap:8px}
+  .ovr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .ovr-text{font-weight:600;font-size:14px;color:var(--text);word-break:break-all}
+  .ovr-meta{font-size:12.5px;color:var(--muted);margin-top:5px}
+  .ovr-meta b{color:#f43f5e}
   .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:6px}
   .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
   .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#7c74f0);border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
@@ -578,10 +586,10 @@
     </div>
     <div class="nav-item" data-view="study"><span class="dot" style="background:#8b5cf6"></span> 学习 <span class="count" id="c-study">0</span></div>
     <div class="nav-item" data-view="life"><span class="dot" style="background:#10b981"></span> 生活 <span class="count" id="c-life">0</span></div>
-    <div class="nav-item" data-view="english"><span>🎯</span> 目标管理 <span class="count" id="c-english">0</span></div>
     <div class="side-btn" id="btnTpl">🔁 例行任务</div>
     <div class="side-btn" id="btnTheme">🌙 深色模式</div>
-    <div class="side-btn" id="btnRemind">🔔 定时提醒</div>
+    <div class="side-btn" id="btnRemind" title="开启后，给任务设置了「提醒时间」的，到时间点会提醒你">🔔 定时提醒</div>
+    <div class="side-hint">开启后，给任务设了提醒时间的，到时间点会提醒</div>
     <div class="nav-label">分析</div>
     <div class="nav-item" data-view="stats"><span>📊</span> 统计分析</div>
     <div class="spacer"></div>
@@ -662,26 +670,15 @@
     </div>
     <div id="listArea"></div>
 
-<!-- 学习目标表单 modal -->
-<div class="gfm-mask" id="goalFormModal"><div class="gfm-box" id="goalFormBox"></div></div>
-
     <div id="statsArea" style="display:none">
-      <div class="stats-tabs">
-        <button class="stab active" data-mode="week">📅 周统计（近 7 天）</button>
-        <button class="stab" data-mode="month">🗓️ 月统计（整月）</button>
-      </div>
       <div class="stats-summary" id="statsSummary"></div>
-      <div class="stats-card" id="barCard">
-        <div class="card-title">每日未完成数量（近 7 天）</div>
-        <div class="bar-chart" id="statsBars"></div>
+      <div class="stats-card" id="ovrListCard">
+        <div class="card-title">🚨 当前逾期清单（按逾期天数排序）</div>
+        <div id="ovrList"></div>
       </div>
-      <div class="stats-card" id="pieCard" style="display:none">
-        <div class="card-title">任务分类占比（本月）</div>
-        <div id="statsPie"></div>
-      </div>
-      <div class="stats-card" id="catCard">
-        <div class="card-title">未完成 · 分类分布</div>
-        <div id="statsCats"></div>
+      <div class="stats-card" id="ovrWeekCard">
+        <div class="card-title">📅 一周逾期分析（近 7 天到期未做）</div>
+        <div id="ovrWeek"></div>
       </div>
       <div class="stats-card analysis">
         <div class="card-title">📌 改进建议</div>
@@ -930,157 +927,71 @@ function catName(t){
   if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);return '工作·'+(s?s.name:t.sub);}
   return c.name;
 }
-// 周/月 未完成事项统计分析
+// 统计分析 → 以「逾期」为核心的实用分析
+function daysOverdue(t){
+  const ref=t.overdueMarkAt||t.due;
+  if(!ref)return 0;
+  const a=new Date(ref+'T00:00:00'),b=new Date(todayStr()+'T00:00:00');
+  return Math.max(0,Math.round((b-a)/86400000));
+}
 function renderStats(){
-  const today=new Date();const todayStr2=fmtDate(today);
-  const y=today.getFullYear(), m=today.getMonth();
-  const isWeek=statsMode==='week';
-  let rangeStart, rangeEnd, arr=[];
-  if(isWeek){
-    {const rs=new Date(today);rs.setDate(today.getDate()-6);rangeStart=fmtDate(rs);}
-    rangeEnd=todayStr2;
-    for(let i=6;i>=0;i--){
-      const d=new Date(today);d.setDate(d.getDate()-i);
-      const ds=fmtDate(d);
-      const due=tasks.filter(t=>t.due===ds);
-      const un=due.filter(t=>!t.done).length;
-      const dn=due.filter(t=>t.done).length;
-      arr.push({ds,label:(i===0?'今天':(''+d.getDate())),due:due.length,un,dn});
-    }
-  }else{
-    const lastDay=new Date(y,m+1,0).getDate();
-    rangeStart=fmtDate(new Date(y,m,1));
-    rangeEnd=fmtDate(new Date(y,m+1,0));
-    for(let i=1;i<=lastDay;i++){
-      const d=new Date(y,m,i);
-      const ds=fmtDate(d);
-      const due=tasks.filter(t=>t.due===ds);
-      const un=due.filter(t=>!t.done).length;
-      const dn=due.filter(t=>t.done).length;
-      arr.push({ds,label:((i===today.getDate())?'今天':(''+i)),due:due.length,un,dn});
-    }
-  }
-  const totalDue=arr.reduce((a,b)=>a+b.due,0);
-  const totalDone=arr.reduce((a,b)=>a+b.dn,0);
-  const totalUn=arr.reduce((a,b)=>a+b.un,0);
-  const rate=totalDue?Math.round(totalDone/totalDue*100):0;
+  const today=todayStr();
+  const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t)));
+  const rs=new Date();rs.setDate(rs.getDate()-6);const weekStart=fmtDate(rs);
+  const weekOvr=tasks.filter(t=>!t.done&&t.due&&t.due>=weekStart&&t.due<=today);
+  // 概览
+  const occ={};ovr.forEach(t=>{const k=catName(t);occ[k]=(occ[k]||0)+1;});
+  const occs=Object.keys(occ).map(k=>({k,n:occ[k]})).sort((a,b)=>b.n-a.n);
+  const topCat=occs.length?occs[0].k:'—';
+  const topCatN=occs.length?occs[0].n:0;
+  const maxDays=ovr.length?Math.max.apply(null,ovr.map(daysOverdue)):0;
   document.getElementById('statsSummary').innerHTML=
-    '<div class="sbox"><div class="n">'+totalDue+'</div><div class="l">总任务</div></div>'+
-    '<div class="sbox clickable" id="sboxDone"><div class="n r">'+totalDone+'</div><div class="l">已完成</div></div>'+
-    '<div class="sbox"><div class="n bad">'+totalUn+'</div><div class="l">未完成</div></div>'+
-    '<div class="sbox"><div class="n g">'+rate+'%</div><div class="l">完成率</div></div>';
-  // 点「已完成」数字 → 展开已完成列表 + 滚动过去
-  const sboxDoneEl=document.getElementById('sboxDone');
-  if(sboxDoneEl)sboxDoneEl.onclick=()=>{
-    // 先确保展开（如果当前在收起状态）
-    if(!showDone){
-      const bar=document.getElementById('doneBar');
-      if(bar)bar.click();
-    }
-    // 滚动到已完成列表
-    setTimeout(()=>{
-      const dl=document.getElementById('doneList');
-      if(dl)dl.scrollIntoView({behavior:'smooth',block:'start'});
-    },100);
-  };
-  document.getElementById('barCard').style.display=isWeek?'':'none';
-  document.getElementById('pieCard').style.display=isWeek?'none':'';
-  document.getElementById('catCard').style.display=isWeek?'':'none';
-  if(isWeek){
-    const maxUn=Math.max(1,...arr.map(x=>x.un));
-    document.getElementById('statsBars').innerHTML=arr.map(x=>{
-      const h=Math.round(x.un/maxUn*100);
-      return '<div class="bar-col'+(x.un===0?' zero':'')+'"><div class="bv">'+(x.un||'')+'</div>'+
-        '<div class="bar" style="height:'+h+'%"></div><div class="bl">'+x.label+'</div></div>';
+    '<div class="sbox"><div class="n bad">'+ovr.length+'</div><div class="l">当前逾期</div></div>'+
+    '<div class="sbox"><div class="n">'+weekOvr.length+'</div><div class="l">本周到期未做</div></div>'+
+    '<div class="sbox"><div class="n g">'+escapeHtml(topCat)+'</div><div class="l">最常逾期分类</div></div>'+
+    '<div class="sbox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期</div></div>';
+  // 当前逾期清单
+  const ovrEl=document.getElementById('ovrList');
+  if(ovr.length===0){
+    ovrEl.innerHTML='<div style="font-size:13px;color:var(--muted)">🎉 当前没有逾期任务，保持得很好！</div>';
+  }else{
+    ovr.sort((a,b)=>daysOverdue(b)-daysOverdue(a));
+    ovrEl.innerHTML=ovr.map(t=>{
+      const d=daysOverdue(t);
+      const cc=(CATS[t.category]&&CATS[t.category].color)||'#64748b';
+      const due=t.due||t.overdueMarkAt||'';
+      return '<div class="ovr-item'+(d>=7?' chronic':'')+'">'+
+        '<div class="ovr-main"><span class="ovr-dot" style="background:'+cc+'"></span>'+
+        '<span class="ovr-text">'+escapeHtml(t.text||'(无内容)')+'</span></div>'+
+        '<div class="ovr-meta">'+escapeHtml(catName(t))+' · 到期 '+due+' · <b>已逾期 '+d+' 天</b></div>'+
+        '</div>';
     }).join('');
+  }
+  // 一周逾期分析（按分类）
+  const wc={};weekOvr.forEach(t=>{const k=catName(t);wc[k]=(wc[k]||0)+1;});
+  const wcs=Object.keys(wc).map(k=>({k,n:wc[k]})).sort((a,b)=>b.n-a.n);
+  const wkEl=document.getElementById('ovrWeek');
+  if(wcs.length===0){
+    wkEl.innerHTML='<div style="font-size:13px;color:var(--muted)">近 7 天没有到期未做的任务。</div>';
   }else{
-    renderMonthPie(rangeStart,rangeEnd);
+    const max=Math.max(1,...wcs.map(c=>c.n));
+    wkEl.innerHTML=wcs.map(c=>{const w=Math.round(c.n/max*100);return '<div class="cat-row"><div class="cn">'+escapeHtml(c.k)+'</div><div class="ct" style="width:'+w+'%"></div><div class="cc">'+c.n+'</div></div>';}).join('');
   }
-  const catCount={};
-  tasks.forEach(t=>{
-    if(!t.due||t.done)return;
-    if(t.due>=rangeStart&&t.due<=rangeEnd){const k=catName(t);catCount[k]=(catCount[k]||0)+1;}
-  });
-  const cats=Object.keys(catCount).map(k=>({k,n:catCount[k]})).sort((a,b)=>b.n-a.n);
-  const catsEl=document.getElementById('statsCats');
-  if(isWeek){
-    const maxCat=Math.max(1,...cats.map(c=>c.n));
-    if(cats.length===0){
-      catsEl.innerHTML='<div style="font-size:13px;color:var(--muted)">🎉 周期内没有未完成的任务，继续保持！</div>';
-    }else{
-      catsEl.innerHTML=cats.map(c=>{
-        const w=Math.round(c.n/maxCat*100);
-        return '<div class="cat-row"><div class="cn">'+escapeHtml(c.k)+'</div>'+
-          '<div class="ct" style="width:'+w+'%"></div><div class="cc">'+c.n+'</div></div>';
-      }).join('');
-    }
-  }
+  // 改进建议
   const li=[];
-  // 趋势对比：本周 vs 上周（仅周统计模式）
-  if(isWeek){
-    let lwDue=0,lwDone=0;
-    for(let i=7;i<=13;i++){
-      const d=new Date(today);d.setDate(today.getDate()-i);
-      const ds=fmtDate(d);
-      const due=tasks.filter(t=>t.due===ds);
-      lwDue+=due.length;
-      lwDone+=due.filter(t=>t.done).length;
-    }
-    const lwRate=lwDue?Math.round(lwDone/lwDue*100):0;
-    const diff=rate-lwRate;
-    if(lwDue>0){
-      const arrow=diff>0?'↑':diff<0?'↓':'→';
-      const cls=diff>0?'good':diff<0?'bad':'';
-      li.push('<li class="'+cls+'">📊 本周完成率 '+rate+'% vs 上周 '+lwRate+'% <b>'+arrow+' '+Math.abs(diff)+'%</b>'+(diff>0?'，势头不错！':diff<0?'，加油追回来':'，持平')+'</li>');
-    }
-  }
-  if(totalDue===0){
-    li.push('<li>周期内还没有带日期的任务记录，先从<span class="hl">每天添加并设定日期</span>开始吧。</li>');
+  if(ovr.length===0){
+    li.push('<li class="good">🎉 当前零逾期，执行力在线！保持每天清空逾期清单的节奏。</li>');
   }else{
-    if(rate>=90)li.push('<li class="good">完成率高达 '+rate+'%，执行力非常棒，保持节奏即可。🏆</li>');
-    else if(rate>=70)li.push('<li>完成率 '+rate+'%，整体不错；把<span class="hl">未完成项</span>往前排一排就能冲到 90%。</li>');
-    else if(rate>=50)li.push('<li>完成率只有 '+rate+'%，接近一半没做完。建议<span class="bad">每天任务量减半</span>或优先做最重要的 3 件。</li>');
-    else li.push('<li class="bad">完成率仅 '+rate+'%，任务明显超载。强烈建议<span class="bad">每天只留 3-5 条核心任务</span>，其余顺延。</li>');
-    if(cats.length){
-      const top=cats[0];
-      li.push('<li>「<span class="hl">'+escapeHtml(top.k)+'</span>」未完成最多（'+top.n+' 条），是主要卡点。可拆分步骤、设更早时间，或授权/外包。</li>');
+    if(ovr.length>=5)li.push('<li class="bad">逾期共 <b>'+ovr.length+'</b> 条，明显超载。建议每天只留 3-5 条核心任务，其余顺延或删除。</li>');
+    if(topCat!=='—')li.push('<li>「<span class="hl">'+escapeHtml(topCat)+'</span>」逾期最多（'+topCatN+' 条），是主要卡点。可拆分步骤、把截止时间提前、或考虑委派/外包。</li>');
+    const chronic=ovr.filter(t=>daysOverdue(t)>=7);
+    if(chronic.length){
+      li.push('<li class="bad">⚠️ 以下 <b>'+chronic.length+'</b> 条已逾期 7 天以上，可能已不相关或长期卡住：'+chronic.slice(0,5).map(t=>escapeHtml(t.text||'')).join('、')+(chronic.length>5?' 等':'')+'。建议要么今天就做，要么果断删除/重新规划。</li>');
     }
-    if(isWeek){
-      let worst=arr[0];arr.forEach(x=>{if(x.un>worst.un)worst=x;});
-      if(worst.un>0)li.push('<li><span class="hl">'+worst.label+'</span> 那天未完成 '+worst.un+' 条，是本周最吃力的一天，复盘下是否被临时插入打断。</li>');
-    }
+    if(ovr.some(t=>t.overdueMark))li.push('<li>有任务被手动标记为逾期，说明一拖再拖。挑一个最小的今天先完成，用「小胜」打破拖延。</li>');
+    li.push('<li>复盘习惯：每晚花 2 分钟看这张表，把「经常逾期」的任务要么提前做、要么从清单里拿掉。</li>');
   }
   document.getElementById('statsAdvice').innerHTML='<ul>'+li.join('')+'</ul>';
-}
-// 月统计：本月任务按顶级分类聚合的饼图
-function renderMonthPie(start,end){
-  const pieCount={};
-  tasks.forEach(t=>{
-    if(!t.due)return;
-    if(t.due>=start&&t.due<=end){
-      const k=t.category;
-      pieCount[k]=(pieCount[k]||0)+1;
-    }
-  });
-  const data=Object.keys(pieCount).map(k=>({name:CATS[k].name,value:pieCount[k],color:CATS[k].color}));
-  const el=document.getElementById('statsPie');
-  const total=data.reduce((a,b)=>a+b.value,0);
-  if(total===0){
-    el.innerHTML='<div style="font-size:13px;color:var(--muted)">本月还没有带日期的任务，先从每天添加并设定日期开始吧。</div>';
-    return;
-  }
-  const cx=70,cy=70,r=58;let acc=0,paths='';
-  data.forEach(d=>{
-    const frac=d.value/total;
-    const a0=acc*2*Math.PI-Math.PI/2;acc+=frac;
-    const a1=acc*2*Math.PI-Math.PI/2;
-    const x0=(cx+r*Math.cos(a0)).toFixed(2),y0=(cy+r*Math.sin(a0)).toFixed(2);
-    const x1=(cx+r*Math.cos(a1)).toFixed(2),y1=(cy+r*Math.sin(a1)).toFixed(2);
-    const large=frac>0.5?1:0;
-    paths+='<path d="M'+cx+' '+cy+' L'+x0+' '+y0+' A'+r+' '+r+' 0 '+large+' 1 '+x1+' '+y1+' Z" fill="'+d.color+'" stroke="var(--card)" stroke-width="2"><title>'+escapeHtml(d.name)+' '+d.value+' ('+Math.round(frac*100)+'%)</title></path>';
-  });
-  const legend=data.map(d=>'<div class="pie-leg"><span class="dot" style="background:'+d.color+'"></span>'+escapeHtml(d.name)+' <b>'+d.value+'</b> <span class="pct">'+Math.round(d.value/total*100)+'%</span></div>').join('');
-  el.innerHTML='<div class="pie-wrap"><svg width="140" height="140" viewBox="0 0 140 140">'+paths+'<circle cx="'+cx+'" cy="'+cy+'" r="32" fill="var(--card)"/></svg><div class="pie-legend">'+legend+'</div></div>';
 }
 
 /* ---------- day navigator ---------- */
@@ -1472,11 +1383,6 @@ function updateCounts(){
   const ci=document.getElementById('c-idea');if(ci)ci.textContent=ideas.filter(x=>!x.done).length;
   const cu=document.getElementById('c-upcoming');if(cu)cu.textContent=tasks.filter(t=>!t.done&&t.due&&t.due>todayStr()).length;
   const cw=document.getElementById('c-week');if(cw){const tw=todayStr(),te=addDays(tw,6);cw.textContent=tasks.filter(t=>!t.done&&!isMarkedOverdue(t)&&((isOverdue(t)||isDueToday(t)||!t.due)||(t.due&&t.due>=tw&&t.due<=te))).length;}
-  const ec=document.getElementById('c-english');
-  if(ec){
-    const n=goals.filter(g=>{const d=goalDone(g),t=g.total||0;return !(t>0&&d>=t);}).length;
-    ec.textContent=n;
-  }
   updateStoreStatus();
 }
 
@@ -1866,10 +1772,9 @@ function render(){
   renderImpCard();
   document.getElementById('taskAddBox').style.display=taskView?'flex':'none';
   document.getElementById('dayNav').style.display=taskView?'flex':'none';
-  document.getElementById('searchBar').style.display=(view==='stats'||view==='english')?'none':'';
+  document.getElementById('searchBar').style.display=(view==='stats')?'none':'';
   document.getElementById('statsArea').style.display=(view==='stats')?'block':'none';
   document.getElementById('listArea').style.display=(view==='stats')?'none':'';
-  if(view==='english'){renderEnglish();return;}
   if(view==='stats'){renderStats();return;}
   if(view==='idea'){renderIdeas();return;}
   if(view==='upcoming'){renderUpcoming();return;}
@@ -1917,241 +1822,8 @@ function render(){
   renderTasks(isTodayMode,focusDate);
 }
 
-/* ---------- 目标管理视图（赖世雄规划打卡） ---------- */
-/* ---------- 学习目标管理 (Goals) ---------- */
-let goalEditId=null;
-let gcalYM=null;
-const GOAL_COLORS=['#8b5cf6','#3b82f6','#10b981','#14b8a6','#ec4899','#f97316','#6366f1','#ef4444','#06b6d4','#a855f7'];
-
+/* ---------- 目标管理数据层（UI 已移除，保留以便 Gist 同步兼容） ---------- */
 function saveGoals(){lsSet('workbench_goals',JSON.stringify(goals));updateCounts();}
-function goalDone(g){let s=0;for(const l of g.logs||[])s+=l.count||0;return s;}
-function goalRemain(g){return Math.max(0,(g.total||0)-goalDone(g));}
-function goalStatus(g){const d=goalDone(g),t=g.total||0;if(t>0&&d>=t)return 'done';if(g.deadline&&g.deadline<todayStr())return 'ovr';return 'doing';}
-function goalDaysLeft(g){if(!g.deadline)return null;const t=new Date();t.setHours(0,0,0,0);const d=new Date(g.deadline+'T00:00:00');return Math.round((d-t)/(1000*60*60*24));}
-function goalTagHtml(s){if(s==='ovr')return '<span class="goal-tag ovr">逾期</span>';if(s==='done')return '<span class="goal-tag done">已完成</span>';return '<span class="goal-tag doing">进行中</span>';}
-function goalAttr(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-function openGoalForm(id){
-  goalEditId=id||null;
-  const g=id?(goals.find(x=>x.id===id)||{}):{name:'',unit:'页',total:100,deadline:'',color:GOAL_COLORS[0],obstacle:'',cope:''};
-  const colorBtns=GOAL_COLORS.map(c=>'<span class="gfm-color'+(c===g.color?' on':'')+'" style="background:'+c+'" data-color="'+c+'"></span>').join('');
-  document.getElementById('goalFormBox').innerHTML=
-    '<div class="gfm-title">'+(id?'调整计划':'新建学习目标')+'</div>'+
-    '<div class="gfm-field"><label class="gfm-label">名称</label>'+
-      '<input class="gfm-input" id="gfm-name" placeholder="如:背完 2000 个单词" value="'+goalAttr(g.name)+'"></div>'+
-    '<div class="gfm-row"><div class="gfm-field"><label class="gfm-label">单位</label>'+
-      '<input class="gfm-input" id="gfm-unit" placeholder="个 / 页 / 节" value="'+goalAttr(g.unit)+'"></div>'+
-      '<div class="gfm-field"><label class="gfm-label">总量</label>'+
-      '<input class="gfm-input" id="gfm-total" type="number" min="1" placeholder="2000" value="'+(g.total||'')+'"></div></div>'+
-    '<div class="gfm-field"><label class="gfm-label">截止日</label>'+
-      '<input class="gfm-input" id="gfm-deadline" type="date" value="'+(g.deadline||'')+'"></div>'+
-    '<div class="gfm-field"><label class="gfm-label">配色</label><div class="gfm-colors" id="gfm-colors">'+colorBtns+'</div></div>'+
-    '<div class="gfm-field"><label class="gfm-label">最容易拦住我的障碍 <span style="font-weight:400;color:var(--muted)">(选填)</span></label>'+
-      '<textarea class="gfm-textarea" id="gfm-obstacle" placeholder="什么最容易让我中断?">'+goalAttr(g.obstacle)+'</textarea></div>'+
-    '<div class="gfm-field"><label class="gfm-label">如果它出现, 我就...... <span style="font-weight:400;color:var(--muted)">(选填·对策)</span></label>'+
-      '<textarea class="gfm-textarea" id="gfm-cope" placeholder="我的应对预案">'+goalAttr(g.cope)+'</textarea></div>'+
-    '<div class="gfm-actions">'+
-      '<button class="gfm-primary" id="gfm-ok">'+(id?'保存修改':'创建目标')+'</button>'+
-      '<button class="gfm-cancel" id="gfm-cancel">取消</button>'+
-    '</div>';
-  const box=document.getElementById('goalFormBox');
-  box.querySelectorAll('.gfm-color').forEach(el=>{
-    el.onclick=()=>{box.querySelectorAll('.gfm-color').forEach(x=>x.classList.remove('on'));el.classList.add('on');};
-  });
-  document.getElementById('gfm-ok').onclick=submitGoalForm;
-  document.getElementById('gfm-cancel').onclick=closeGoalForm;
-  document.getElementById('goalFormModal').classList.add('show');
-}
-function closeGoalForm(){document.getElementById('goalFormModal').classList.remove('show');goalEditId=null;}
-function submitGoalForm(){
-  const nm=document.getElementById('gfm-name').value.trim();
-  const un=document.getElementById('gfm-unit').value.trim()||'单位';
-  const tt=parseInt(document.getElementById('gfm-total').value,10);
-  const dl=document.getElementById('gfm-deadline').value;
-  const cc=document.querySelector('#gfm-colors .gfm-color.on');
-  const ob=document.getElementById('gfm-obstacle').value.trim();
-  const cp=document.getElementById('gfm-cope').value.trim();
-  if(!nm){showToast('请填写目标名称');return;}
-  if(!tt||tt<1){showToast('请填写有效总量');return;}
-  const color=cc?cc.dataset.color:GOAL_COLORS[0];
-  if(goalEditId){
-    const g=goals.find(x=>x.id===goalEditId);
-    if(g){g.name=nm;g.unit=un;g.total=tt;g.deadline=dl;g.color=color;g.obstacle=ob;g.cope=cp;g.updated=Date.now();}
-  }else{
-    goals.push({id:'g_'+Date.now()+'_'+Math.floor(Math.random()*9999),name:nm,unit:un,total:tt,deadline:dl,color:color,obstacle:ob,cope:cp,logs:[],createdAt:Date.now(),updated:Date.now()});
-  }
-  saveGoals();closeGoalForm();renderEnglish();showToast(goalEditId?'已保存修改':'已创建目标');
-}
-function deleteGoal(id){
-  const g=goals.find(x=>x.id===id);if(!g)return;
-  if(!confirm('确定删除目标「'+g.name+'」?\n历史打卡数据也会清除。'))return;
-  goals=goals.filter(x=>x.id!==id);
-  saveGoals();renderEnglish();showToast('已删除');
-}
-function quickCheckIn(g,add){
-  const td=todayStr();
-  if(!g.logs)g.logs=[];
-  const idx=g.logs.findIndex(l=>l.date===td);
-  if(idx>=0){
-    g.logs[idx].count=Math.max(0,(g.logs[idx].count||0)+add);
-    if(g.logs[idx].count<=0)g.logs.splice(idx,1);
-  }else{
-    g.logs.push({date:td,count:add});
-  }
-  g.updated=Date.now();
-  saveGoals();renderEnglish();showToast('打卡 +'+add+' '+g.unit);
-}
-
-function goalCardHtml(g){
-  const status=goalStatus(g);
-  const done=goalDone(g),remain=goalRemain(g);
-  const pct=g.total?Math.min(100,Math.round(done/g.total*100)):0;
-  const dl=g.deadline?g.deadline.replace(/-/g,'/'):'';
-  const days=goalDaysLeft(g);
-  const hasOb=(g.obstacle&&g.obstacle.trim())||(g.cope&&g.cope.trim());
-  let progLine='';
-  if(status==='ovr'){
-    const d=Math.abs(days||0);
-    progLine='<div class="goal-progress-line"><span class="danger">已逾期 '+d+' 天</span>, 截止日 '+dl+' 已过, 还剩 <b>'+remain+' '+g.unit+'</b>。</div>';
-  }else if(status==='done'){
-    progLine='<div class="goal-progress-line">已完成 ✅ 共 <b>'+done+' '+g.unit+'</b>。</div>';
-  }else if(days!=null){
-    if(days<=0)progLine='<div class="goal-progress-line">今天到期, 还剩 <b>'+remain+' '+g.unit+'</b>。</div>';
-    else if(days<=3)progLine='<div class="goal-progress-line">⚠️ 距截止 <b>'+days+'</b> 天, 还剩 <b>'+remain+' '+g.unit+'</b>。</div>';
-    else progLine='<div class="goal-progress-line">进度 <b>'+done+'/'+g.total+' '+g.unit+'</b>, 还剩 <b>'+remain+' '+g.unit+'</b>, 距截止 '+days+' 天。</div>';
-  }else{
-    progLine='<div class="goal-progress-line">进度 <b>'+done+'/'+g.total+' '+g.unit+'</b>, 还剩 <b>'+remain+' '+g.unit+'</b>。</div>';
-  }
-  const pill=hasOb
-    ?'<div class="goal-pillbox">'+
-       (g.obstacle?'<div><b>障碍:</b>'+goalAttr(g.obstacle)+'</div>':'')+
-       (g.cope?'<div><b>对策:</b>'+goalAttr(g.cope)+'</div>':'')+
-      '</div>'
-    :'';
-  const actionsBody=(status!=='done')
-    ?'<span class="label">今日建议 +<input class="goal-now-input" data-gid="'+g.id+'" type="number" min="1" value="1"><span style="font-size:11px;color:var(--muted);margin-left:2px">'+goalAttr(g.unit)+'</span></span>'+
-     '<button class="goal-now" data-gid="'+g.id+'">立即打卡</button>'
-    :'<span class="label">已完成全部 '+(g.total||0)+' '+g.unit+' ✅</span>';
-  return ''+
-    '<div class="goal-card" data-gid="'+g.id+'">'+
-      '<div class="goal-card-row">'+
-        '<span class="goal-dot" style="background:'+g.color+'"></span>'+
-        '<span class="goal-name">'+goalAttr(g.name)+'</span>'+
-        goalTagHtml(status)+
-      '</div>'+
-      progLine+
-      '<div class="goal-bar"><div class="goal-bar-fg" style="width:'+pct+'%;background:'+g.color+'"></div></div>'+
-      pill+
-      '<div class="goal-actions">'+
-        actionsBody+
-        '<button class="goal-adjust" data-gid="'+g.id+'">调整计划</button>'+
-        '<button class="goal-del" data-gid="'+g.id+'" title="删除目标">×</button>'+
-      '</div>'+
-    '</div>';
-}
-
-function goalMonthLogs(y,m){
-  const out={};
-  for(const g of goals){
-    for(const l of g.logs||[]){
-      if(!l||!l.date)continue;
-      const dt=new Date(l.date+'T00:00:00');
-      if(dt.getFullYear()===y && (dt.getMonth()+1)===m){
-        out[l.date]=(out[l.date]||0)+(l.count||0);
-      }
-    }
-  }
-  return out;
-}
-function _maxOfMap(o){let m=0;for(const k in o)if(o[k]>m)m=o[k];return m;}
-function gcalLevel(v,mx){if(!v)return 0;if(mx<=0)return 0;const p=v/mx;if(p<=0.25)return 1;if(p<=0.5)return 2;if(p<=0.75)return 3;return 4;}
-function gcalHtml(){
-  const now=new Date();
-  if(!gcalYM)gcalYM=[now.getFullYear(),now.getMonth()+1];
-  let [y,m]=gcalYM;
-  const map=goalMonthLogs(y,m);
-  const mx=_maxOfMap(map);
-  const first=new Date(y,m-1,1);
-  const firstDay=first.getDay();
-  const days=new Date(y,m,0).getDate();
-  const prevY=m===1?y-1:y;
-  const prevM=m===1?12:m-1;
-  const today=todayStr();
-  const wd=['日','一','二','三','四','五','六'];
-  let cells='';
-  for(let i=0;i<firstDay;i++){
-    const pd=new Date(prevY,prevM-1,0-(firstDay-1-i)).getDate();
-    cells+='<div class="gcal-cell muted"><span class="gcal-num">'+pd+'</span></div>';
-  }
-  for(let d=1;d<=days;d++){
-    const ds=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const v=map[ds]||0;
-    const lvl=gcalLevel(v,mx);
-    const isToday=ds===today;
-    cells+='<div class="gcal-cell'+(isToday?' today':'')+(lvl?' lvl'+lvl:'')+'" title="'+ds+(v?' · '+v+' 单位':'')+'">'+
-      '<span class="gcal-num">'+d+'</span>'+(v?'<span class="gcal-v">'+v+'</span>':'')+'</div>';
-  }
-  const rem=(7-((firstDay+days)%7))%7;
-  for(let i=1;i<=rem;i++){
-    cells+='<div class="gcal-cell muted"><span class="gcal-num">'+i+'</span></div>';
-  }
-  return ''+
-    '<div class="gcal-wrap">'+
-      '<div class="gcal-head">'+
-        '<div class="gcal-title">🗓 学习日历</div>'+
-        '<div class="gcal-nav">'+
-          '<button id="gcal-prev" title="上个月">‹</button>'+
-          '<div class="gcal-ym">'+y+' / '+String(m).padStart(2,'0')+'</div>'+
-          '<button id="gcal-next" title="下个月">›</button>'+
-        '</div>'+
-      '</div>'+
-      '<div class="gcal-grid">'+
-        wd.map(w=>'<div class="gcal-wd">'+w+'</div>').join('')+
-        cells+
-      '</div>'+
-      '<div class="gcal-legend">打卡热度:'+
-        '<span class="lg" style="background:var(--card-2)"></span> 无'+
-        '<span class="lg" style="background:#ede9fe"></span> 低'+
-        '<span class="lg" style="background:#ddd6fe"></span> 中'+
-        '<span class="lg" style="background:#a78bfa"></span> 高'+
-      '</div>'+
-    '</div>';
-}
-
-function renderEnglish(){
-  if(gcalYM===null){const d=new Date();gcalYM=[d.getFullYear(),d.getMonth()+1];}
-  let html='';
-  if(goals.length===0){
-    html+='<div class="glist-empty">还没有学习目标。<br>挑一个想要坚持的事,给它定个截止日,把"障碍"和"对策"写下来。<br>'+
-           '<span class="empty-cta" id="goalFirstAdd">+ 新建第一个目标</span></div>';
-  }else{
-    html+=goals.map(goalCardHtml).join('');
-    html+='<button class="goal-add-btn" id="goalAdd">+ 新建学习目标</button>';
-  }
-  html+=gcalHtml();
-  const la=document.getElementById('listArea');if(la)la.innerHTML=html;
-  bindGoals();
-}
-function bindGoals(){
-  const fab=document.getElementById('goalAdd');if(fab)fab.onclick=()=>openGoalForm();
-  const first=document.getElementById('goalFirstAdd');if(first)first.onclick=()=>openGoalForm();
-  document.querySelectorAll('#listArea .goal-now').forEach(el=>{
-    el.onclick=()=>{
-      const id=el.dataset.gid;
-      const inp=document.querySelector('.goal-now-input[data-gid="'+id+'"]');
-      const add=Math.max(1,parseInt((inp&&inp.value)||'1',10));
-      const g=goals.find(x=>x.id===id);if(g)quickCheckIn(g,add);
-    };
-  });
-  document.querySelectorAll('#listArea .goal-adjust').forEach(el=>{
-    el.onclick=()=>openGoalForm(el.dataset.gid);
-  });
-  document.querySelectorAll('#listArea .goal-del').forEach(el=>{
-    el.onclick=()=>deleteGoal(el.dataset.gid);
-  });
-  const p=document.getElementById('gcal-prev');if(p)p.onclick=()=>{let[y,m]=gcalYM;m--;if(m<1){m=12;y--;}gcalYM=[y,m];renderEnglish();};
-  const nx=document.getElementById('gcal-next');if(nx)nx.onclick=()=>{let[y,m]=gcalYM;m++;if(m>12){m=1;y++;}gcalYM=[y,m];renderEnglish();};
-}
 
 /* ---------- 灵感笔记视图 ---------- */
 function fmtIdeaTime(ts){
@@ -2539,10 +2211,10 @@ function startReminder(){
 }
 function stopReminder(){if(_remindTimer){clearInterval(_remindTimer);_remindTimer=null;}}
 function checkReminders(){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
   const now=new Date();
   const hh=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   const today=todayStr();
+  const canNotify=('Notification' in window)&&Notification.permission==='granted';
   tasks.forEach(t=>{
     if(t.done||!t.start)return;
     const active=(t.repeat&&t.repeat!=='none')?isRepeatActive(t):(t.due===today);
@@ -2551,7 +2223,9 @@ function checkReminders(){
       const k=t.id+'@'+((t.repeat&&t.repeat!=='none')?today:t.due);
       if(_notified[k])return;_notified[k]=1;
       const cat=CATS[t.category];const name=cat?cat.name:(t.category==='work'&&t.sub?(SUBS.work.find(s=>s.key===t.sub)||{}).name:'');
-      try{new Notification('⏰ 任务提醒 · '+hh,{body:(t.text||'')+(name?('（'+name+'）'):''),tag:k});}catch(e){}
+      const body=(t.text||'')+(name?('（'+name+'）'):'');
+      if(canNotify){try{new Notification('⏰ 任务提醒 · '+hh,{body,tag:k});}catch(e){}}
+      else showToast('⏰ '+hh+' 提醒：'+body); // 应用内兜底提醒
     }
   });
 }
@@ -2562,14 +2236,21 @@ function updateRemindBtn(){
   btn.classList.toggle('on',on);
 }
 function toggleReminder(){
-  if(!('Notification' in window)){showToast('当前浏览器不支持通知');return;}
   const on=lsGet('workbench_reminder')==='on';
   if(!on){
-    Notification.requestPermission().then(p=>{
-      if(p==='granted'){lsSet('workbench_reminder','on');startReminder();showToast('🔔 定时提醒已开启（到点会弹通知）');}
-      else showToast('未授权通知权限，无法开启提醒');
-      updateRemindBtn();
-    });
+    // 开启：尽量申请通知权限；不论结果都开启，无权限时改用应用内提醒兜底
+    if('Notification' in window && Notification.permission!=='granted'){
+      try{const p=Notification.requestPermission();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+    }
+    lsSet('workbench_reminder','on');
+    startReminder();
+    const hasStart=tasks.some(t=>!!t.start);
+    if('Notification' in window && Notification.permission==='granted'){
+      showToast(hasStart?'🔔 定时提醒已开启（到点弹通知）':'🔔 已开启。编辑任务→设置「提醒时间」，到点会弹通知');
+    }else{
+      showToast('🔔 已开启（当前环境不支持弹窗通知，将用应用内提醒兜底）');
+    }
+    updateRemindBtn();
   }else{
     lsSet('workbench_reminder','off');stopReminder();showToast('已关闭定时提醒');updateRemindBtn();
   }
@@ -2615,11 +2296,7 @@ function init(){
     document.getElementById('timeRow').classList.toggle('show',e.target.checked);
   });
   document.getElementById('tlToggle').onclick=()=>{tlMode=!tlMode;render();};
-  document.querySelectorAll('.stab').forEach(b=>b.onclick=()=>{
-    statsMode=b.dataset.mode;
-    document.querySelectorAll('.stab').forEach(x=>x.classList.toggle('active',x===b));
-    renderStats();
-  });
+  // 统计视图已改为单页「逾期分析」，不再有周/月切换 tab
   document.getElementById('editSave').onclick=saveEdit;
   document.getElementById('editCat').onchange=()=>{document.getElementById('editSubRow').style.display=document.getElementById('editCat').value==='work'?'':'none';};
   document.getElementById('ideaEditSave').onclick=saveIdeaEdit;
