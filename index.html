@@ -679,10 +679,6 @@
         <div class="card-title">🚨 当前逾期清单（按逾期天数排序）</div>
         <div id="ovrList"></div>
       </div>
-      <div class="stats-card" id="ovrWeekCard">
-        <div class="card-title">📅 近 7 天到期未做清单（具体内容）</div>
-        <div id="ovrWeek"></div>
-      </div>
       <div class="stats-card analysis">
         <div class="card-title">📌 改进建议</div>
         <div id="statsAdvice"></div>
@@ -938,16 +934,9 @@ function daysOverdue(t){
   return Math.max(0,Math.round((b-a)/86400000));
 }
 
-function dueInDays(t){
-  if(!t.due)return null;
-  const a=new Date(t.due+'T00:00:00'),b=new Date(todayStr()+'T00:00:00');
-  return Math.round((a-b)/86400000); // 负=逾期, 0=今天, 正=未来
-}
 function renderStats(){
   const today=todayStr();
   const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t))&&daysOverdue(t)>0);
-  const rs=new Date();rs.setDate(rs.getDate()-6);const weekStart=fmtDate(rs);
-  const weekEnd=addDays(today,6); const weekOvr=tasks.filter(t=>!t.done&&t.due&&t.due>=today&&t.due<=weekEnd);
   const maxDays=ovr.length?Math.max.apply(null,ovr.map(daysOverdue)):0;
   ovr.sort((a,b)=>daysOverdue(b)-daysOverdue(a));
   const topTask=ovr.length?ovr[0]:null;
@@ -955,7 +944,6 @@ function renderStats(){
   const maxOvrTasks=maxDays>0?ovr.filter(t=>daysOverdue(t)===maxDays):[];
   document.getElementById('statsSummary').innerHTML=
     '<div class="sbox"><div class="n bad">'+ovr.length+'</div><div class="l">当前逾期</div></div>'+
-    '<div class="sbox"><div class="n">'+weekOvr.length+'</div><div class="l">本周到期未做</div></div>'+
     (maxDays>0?'<div class="sbox clickable" id="maxOvrBox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期 👆</div></div>':'<div class="sbox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期</div></div>');
   // 最长逾期点击展开
   const mBox=document.getElementById('maxOvrBox');
@@ -998,38 +986,6 @@ function renderStats(){
         '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
         '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
         '<div class="ovr-meta">到期 '+m.due+' · <b>已逾期 '+d+' 天</b></div>'+
-        '</div>';
-    }).join('');
-  }
-  // 近 7 天到期未做：前瞻提醒（今天 + 未来 6 天），不再把今天到期标成「已逾期 0 天」
-  const wkEl=document.getElementById('ovrWeek');
-  if(weekOvr.length===0){
-    wkEl.innerHTML='<div style="font-size:13px;color:var(--muted)">未来 7 天没有到期未做的任务。</div>';
-  }else{
-    // 合并相同文字
-    const wgrp={};
-    weekOvr.forEach(t=>{
-      const key=(t.text||'(无内容)').trim();
-      if(!wgrp[key])wgrp[key]=[];
-      wgrp[key].push(t);
-    });
-    const wmerged=[];
-    Object.keys(wgrp).forEach(k=>{
-      const arr=wgrp[k];
-      const earliestDue=arr.map(t=>t.due||'').sort()[0];
-      wmerged.push({text:k,count:arr.length,due:earliestDue,sample:arr[0]});
-    });
-    wmerged.sort((a,b)=>a.due.localeCompare(b.due));
-    wkEl.innerHTML=wmerged.map(m=>{
-      const din=dueInDays(m.sample);
-      let txt;
-      if(din===0)txt='今天到期';
-      else if(din>0)txt='还有 '+din+' 天';
-      else txt='已逾期 '+(-din)+' 天';
-      return '<div class="ovr-item'+(din<0?' chronic':'')+(m.count>1?' merged':'')+'">'+
-        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
-        '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
-        '<div class="ovr-meta">到期 '+m.due+' · <b>'+txt+'</b></div>'+
         '</div>';
     }).join('');
   }
