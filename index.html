@@ -671,6 +671,10 @@
 
     <div id="statsArea" style="display:none">
       <div class="stats-summary" id="statsSummary"></div>
+      <div class="stats-card" id="maxOvrDetailCard" style="display:none">
+        <div class="card-title">🔴 最长逾期任务详情</div>
+        <div id="maxOvrDetail"></div>
+      </div>
       <div class="stats-card" id="ovrListCard">
         <div class="card-title">🚨 当前逾期清单（按逾期天数排序）</div>
         <div id="ovrList"></div>
@@ -948,10 +952,26 @@ function renderStats(){
   ovr.sort((a,b)=>daysOverdue(b)-daysOverdue(a));
   const topTask=ovr.length?ovr[0]:null;
   // 概览（去掉分类，改为关键数字）
+  const maxOvrTasks=maxDays>0?ovr.filter(t=>daysOverdue(t)===maxDays):[];
   document.getElementById('statsSummary').innerHTML=
     '<div class="sbox"><div class="n bad">'+ovr.length+'</div><div class="l">当前逾期</div></div>'+
     '<div class="sbox"><div class="n">'+weekOvr.length+'</div><div class="l">本周到期未做</div></div>'+
-    '<div class="sbox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期</div></div>';
+    (maxDays>0?'<div class="sbox clickable" id="maxOvrBox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期 👆</div></div>':'<div class="sbox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期</div></div>');
+  // 最长逾期点击展开
+  const mBox=document.getElementById('maxOvrBox');
+  if(mBox)mBox.onclick=()=>{const c=document.getElementById('maxOvrDetailCard');c.style.display=c.style.display==='none'?'block':'none';};
+  // 填充最长逾期详情
+  const mEl=document.getElementById('maxOvrDetail');
+  if(maxDays===0||maxOvrTasks.length===0){document.getElementById('maxOvrDetailCard').style.display='none';}
+  else{
+    // 合并相同文字
+    const mgrp={};maxOvrTasks.forEach(t=>{const k=(t.text||'(无内容)').trim();if(!mgrp[k])mgrp[k]=[];mgrp[k].push(t);});
+    const mmerged=[];Object.keys(mgrp).forEach(k=>{const arr=mgrp[k];mmerged.push({text:k,count:arr.length,maxDays,due:arr[0].due,sample:arr[0]});});
+    mEl.innerHTML=mmerged.map(m=>'<div class="ovr-item chronic'+(m.count>1?' merged':'')+'">'+
+      '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
+      '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
+      '<div class="ovr-meta">到期 '+m.due+' · <b>已逾期 '+maxDays+' 天</b></div></div>').join('');
+  }
   // 当前逾期清单：合并相同内容，按逾期天数排序
   const ovrEl=document.getElementById('ovrList');
   if(ovr.length===0){
