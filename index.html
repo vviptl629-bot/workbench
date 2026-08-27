@@ -936,7 +936,7 @@ function daysOverdue(t){
 
 function renderStats(){
   const today=todayStr();
-  const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t))&&daysOverdue(t)>0);
+  const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t)));
   const maxDays=ovr.length?Math.max.apply(null,ovr.map(daysOverdue)):0;
   ovr.sort((a,b)=>daysOverdue(b)-daysOverdue(a));
   const topTask=ovr.length?ovr[0]:null;
@@ -961,7 +961,7 @@ function renderStats(){
     mEl.innerHTML=mmerged.map(m=>'<div class="ovr-item chronic'+(m.count>1?' merged':'')+'">'+
       '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
       '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
-      '<div class="ovr-meta">到期 '+m.due+' · <b>已逾期 '+maxDays+' 天</b></div></div>').join('');
+      '<div class="ovr-meta">'+(m.due?('到期 '+m.due):'未设到期日')+' · <b>已逾期 '+maxDays+' 天</b></div></div>').join('');
   }
   // 当前逾期清单：合并相同内容，按逾期天数排序
   const ovrEl=document.getElementById('ovrList');
@@ -979,8 +979,11 @@ function renderStats(){
     Object.keys(grp).forEach(k=>{
       const arr=grp[k];
       const maxD=Math.max.apply(null,arr.map(daysOverdue));
-      const earliestDue=arr.map(t=>t.due||t.overdueMarkAt||'').sort()[0];
-      merged.push({text:k,count:arr.length,maxDays:maxD,due:earliestDue,sample:arr[0]});
+      const dueT=arr.find(t=>t.due);
+      const markT=arr.find(t=>t.overdueMarkAt);
+      const ref=dueT?dueT.due:(markT?markT.overdueMarkAt:'');
+      const dueLabel=dueT?'到期 '+ref:(markT?'标记于 '+ref:'未设到期日');
+      merged.push({text:k,count:arr.length,maxDays:maxD,due:ref,dueLabel,sample:arr[0]});
     });
     merged.sort((a,b)=>b.maxDays-a.maxDays);
     ovrEl.innerHTML=merged.map(m=>{
@@ -988,7 +991,7 @@ function renderStats(){
       return '<div class="ovr-item'+(d>=7?' chronic':'')+(m.count>1?' merged':'')+'">'+
         '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
         '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
-        '<div class="ovr-meta">到期 '+m.due+' · <b>已逾期 '+d+' 天</b></div>'+
+        '<div class="ovr-meta">'+m.dueLabel+' · <b>'+(d>0?('已逾期 '+d+' 天'):'今日逾期')+'</b></div>'+
         '</div>';
     }).join('');
   }
