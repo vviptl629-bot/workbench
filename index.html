@@ -297,6 +297,8 @@
   .ovr-text{font-weight:600;font-size:14px;color:var(--text);word-break:break-all}
   .ovr-meta{font-size:12.5px;color:var(--muted);margin-top:5px}
   .ovr-meta b{color:#f43f5e}
+  .ovr-count-badge{display:inline-block;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle;line-height:1.6}
+  .ovr-item.merged{border-left-color:#dc2626;border-left-width:4px}
   .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:6px}
   .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
   .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#7c74f0);border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
@@ -933,7 +935,7 @@ function daysOverdue(t){
 }
 function renderStats(){
   const today=todayStr();
-  const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t)));
+  const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t))&&daysOverdue(t)>0);
   const rs=new Date();rs.setDate(rs.getDate()-6);const weekStart=fmtDate(rs);
   const weekOvr=tasks.filter(t=>!t.done&&t.due&&t.due>=weekStart&&t.due<=today);
   const maxDays=ovr.length?Math.max.apply(null,ovr.map(daysOverdue)):0;
@@ -944,34 +946,61 @@ function renderStats(){
     '<div class="sbox"><div class="n bad">'+ovr.length+'</div><div class="l">当前逾期</div></div>'+
     '<div class="sbox"><div class="n">'+weekOvr.length+'</div><div class="l">本周到期未做</div></div>'+
     '<div class="sbox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期</div></div>';
-  // 当前逾期清单：显示每条具体内容
+  // 当前逾期清单：合并相同内容，按逾期天数排序
   const ovrEl=document.getElementById('ovrList');
   if(ovr.length===0){
     ovrEl.innerHTML='<div style="font-size:13px;color:var(--muted)">🎉 当前没有逾期任务，保持得很好！</div>';
   }else{
-    ovrEl.innerHTML=ovr.map(t=>{
-      const d=daysOverdue(t);
-      const due=t.due||t.overdueMarkAt||'';
-      return '<div class="ovr-item'+(d>=7?' chronic':'')+'">'+
-        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[t.category]&&CATS[t.category].color)||'#64748b')+'"></span>'+
-        '<span class="ovr-text">'+escapeHtml(t.text||'(无内容)')+'</span></div>'+
-        '<div class="ovr-meta">到期 '+due+' · <b>已逾期 '+d+' 天</b></div>'+
+    // 按任务文字分组合并
+    const grp={};
+    ovr.forEach(t=>{
+      const key=(t.text||'(无内容)').trim();
+      if(!grp[key])grp[key]=[];
+      grp[key].push(t);
+    });
+    const merged=[];
+    Object.keys(grp).forEach(k=>{
+      const arr=grp[k];
+      const maxD=Math.max.apply(null,arr.map(daysOverdue));
+      const earliestDue=arr.map(t=>t.due||t.overdueMarkAt||'').sort()[0];
+      merged.push({text:k,count:arr.length,maxDays:maxD,due:earliestDue,sample:arr[0]});
+    });
+    merged.sort((a,b)=>b.maxDays-a.maxDays);
+    ovrEl.innerHTML=merged.map(m=>{
+      const d=m.maxDays;
+      return '<div class="ovr-item'+(d>=7?' chronic':'')+(m.count>1?' merged':'')+'">'+
+        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
+        '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
+        '<div class="ovr-meta">到期 '+m.due+' · <b>已逾期 '+d+' 天</b></div>'+
         '</div>';
     }).join('');
   }
-  // 近 7 天到期未做：列出具体内容（不再按分类聚合）
+  // 近 7 天到期未做：列出具体内容（合并相同内容）
   const wkEl=document.getElementById('ovrWeek');
   if(weekOvr.length===0){
     wkEl.innerHTML='<div style="font-size:13px;color:var(--muted)">近 7 天没有到期未做的任务。</div>';
   }else{
-    const wa=weekOvr.slice().sort((a,b)=>daysOverdue(b)-daysOverdue(a));
-    wkEl.innerHTML=wa.map(t=>{
-      const d=daysOverdue(t);
-      const due=t.due||'';
-      return '<div class="ovr-item'+(d>=7?' chronic':'')+'">'+
-        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[t.category]&&CATS[t.category].color)||'#64748b')+'"></span>'+
-        '<span class="ovr-text">'+escapeHtml(t.text||'(无内容)')+'</span></div>'+
-        '<div class="ovr-meta">到期 '+due+' · <b>已逾期 '+d+' 天</b></div>'+
+    // 合并相同文字
+    const wgrp={};
+    weekOvr.forEach(t=>{
+      const key=(t.text||'(无内容)').trim();
+      if(!wgrp[key])wgrp[key]=[];
+      wgrp[key].push(t);
+    });
+    const wmerged=[];
+    Object.keys(wgrp).forEach(k=>{
+      const arr=wgrp[k];
+      const maxD=Math.max.apply(null,arr.map(daysOverdue));
+      const earliestDue=arr.map(t=>t.due||'').sort()[0];
+      wmerged.push({text:k,count:arr.length,maxDays:maxD,due:earliestDue,sample:arr[0]});
+    });
+    wmerged.sort((a,b)=>b.maxDays-a.maxDays);
+    wkEl.innerHTML=wmerged.map(m=>{
+      const d=m.maxDays;
+      return '<div class="ovr-item'+(d>=7?' chronic':'')+(m.count>1?' merged':'')+'">'+
+        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[m.sample.category]&&CATS[m.sample.category].color)||'#64748b')+'"></span>'+
+        '<span class="ovr-text">'+escapeHtml(m.text)+'</span>'+(m.count>1?' <span class="ovr-count-badge">×</'+m.count+'</span>':'')+'</div>'+
+        '<div class="ovr-meta">到期 '+m.due+' · <b>已逾期 '+d+' 天</b></div>'+
         '</div>';
     }).join('');
   }
@@ -1427,7 +1456,7 @@ function renderTasks(isTodayMode,focusDate){
   // ---- 未完成任务 ----
   if(view==='today'&&isTodayMode){
     const rep=openList.filter(isRepeatActive);
-    const over=openList.filter(t=>!isRepeatActive(t)&&isOverdue(t));
+    const over=openList.filter(t=>!isRepeatActive(t)&&isOverdue(t)&&daysOverdue(t)>0);
     const tod=openList.filter(t=>!isRepeatActive(t)&&isDueToday(t));
     const none=openList.filter(t=>!isRepeatActive(t)&&!t.due);
     if(rep.length)html+=secTitle('🔁 每日重复',rep.length)+items(rep);
