@@ -58,7 +58,6 @@
   .side-btn:hover{color:var(--text);border-color:var(--accent)}
   .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
   .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
-  .side-hint{font-size:11px;color:var(--muted);line-height:1.4;padding:2px 4px 6px;margin-top:-4px;opacity:.85;}
 
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:24px 28px 96px;display:flex;flex-direction:column;gap:20px}
@@ -588,8 +587,6 @@
     <div class="nav-item" data-view="life"><span class="dot" style="background:#10b981"></span> 生活 <span class="count" id="c-life">0</span></div>
     <div class="side-btn" id="btnTpl">🔁 例行任务</div>
     <div class="side-btn" id="btnTheme">🌙 深色模式</div>
-    <div class="side-btn" id="btnRemind" title="开启后，给任务设置了「提醒时间」的，到时间点会提醒你">🔔 定时提醒</div>
-    <div class="side-hint">开启后，给任务设了提醒时间的，到时间点会提醒</div>
     <div class="nav-label">分析</div>
     <div class="nav-item" data-view="stats"><span>📊</span> 统计分析</div>
     <div class="spacer"></div>
@@ -677,7 +674,7 @@
         <div id="ovrList"></div>
       </div>
       <div class="stats-card" id="ovrWeekCard">
-        <div class="card-title">📅 一周逾期分析（近 7 天到期未做）</div>
+        <div class="card-title">📅 近 7 天到期未做清单（具体内容）</div>
         <div id="ovrWeek"></div>
       </div>
       <div class="stats-card analysis">
@@ -939,51 +936,52 @@ function renderStats(){
   const ovr=tasks.filter(t=>!t.done&&(isOverdue(t)||isMarkedOverdue(t)));
   const rs=new Date();rs.setDate(rs.getDate()-6);const weekStart=fmtDate(rs);
   const weekOvr=tasks.filter(t=>!t.done&&t.due&&t.due>=weekStart&&t.due<=today);
-  // 概览
-  const occ={};ovr.forEach(t=>{const k=catName(t);occ[k]=(occ[k]||0)+1;});
-  const occs=Object.keys(occ).map(k=>({k,n:occ[k]})).sort((a,b)=>b.n-a.n);
-  const topCat=occs.length?occs[0].k:'—';
-  const topCatN=occs.length?occs[0].n:0;
   const maxDays=ovr.length?Math.max.apply(null,ovr.map(daysOverdue)):0;
+  ovr.sort((a,b)=>daysOverdue(b)-daysOverdue(a));
+  const topTask=ovr.length?ovr[0]:null;
+  // 概览（去掉分类，改为关键数字）
   document.getElementById('statsSummary').innerHTML=
     '<div class="sbox"><div class="n bad">'+ovr.length+'</div><div class="l">当前逾期</div></div>'+
     '<div class="sbox"><div class="n">'+weekOvr.length+'</div><div class="l">本周到期未做</div></div>'+
-    '<div class="sbox"><div class="n g">'+escapeHtml(topCat)+'</div><div class="l">最常逾期分类</div></div>'+
     '<div class="sbox"><div class="n bad">'+maxDays+'天</div><div class="l">最长逾期</div></div>';
-  // 当前逾期清单
+  // 当前逾期清单：显示每条具体内容
   const ovrEl=document.getElementById('ovrList');
   if(ovr.length===0){
     ovrEl.innerHTML='<div style="font-size:13px;color:var(--muted)">🎉 当前没有逾期任务，保持得很好！</div>';
   }else{
-    ovr.sort((a,b)=>daysOverdue(b)-daysOverdue(a));
     ovrEl.innerHTML=ovr.map(t=>{
       const d=daysOverdue(t);
-      const cc=(CATS[t.category]&&CATS[t.category].color)||'#64748b';
       const due=t.due||t.overdueMarkAt||'';
       return '<div class="ovr-item'+(d>=7?' chronic':'')+'">'+
-        '<div class="ovr-main"><span class="ovr-dot" style="background:'+cc+'"></span>'+
+        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[t.category]&&CATS[t.category].color)||'#64748b')+'"></span>'+
         '<span class="ovr-text">'+escapeHtml(t.text||'(无内容)')+'</span></div>'+
-        '<div class="ovr-meta">'+escapeHtml(catName(t))+' · 到期 '+due+' · <b>已逾期 '+d+' 天</b></div>'+
+        '<div class="ovr-meta">到期 '+due+' · <b>已逾期 '+d+' 天</b></div>'+
         '</div>';
     }).join('');
   }
-  // 一周逾期分析（按分类）
-  const wc={};weekOvr.forEach(t=>{const k=catName(t);wc[k]=(wc[k]||0)+1;});
-  const wcs=Object.keys(wc).map(k=>({k,n:wc[k]})).sort((a,b)=>b.n-a.n);
+  // 近 7 天到期未做：列出具体内容（不再按分类聚合）
   const wkEl=document.getElementById('ovrWeek');
-  if(wcs.length===0){
+  if(weekOvr.length===0){
     wkEl.innerHTML='<div style="font-size:13px;color:var(--muted)">近 7 天没有到期未做的任务。</div>';
   }else{
-    const max=Math.max(1,...wcs.map(c=>c.n));
-    wkEl.innerHTML=wcs.map(c=>{const w=Math.round(c.n/max*100);return '<div class="cat-row"><div class="cn">'+escapeHtml(c.k)+'</div><div class="ct" style="width:'+w+'%"></div><div class="cc">'+c.n+'</div></div>';}).join('');
+    const wa=weekOvr.slice().sort((a,b)=>daysOverdue(b)-daysOverdue(a));
+    wkEl.innerHTML=wa.map(t=>{
+      const d=daysOverdue(t);
+      const due=t.due||'';
+      return '<div class="ovr-item'+(d>=7?' chronic':'')+'">'+
+        '<div class="ovr-main"><span class="ovr-dot" style="background:'+((CATS[t.category]&&CATS[t.category].color)||'#64748b')+'"></span>'+
+        '<span class="ovr-text">'+escapeHtml(t.text||'(无内容)')+'</span></div>'+
+        '<div class="ovr-meta">到期 '+due+' · <b>已逾期 '+d+' 天</b></div>'+
+        '</div>';
+    }).join('');
   }
-  // 改进建议
+  // 改进建议（基于具体任务内容）
   const li=[];
   if(ovr.length===0){
     li.push('<li class="good">🎉 当前零逾期，执行力在线！保持每天清空逾期清单的节奏。</li>');
   }else{
     if(ovr.length>=5)li.push('<li class="bad">逾期共 <b>'+ovr.length+'</b> 条，明显超载。建议每天只留 3-5 条核心任务，其余顺延或删除。</li>');
-    if(topCat!=='—')li.push('<li>「<span class="hl">'+escapeHtml(topCat)+'</span>」逾期最多（'+topCatN+' 条），是主要卡点。可拆分步骤、把截止时间提前、或考虑委派/外包。</li>');
+    if(topTask)li.push('<li>「<span class="hl">'+escapeHtml(topTask.text||'')+'</span>」已逾期最久（'+daysOverdue(topTask)+' 天），是首要卡点。今天优先把它清掉，或重新规划截止时间。</li>');
     const chronic=ovr.filter(t=>daysOverdue(t)>=7);
     if(chronic.length){
       li.push('<li class="bad">⚠️ 以下 <b>'+chronic.length+'</b> 条已逾期 7 天以上，可能已不相关或长期卡住：'+chronic.slice(0,5).map(t=>escapeHtml(t.text||'')).join('、')+(chronic.length>5?' 等':'')+'。建议要么今天就做，要么果断删除/重新规划。</li>');
@@ -993,6 +991,7 @@ function renderStats(){
   }
   document.getElementById('statsAdvice').innerHTML='<ul>'+li.join('')+'</ul>';
 }
+
 
 /* ---------- day navigator ---------- */
 function fmtSel(){
@@ -2198,64 +2197,8 @@ function toggleTheme(){
   lsSet('workbench_theme',dark?'dark':'light');
   const btn=document.getElementById('btnTheme');if(btn)btn.textContent=dark?'☀️ 浅色模式':'🌙 深色模式';
 }
-function applyReminder(){
-  const on=lsGet('workbench_reminder')==='on';
-  if(on&&'Notification' in window&&Notification.permission==='granted')startReminder();
-  updateRemindBtn();
-}
-let _remindTimer=null,_notified={};
-function startReminder(){
-  if(_remindTimer)return;
-  _remindTimer=setInterval(checkReminders,20000);
-  checkReminders();
-}
-function stopReminder(){if(_remindTimer){clearInterval(_remindTimer);_remindTimer=null;}}
-function checkReminders(){
-  const now=new Date();
-  const hh=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  const today=todayStr();
-  const canNotify=('Notification' in window)&&Notification.permission==='granted';
-  tasks.forEach(t=>{
-    if(t.done||!t.start)return;
-    const active=(t.repeat&&t.repeat!=='none')?isRepeatActive(t):(t.due===today);
-    if(!active)return;
-    if(t.start===hh){
-      const k=t.id+'@'+((t.repeat&&t.repeat!=='none')?today:t.due);
-      if(_notified[k])return;_notified[k]=1;
-      const cat=CATS[t.category];const name=cat?cat.name:(t.category==='work'&&t.sub?(SUBS.work.find(s=>s.key===t.sub)||{}).name:'');
-      const body=(t.text||'')+(name?('（'+name+'）'):'');
-      if(canNotify){try{new Notification('⏰ 任务提醒 · '+hh,{body,tag:k});}catch(e){}}
-      else showToast('⏰ '+hh+' 提醒：'+body); // 应用内兜底提醒
-    }
-  });
-}
-function updateRemindBtn(){
-  const btn=document.getElementById('btnRemind');if(!btn)return;
-  const on=lsGet('workbench_reminder')==='on';
-  btn.textContent=on?'🔔 提醒已开':'🔔 定时提醒';
-  btn.classList.toggle('on',on);
-}
-function toggleReminder(){
-  const on=lsGet('workbench_reminder')==='on';
-  if(!on){
-    // 开启：尽量申请通知权限；不论结果都开启，无权限时改用应用内提醒兜底
-    if('Notification' in window && Notification.permission!=='granted'){
-      try{const p=Notification.requestPermission();if(p&&p.catch)p.catch(()=>{});}catch(e){}
-    }
-    lsSet('workbench_reminder','on');
-    startReminder();
-    const hasStart=tasks.some(t=>!!t.start);
-    if('Notification' in window && Notification.permission==='granted'){
-      showToast(hasStart?'🔔 定时提醒已开启（到点弹通知）':'🔔 已开启。编辑任务→设置「提醒时间」，到点会弹通知');
-    }else{
-      showToast('🔔 已开启（当前环境不支持弹窗通知，将用应用内提醒兜底）');
-    }
-    updateRemindBtn();
-  }else{
-    lsSet('workbench_reminder','off');stopReminder();showToast('已关闭定时提醒');updateRemindBtn();
-  }
-}
 function hideBoot(){
+
   const b=document.getElementById('bootScreen');if(!b)return;
   b.classList.add('boot-hide');
   setTimeout(()=>{const x=document.getElementById('bootScreen');if(x)x.remove();},600);
@@ -2267,7 +2210,6 @@ function init(){
   setupInstallHint();
   load();
   applyTheme(); // 应用已保存的深色/浅色偏好
-  applyReminder(); // 若已开启定时提醒则启动检测
   genRoutine(); // 打开即生成今天的例行任务
   // 跨天检测：页面一直开着跨过零点时也能自动生成
   let _lastDay=todayStr();
@@ -2322,7 +2264,6 @@ function init(){
   document.getElementById('btnSync').onclick=openSync;
   document.getElementById('btnTpl').onclick=()=>{openTpl();closeSidebar();};
   document.getElementById('btnTheme').onclick=toggleTheme;
-  document.getElementById('btnRemind').onclick=toggleReminder;
   document.getElementById('tplClose').onclick=()=>document.getElementById('tplModal').classList.remove('show');
   document.getElementById('tplModal').addEventListener('click',e=>{if(e.target.id==='tplModal')e.currentTarget.classList.remove('show');});
   document.getElementById('tplAddBtn').onclick=addTpl;
