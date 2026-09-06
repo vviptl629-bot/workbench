@@ -233,6 +233,15 @@
   .tpl-add-row{display:flex;gap:10px;margin-top:10px;align-items:stretch}
   .tpl-add-row select{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:13.5px;background:var(--bg);color:var(--text)}
   .tpl-add-row .btn-add{flex:1;padding:9px 12px;border-radius:10px;font-size:14px}
+  /* 例行任务模板：行内编辑 */
+  .tpl-row.editing{border:1px solid var(--accent);background:var(--accent-soft);margin:2px 0;}
+  .tpl-edit{display:flex;flex-direction:column;gap:8px;padding:4px 2px;}
+  .tpl-edit-text{padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:14px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;}
+  .tpl-edit-note{padding:8px 11px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;min-height:54px;resize:vertical;font-family:inherit;}
+  .tpl-edit-row{display:flex;gap:8px;}
+  .tpl-edit-row select,.tpl-edit-row input[type=time]{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--bg);color:var(--text);}
+  .tpl-edit-actions{display:flex;gap:8px;margin-top:2px;}
+  .tpl-edit-actions .btn-ghost,.tpl-edit-actions .btn-add{flex:1;padding:8px 10px;font-size:13.5px;border-radius:9px;}
   .tpl-list{margin-top:14px;max-height:42vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
   .tpl-empty{font-size:13px;color:var(--muted);padding:14px 4px;text-align:center;line-height:1.7}
   .tpl-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;background:var(--card-2)}
@@ -849,7 +858,7 @@ const SUBS={work:[
   {key:'trade',name:'自营交易',color:'#db2777'}
 ]};
 const STORE_KEY='workbench_tasks_v1', TRASH_KEY='workbench_trash_v1', TPL_KEY='workbench_tpl_v1', TOMB_KEY='workbench_tomb_v1';
-let tasks=[], trash=[], templates=[], ideas=[], tombstones=[];
+let tasks=[], trash=[], templates=[], ideas=[], tombstones=[], editingTplId=null;
 try{ideas=JSON.parse(lsGet('workbench_ideas')||'[]');if(!Array.isArray(ideas))ideas=[];}catch(e){ideas=[];}
 try{tombstones=JSON.parse(lsGet(TOMB_KEY)||'[]')||[];if(!Array.isArray(tombstones))tombstones=[];}catch(e){tombstones=[];}
 let view='today';
@@ -1273,17 +1282,20 @@ function renderTplList(filter){
       list=templates.filter(t=>t.category===filter&&(!t.sub||['waishi','coffee','trade'].indexOf(t.sub)<0));
   }
   if(!list.length){box.innerHTML='<div class="tpl-empty">该分类下还没有例行任务。</div>';return;}
-  box.innerHTML=list.map((tpl,idx)=>
-    '<div class="tpl-row'+(tpl.paused?' paused':'')+'" data-tpl-id="'+tpl.id+'">'+
+  box.innerHTML=list.map((tpl,idx)=>{
+    if(editingTplId===tpl.id)return tplEditRowHtml(tpl);
+    return '<div class="tpl-row'+(tpl.paused?' paused':'')+'" data-tpl-id="'+tpl.id+'">'+
       '<div class="tpl-info"><div class="tpl-text">'+escapeHtml(tpl.text)+'</div>'+
-      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · '+tpl.start:'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
+      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · '+tpl.start:'')+(tpl.note?' · 📝'+escapeHtml(tpl.note):'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
       '<div class="tpl-ops">'+
+        '<span class="tpl-op" data-tpl-act="edit" data-id="'+tpl.id+'" title="编辑">✎</span>'+
         '<span class="tpl-op" data-tpl-act="up" data-id="'+tpl.id+'" title="上移">▲</span>'+
         '<span class="tpl-op" data-tpl-act="down" data-id="'+tpl.id+'" title="下移">▼</span>'+
         '<span class="tpl-op" data-tpl-act="pause" data-id="'+tpl.id+'" title="'+(tpl.paused?'启用':'暂停')+'">'+(tpl.paused?'▶':'⏸')+'</span>'+
         '<span class="tpl-op danger" data-tpl-act="deltpl" data-id="'+tpl.id+'" title="删除模板">×</span>'+
       '</div>'+
-    '</div>').join('');
+    '</div>';
+  }).join('');
 }
 function openTpl(){renderTplList(document.getElementById('tplCat').value);document.getElementById('tplModal').classList.add('show');}
 function addTpl(){
@@ -1320,6 +1332,46 @@ function tplAction(act,id){
     if(!confirm('删除该例行任务模板？（已生成的任务不受影响）'))return;
     templates=templates.filter(x=>x.id!==id);saveTpl();renderTplList(document.getElementById('tplCat').value);showToast('模板已删除');
   }
+}
+/* 例行任务模板：行内编辑表单 */
+function tplEditRowHtml(tpl){
+  const raw=(tpl.sub)?tpl.sub:tpl.category;
+  const labels={coffee:'☕ 咖啡店',waishi:'🏢 外事办',trade:'📈 自营交易',study:'📚 学习',life:'🏠 生活',temp:'⚡ 临时任务'};
+  const opt=v=>'<option value="'+v+'"'+(raw===v?' selected':'')+'>'+labels[v]+'</option>';
+  return '<div class="tpl-row editing" data-tpl-id="'+tpl.id+'">'+
+    '<div class="tpl-edit">'+
+      '<input class="tpl-edit-text" type="text" maxlength="200" value="'+escapeHtml(tpl.text)+'" placeholder="任务名称">'+
+      '<textarea class="tpl-edit-note" maxlength="300" placeholder="描述（可选）">'+escapeHtml(tpl.note||'')+'</textarea>'+
+      '<div class="tpl-edit-row">'+
+        '<select class="tpl-edit-cat">'+opt('coffee')+opt('waishi')+opt('trade')+opt('study')+opt('life')+opt('temp')+'</select>'+
+        '<input class="tpl-edit-start" type="time" value="'+escapeHtml(tpl.start||'')+'">'+
+      '</div>'+
+      '<div class="tpl-edit-actions">'+
+        '<button type="button" class="btn-ghost tpl-edit-cancel">取消</button>'+
+        '<button type="button" class="btn-add tpl-edit-save">保存</button>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+function doSaveTplEdit(id,row){
+  const tpl=templates.find(x=>x.id===id);if(!tpl)return;
+  const text=(row.querySelector('.tpl-edit-text').value||'').trim();
+  if(!text){showToast('名称不能为空');return;}
+  const raw=row.querySelector('.tpl-edit-cat').value;
+  const isSub=['waishi','coffee','trade'].includes(raw);
+  const note=(row.querySelector('.tpl-edit-note').value||'').trim();
+  const start=row.querySelector('.tpl-edit-start').value||'';
+  tpl.text=text;tpl.note=note;tpl.category=isSub?'work':raw;tpl.sub=isSub?raw:null;tpl.start=start;tpl.updated=Date.now();
+  tasks.forEach(t=>{
+    if(t.tplId===id){
+      t.text=text;t.category=isSub?'work':raw;t.sub=isSub?raw:null;t.start=start;
+      if(!t.note&&note)t.note=note;
+      t.updated=Date.now();
+    }
+  });
+  saveTpl();saveTasks();editingTplId=null;
+  renderTplList(document.getElementById('tplCat').value);render();
+  showToast('已保存修改');
 }
 
 /* ---------- task render ---------- */
@@ -2361,6 +2413,12 @@ function init(){
   document.getElementById('tplText').addEventListener('keydown',e=>{if(e.key==='Enter')addTpl();});
   document.getElementById('tplCat').addEventListener('change',e=>{renderTplList(e.target.value);});
   document.getElementById('tplList').addEventListener('click',e=>{
+    const editBtn=e.target.closest('[data-tpl-act="edit"]');
+    if(editBtn){editingTplId=editBtn.dataset.id;renderTplList(document.getElementById('tplCat').value);return;}
+    const saveBtn=e.target.closest('.tpl-edit-save');
+    if(saveBtn){const row=saveBtn.closest('.tpl-row');doSaveTplEdit(row.dataset.tplId,row);return;}
+    const cancelBtn=e.target.closest('.tpl-edit-cancel');
+    if(cancelBtn){editingTplId=null;renderTplList(document.getElementById('tplCat').value);return;}
     const el=e.target.closest('[data-tpl-act]');if(!el)return;
     tplAction(el.dataset.tplAct,el.dataset.id);
   });
