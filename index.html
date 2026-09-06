@@ -68,6 +68,45 @@
   .edit-times .et-row>span{width:34px;font-size:12.5px;color:var(--muted);flex-shrink:0;}
   .edit-times .et-row input{flex:1;}
 
+  /* ---------- 自定义时间选择器（替代原生 input[type=time]） ---------- */
+  .time-trigger{display:flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card-2);color:var(--text);cursor:pointer;font-size:14px;min-width:100px;box-sizing:border-box;transition:.15s;user-select:none;-webkit-user-select:none;}
+  .time-trigger:hover{border-color:var(--accent)}
+  .time-trigger:active{transform:scale(.98)}
+  .time-trigger .tt-val{flex:1;font-variant-numeric:tabular-nums;}
+  .time-trigger .tt-icon{font-size:16px;color:var(--muted);flex-shrink:0}
+  .time-trigger .tt-clear{display:none;font-size:13px;color:var(--muted);padding:2px 6px;border-radius:6px}
+  .time-trigger.has-val .tt-clear{display:inline-block}
+  .time-trigger .tt-clear:hover{color:#ef4444}
+  /* 隐藏原生 time input */
+  .hide-native-time{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+
+  /* 时间选择器弹窗 */
+  #timePickerModal{z-index:90}
+  #timePickerModal .tp-body{background:var(--card);border-radius:20px;padding:24px 22px 20px;width:92%;max-width:340px;box-shadow:0 24px 64px rgba(0,0,0,.3);border:1px solid var(--border);position:relative}
+  .tp-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:18px;text-align:center}
+  .tp-digits{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px}
+  .tp-digit{width:72px;height:56px;border:2px solid var(--border);border-radius:14px;background:var(--bg);color:var(--text);font-size:28px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;outline:none;transition:.15s;font-family:inherit;
+    -moz-appearance:textfield;}
+  .tp-digit::-webkit-inner-spin-button,.tp-digit::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  .tp-digit:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .tp-colon{font-size:26px;font-weight:700;color:var(--muted);padding-bottom:4px}
+  .tp-labels{display:flex;justify-content:center;gap:8px;margin-top:-12px;margin-bottom:16px}
+  .tp-labels span{width:72px;text-align:center;font-size:11.5px;color:var(--muted)}
+  /* 快捷预设 */
+  .tp-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px}
+  .tp-preset{padding:7px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card-2);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:.15s;user-select:none;-webkit-user-select:none}
+  .tp-preset:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+  .tp-preset:active{transform:scale(.95)}
+  .tp-preset.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  /* 操作按钮 */
+  .tp-actions{display:flex;gap:10px}
+  .tp-actions button{flex:1;border:none;border-radius:12px;padding:11px;font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s}
+  .tp-btn-clear{background:var(--card-2);color:var(--muted);border:1px solid var(--border)}
+  .tp-btn-cancel{background:var(--card-2);color:var(--text);border:1px solid var(--border)}
+  .tp-btn-ok{background:var(--accent);color:#fff}
+  .tp-btn-ok:active{filter:brightness(1.1)}
+  .tp-btn-clear:active,.tp-btn-cancel:active{transform:scale(.97)}
+
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:24px 28px 96px;display:flex;flex-direction:column;gap:20px}
   .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
@@ -196,6 +235,7 @@
   .addbox .row4.show{display:flex}
   .addbox .row4 .lbl{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:5px}
   .addbox input[type=time]{border:1px solid var(--border);background:var(--card-2);color:var(--text);border-radius:10px;padding:10px 12px;font-size:15px;min-width:100px;cursor:pointer;color-scheme:light dark}
+  .addbox .row4 .time-trigger{flex:1;min-width:100px;}
   .acts{margin-left:auto;display:flex;align-items:center;gap:2px;flex-shrink:0}
   .task .edit{color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;border-radius:8px;opacity:.5;transition:.15s}
   .task .edit:hover{color:var(--accent);opacity:1;background:var(--card-2)}
@@ -228,32 +268,40 @@
   .sync-gist{font-size:12px;color:var(--muted);margin-top:10px;word-break:break-all;line-height:1.6}
   .sync-gist a{color:var(--accent)}
   /* 例行任务模板 */
-  .tpl-add{margin-top:14px}
-  .tpl-add input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--bg);color:var(--text);box-sizing:border-box}
+  .tpl-add{margin-top:16px}
+  .tpl-add input[type=text]{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:var(--bg);color:var(--text);box-sizing:border-box}
   .tpl-add-row{display:flex;gap:10px;margin-top:10px;align-items:stretch}
-  .tpl-add-row select{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:13.5px;background:var(--bg);color:var(--text)}
-  .tpl-add-row .btn-add{flex:1;padding:9px 12px;border-radius:10px;font-size:14px}
+  .tpl-add-row select{flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:12px;font-size:14px;background:var(--bg);color:var(--text)}
+  .tpl-add-row .btn-add{flex:1;padding:10px 14px;border-radius:12px;font-size:15px}
   /* 例行任务模板：行内编辑 */
-  .tpl-row.editing{border:1px solid var(--accent);background:var(--accent-soft);margin:2px 0;}
-  .tpl-edit{display:flex;flex-direction:column;gap:8px;padding:4px 2px;}
-  .tpl-edit-text{padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:14px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;}
-  .tpl-edit-note{padding:8px 11px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;min-height:54px;resize:vertical;font-family:inherit;}
-  .tpl-edit-row{display:flex;gap:8px;}
-  .tpl-edit-row select,.tpl-edit-row input[type=time]{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--bg);color:var(--text);}
-  .tpl-edit-actions{display:flex;gap:8px;margin-top:2px;}
-  .tpl-edit-actions .btn-ghost,.tpl-edit-actions .btn-add{flex:1;padding:8px 10px;font-size:13.5px;border-radius:9px;}
-  .tpl-list{margin-top:14px;max-height:42vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-  .tpl-empty{font-size:13px;color:var(--muted);padding:14px 4px;text-align:center;line-height:1.7}
-  .tpl-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;background:var(--card-2)}
-  .tpl-row.paused{opacity:.55}
+  .tpl-row.editing{border:2px solid var(--accent);background:var(--accent-soft);margin:2px 0;box-shadow:0 0 0 3px rgba(79,70,229,.08);}
+  .tpl-edit{display:flex;flex-direction:column;gap:10px;padding:6px 4px;}
+  .tpl-edit-text{padding:10px 13px;border:1px solid var(--border);border-radius:11px;font-size:15px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;}
+  .tpl-edit-note{padding:9px 13px;border:1px solid var(--border);border-radius:11px;font-size:14px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;min-height:58px;resize:vertical;font-family:inherit;}
+  .tpl-edit-row{display:flex;gap:8px;align-items:center;}
+  .tpl-edit-row select{flex:1;padding:9px 11px;border:1px solid var(--border);border-radius:11px;font-size:14px;background:var(--bg);color:var(--text);}
+  .tpl-edit-row .time-trigger{flex:1;}
+  .tpl-edit-actions{display:flex;gap:8px;margin-top:4px;}
+  .tpl-edit-actions .btn-ghost,.tpl-edit-actions .btn-add{flex:1;padding:9px 12px;font-size:14px;border-radius:11px;}
+  .tpl-list{margin-top:16px;max-height:45vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+  .tpl-empty{font-size:14px;color:var(--muted);padding:20px 8px;text-align:center;line-height:1.7}
+  .tpl-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--card-2);transition:.15s;}
+  .tpl-row:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .tpl-row.paused{opacity:.5}
   .tpl-info{flex:1;min-width:0}
-  .tpl-text{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tpl-meta{font-size:11.5px;color:var(--muted);margin-top:3px}
-  .tpl-ops{display:flex;gap:4px;flex-shrink:0}
-  .tpl-op{cursor:pointer;padding:6px 9px;border-radius:8px;font-size:14px;color:var(--muted);user-select:none}
-  .tpl-op:hover{background:var(--bg);color:var(--accent)}
-  .tpl-op[data-tpl-act="up"],.tpl-op[data-tpl-act="down"]{font-size:11px;padding:4px 6px;line-height:1}
-  .tpl-op.danger:hover{color:#ef4444}
+  .tpl-text{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;color:var(--text)}
+  .tpl-meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .tpl-ops{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .tpl-op{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;font-size:15px;color:var(--muted);user-select:none;-webkit-user-select:none;transition:.15s;flex-shrink:0;}
+  .tpl-op:hover{background:var(--accent-soft);color:var(--accent)}
+  .tpl-op:active{transform:scale(.92)}
+  .tpl-op[data-tpl-act="edit"]{color:var(--accent);font-size:16px;width:36px;height:36px;}
+  .tpl-op[data-tpl-act="edit"]:hover{background:var(--accent);color:#fff}
+  .tpl-op[data-tpl-act="up"],.tpl-op[data-tpl-act="down"]{font-size:12px;width:30px;height:30px;border-radius:8px;}
+  .tpl-op[data-tpl-act="pause"]{font-size:14px}
+  .tpl-op.danger{color:var(--muted)}
+  .tpl-op.danger:hover{background:#fef2f2;color:#ef4444;border-color:#fecaca}
   .edit-field{margin-bottom:12px}
   .edit-field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
   .edit-field input[type=text]{width:100%;border:1px solid var(--border);background:var(--card-2);color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;box-sizing:border-box}
@@ -261,7 +309,8 @@
   .edit-modal textarea:focus{outline:none;border-color:var(--accent)}
   .edit-times{display:flex;gap:10px}
   .edit-times>div{flex:1}
-  .edit-times input[type=time]{width:100%;border:1px solid var(--border);background:var(--card-2);color:var(--text);border-radius:10px;padding:9px 8px;font-size:13.5px;box-sizing:border-box;color-scheme:light dark}
+  .edit-times .time-trigger{width:100%;}
+  .edit-times input[type=time]{position:absolute;opacity:0;pointer-events:none;}
   .edit-actions{display:flex;gap:10px;margin-top:6px}
   .edit-actions button{flex:1;border:none;border-radius:11px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
   .edit-actions .save{background:var(--accent);color:#fff}
@@ -400,6 +449,22 @@
     .daynav button,.daynav input{font-size:14px;padding:9px 10px}
     #bTodayNum{font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.2}
     .bn.active #bTodayNum{color:var(--accent)}
+    /* 模板行移动端优化 */
+    .tpl-row{padding:12px 12px;gap:8px;}
+    .tpl-text{font-size:15px}
+    .tpl-meta{font-size:11.5px}
+    .tpl-op{width:32px;height:32px;font-size:14px;}
+    .tpl-op[data-tpl-act="edit"]{width:34px;height:34px;font-size:15px;}
+    .tpl-op[data-tpl-act="up"],.tpl-op[data-tpl-act="down"]{width:28px;height:28px;font-size:11px;}
+    .tpl-list{max-height:40vh;gap:8px;}
+    /* 时间选择器移动端 */
+    .tp-digit{width:68px;height:52px;font-size:26px;border-radius:12px;}
+    .tp-body{padding:20px 18px 18px;width:94%;}
+    .tp-preset{padding:8px 12px;font-size:13px;}
+    .time-trigger{padding:10px 12px;font-size:15px;}
+    /* 编辑弹窗移动端 */
+    .edit-modal{border-radius:18px;padding:20px 18px 16px;width:94%;}
+    .edit-modal h3{font-size:17px;margin-bottom:12px;}
   }
 
   /* ---- 目标管理视图 ---- */
@@ -670,7 +735,9 @@
         <label class="time-chk"><input type="checkbox" id="timeChk"> ⏰ 设置时间</label>
       </div>
       <div class="row4" id="timeRow">
-        <span class="lbl">⏰ 时间</span><input type="time" id="timeStart">
+        <span class="lbl">⏰ 时间</span>
+        <div id="timeStartTrigger"></div>
+        <input type="time" id="timeStart" class="hide-native-time">
       </div>
     </div>
 
@@ -769,8 +836,8 @@
     <div class="edit-field">
       <label>时间（可选，24 小时制）</label>
       <div class="edit-times">
-        <div class="et-row"><span>开始</span><input type="time" id="editStart"></div>
-        <div class="et-row"><span>截止</span><input type="time" id="editEnd"></div>
+        <div class="et-row"><span>开始</span><div id="editStartTrigger"></div><input type="time" id="editStart" class="hide-native-time"></div>
+        <div class="et-row"><span>截止</span><div id="editEndTrigger"></div><input type="time" id="editEnd" class="hide-native-time"></div>
       </div>
     </div>
     <div class="edit-field">
@@ -840,6 +907,31 @@
     </div>
     <div class="tpl-list" id="tplList"></div>
     <div class="sync-actions"><button class="btn-ghost" id="tplClose">关闭</button></div>
+  </div>
+</div>
+
+<!-- custom time picker modal -->
+<div class="modal-overlay" id="timePickerModal">
+  <div class="tp-body">
+    <div class="tp-title">设置时间</div>
+    <div class="tp-digits">
+      <input class="tp-digit" id="tpHour" type="number" min="0" max="23" placeholder="00" inputmode="numeric" pattern="[0-9]*">
+      <span class="tp-colon">:</span>
+      <input class="tp-digit" id="tpMin" type="number" min="0" max="59" placeholder="00" inputmode="numeric" pattern="[0-9]*">
+    </div>
+    <div class="tp-labels"><span>时</span><span>分</span></div>
+    <div class="tp-presets" id="tpPresets">
+      <button class="tp-preset" data-h="6" data-m="0">06:00</button>
+      <button class="tp-preset" data-h="9" data-m="0">09:00</button>
+      <button class="tp-preset" data-h="12" data-m="0">12:00</button>
+      <button class="tp-preset" data-h="18" data-m="0">18:00</button>
+      <button class="tp-preset" data-h="21" data-m="0">21:00</button>
+    </div>
+    <div class="tp-actions">
+      <button class="tp-btn-clear" id="tpBtnClear">清除</button>
+      <button class="tp-btn-cancel" id="tpBtnCancel">取消</button>
+      <button class="tp-btn-ok" id="tpBtnOk">设置</button>
+    </div>
   </div>
 </div>
 
@@ -913,6 +1005,147 @@ try{goals=JSON.parse(lsGet('workbench_goals')||'[]')||[];if(!Array.isArray(goals
 /* ---------- safe storage (fix: localStorage may be blocked) ---------- */
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+/* ---------- 自定义时间选择器 ---------- */
+let _tpCallback=null;  // 确认后的回调 function(val){}
+let _tpTarget=null;   // 当前正在编辑的目标触发器元素
+
+/** 打开时间选择器
+ * @param {HTMLElement} triggerEl - 触发按钮（用于回写显示值）
+ * @param {string} currentVal - 当前值 "HH:mm" 或 ""
+ * @param {function} callback - 确认回调，参数为 "HH:mm" 或 ""
+ */
+function showTimePicker(triggerEl, currentVal, callback){
+  _tpTarget=triggerEl;
+  _tpCallback=callback;
+  const hEl=document.getElementById('tpHour');
+  const mEl=document.getElementById('tpMin');
+  if(currentVal&&/:/.test(currentVal)){
+    const p=currentVal.split(':');
+    hEl.value=p[0];mEl.value=p[1];
+  }else{
+    hEl.value='';mEl.value='';
+  }
+  // 高亮匹配的预设
+  document.querySelectorAll('#tpPresets .tp-preset').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.h===hEl.value&&btn.dataset.m===mEl.value);
+  });
+  document.getElementById('timePickerModal').classList.add('show');
+  // 延迟聚焦时（等动画）
+  setTimeout(()=>{if(!hEl.value)hEl.focus();else mEl.focus();},300);
+}
+function hideTimePicker(){
+  document.getElementById('timePickerModal').classList.remove('show');
+  _tpCallback=null;_tpTarget=null;
+}
+function tpGetVal(){
+  let h=parseInt(document.getElementById('tpHour').value||'0',10);
+  let m=parseInt(document.getElementById('tpMin').value||'0',10);
+  if(isNaN(h)||h<0)h=0;if(h>23)h=23;
+  if(isNaN(m)||m<0)m=0;if(m>59)m=59;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function tpSyncTrigger(triggerEl, val){
+  if(!triggerEl)return;
+  const valSpan=triggerEl.querySelector('.tt-val');
+  if(valSpan)valSpan.textContent=val||'设置时间';
+  triggerEl.classList.toggle('has-val',!!val);
+  // 同步隐藏的原生 input
+  const nativeInput=triggerEl.nextElementSibling;
+  if(nativeInput&&nativeInput.type==='time')nativeInput.value=val||'';
+}
+
+/* 初始化时间选择器事件绑定（在 init() 中调用） */
+function initTimePicker(){
+  const modal=document.getElementById('timePickerModal');
+  // 点击遮罩关闭
+  modal.addEventListener('click',e=>{if(e.target===modal)hideTimePicker();});
+  // 预设按钮
+  document.querySelectorAll('#tpPresets .tp-preset').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.getElementById('tpHour').value=btn.dataset.h;
+      document.getElementById('tpMin').value=btn.dataset.m;
+      document.querySelectorAll('#tpPresets .tp-preset').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+  // 清除
+  document.getElementById('tpBtnClear').addEventListener('click',()=>{
+    document.getElementById('tpHour').value='';
+    document.getElementById('tpMin').value='';
+    document.querySelectorAll('#tpPresets .tp-preset').forEach(b=>b.classList.remove('active'));
+  });
+  // 取消
+  document.getElementById('tpBtnCancel').addEventListener('click',hideTimePicker);
+  // 确认
+  document.getElementById('tpBtnOk').addEventListener('click',()=>{
+    const h=document.getElementById('tpHour').value;
+    const m=document.getElementById('tpMin').value;
+    const val=(h!==''&&m!=='')?tpGetVal():'';
+    hideTimePicker();
+    if(_tpCallback)_tpCallback(val);
+  });
+  // 数字输入框：限制位数、自动跳转、实时更新预设高亮
+  const hEl=document.getElementById('tpHour'), mEl=document.getElementById('tpMin');
+  [hEl,mEl].forEach(el=>{
+    el.addEventListener('input',()=>{
+      let v=el.value.replace(/\D/g,'');
+      if(v.length>2)v=v.slice(0,2);
+      el.value=v;
+      // 实时更新预设高亮
+      document.querySelectorAll('#tpPresets .tp-preset').forEach(btn=>{
+        btn.classList.toggle('active',
+          btn.dataset.h===hEl.value&&btn.dataset.m===mEl.value);
+      });
+    });
+    el.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();document.getElementById('tpBtnOk').click();}
+      if(e.key==='Escape'){e.preventDefault();hideTimePicker();}
+    });
+  });
+  // 时→分自动跳转
+  hEl.addEventListener('input',()=>{
+    if(hEl.value.length>=2)mEl.focus();
+  });
+}
+
+/** 创建时间触发器 HTML（替代原生 input[type=time]）
+ * @param {string} id - 触发器唯一 ID
+ * @param {string} val - 当前时间值 "HH:mm" 或 ""
+ * @returns {string} HTML 字符串
+ */
+function timeTriggerHtml(id, val){
+  return '<div class="time-trigger'+(val?' has-val':'')+'" id="'+id+'" data-tp-id="'+id+'">'+
+    '<span class="tt-val">'+(val||'设置时间')+'</span>'+
+    '<span class="tt-icon">🕐</span>'+
+    '<span class="tt-clear" data-tp-clear="'+id+'">✕</span>'+
+    '</div>';
+}
+/** 绑定时间触发器的点击事件 */
+function bindTimeTrigger(triggerId, nativeInputId){
+  const el=document.getElementById(triggerId);
+  if(!el)return;
+  // 点击触发器→打开选择器
+  el.addEventListener('click',e=>{
+    e.stopPropagation();
+    const nativeEl=document.getElementById(nativeInputId);
+    const curVal=nativeEl?nativeEl.value:'';
+    showTimePicker(el,curVal,function(val){
+      tpSyncTrigger(el,val);
+      if(nativeEl)nativeEl.value=val||'';
+    });
+  });
+  // 清除按钮
+  const clearBtn=el.querySelector('.tt-clear');
+  if(clearBtn){
+    clearBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const nativeEl=document.getElementById(nativeInputId);
+      tpSyncTrigger(el,'');
+      if(nativeEl)nativeEl.value='';
+    });
+  }
+}
 
 /* ---------- date helpers ---------- */
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1344,7 +1577,8 @@ function tplEditRowHtml(tpl){
       '<textarea class="tpl-edit-note" maxlength="300" placeholder="描述（可选）">'+escapeHtml(tpl.note||'')+'</textarea>'+
       '<div class="tpl-edit-row">'+
         '<select class="tpl-edit-cat">'+opt('coffee')+opt('waishi')+opt('trade')+opt('study')+opt('life')+opt('temp')+'</select>'+
-        '<input class="tpl-edit-start" type="time" value="'+escapeHtml(tpl.start||'')+'">'+
+        '<div id="tplStartTrigger_'+tpl.id+'"></div>'+
+        '<input class="tpl-edit-start hide-native-time" type="time" value="'+escapeHtml(tpl.start||'')" data-tpl-id="'+tpl.id+'">'+
       '</div>'+
       '<div class="tpl-edit-actions">'+
         '<button type="button" class="btn-ghost tpl-edit-cancel">取消</button>'+
@@ -2084,6 +2318,7 @@ function addTask(){
   inp.value='';
   document.getElementById('timeChk').checked=false;
   document.getElementById('timeStart').value='';
+  tpSyncTrigger(document.getElementById('timeStartTrigger'),'');
   document.getElementById('timeRow').classList.remove('show');
   saveTasks();render();
 }
@@ -2143,8 +2378,15 @@ function openEdit(id){
   else subRow.style.display='none';
   document.getElementById('editDue').value=t.due||todayStr();
   document.getElementById('editRepeat').value=t.repeat||'none';
-  document.getElementById('editStart').value=t.start||'';
-  document.getElementById('editEnd').value=t.end||'';
+  // 渲染时间触发器
+  const sVal=t.start||'', eVal=t.end||'';
+  document.getElementById('editStartTrigger').innerHTML=timeTriggerHtml('editStartTrigger',sVal);
+  document.getElementById('editEndTrigger').innerHTML=timeTriggerHtml('editEndTrigger',eVal);
+  document.getElementById('editStart').value=sVal;
+  document.getElementById('editEnd').value=eVal;
+  // 绑定触发器点击
+  bindTimeTrigger('editStartTrigger','editStart');
+  bindTimeTrigger('editEndTrigger','editEnd');
   document.getElementById('editNote').value=t.note||'';
   document.getElementById('editModal').classList.add('show');
   setTimeout(()=>document.getElementById('editText').focus(),50);
@@ -2348,6 +2590,11 @@ function hideBoot(){
 }
 
 function init(){
+  // 初始化自定义时间选择器
+  initTimePicker();
+  // 快速添加任务的时间触发器
+  document.getElementById('timeStartTrigger').innerHTML=timeTriggerHtml('timeStartTrigger','');
+  bindTimeTrigger('timeStartTrigger','timeStart');
   // PWA: 注册离线缓存 + 安装引导
   if('serviceWorker' in navigator){try{navigator.serviceWorker.register('./sw.js');}catch(e){}}
   setupInstallHint();
@@ -2389,7 +2636,12 @@ function init(){
   document.getElementById('ideaEditText').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')saveIdeaEdit();});
   document.getElementById('ideaEditModal').addEventListener('click',e=>{if(e.target.id==='ideaEditModal')closeIdeaEdit();});
   document.getElementById('editCancel').onclick=closeEdit;
-  document.getElementById('editClearTime').onclick=()=>{document.getElementById('editStart').value='';document.getElementById('editEnd').value='';};
+  document.getElementById('editClearTime').onclick=()=>{
+    document.getElementById('editStart').value='';
+    document.getElementById('editEnd').value='';
+    tpSyncTrigger(document.getElementById('editStartTrigger'),'');
+    tpSyncTrigger(document.getElementById('editEndTrigger'),'');
+  };
   document.getElementById('editText').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
   document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit();});
   document.getElementById('searchInput').addEventListener('input',e=>{q=e.target.value.trim().toLowerCase();render();});
@@ -2414,7 +2666,21 @@ function init(){
   document.getElementById('tplCat').addEventListener('change',e=>{renderTplList(e.target.value);});
   document.getElementById('tplList').addEventListener('click',e=>{
     const editBtn=e.target.closest('[data-tpl-act="edit"]');
-    if(editBtn){editingTplId=editBtn.dataset.id;renderTplList(document.getElementById('tplCat').value);return;}
+    if(editBtn){editingTplId=editBtn.dataset.id;renderTplList(document.getElementById('tplCat').value);
+      // 绑定模板编辑中的时间触发器
+      const tid=editingTplId;
+      const trigEl=document.getElementById('tplStartTrigger_'+tid);
+      const nativeEl=trigEl?trigEl.nextElementSibling:null;
+      if(trigEl&&nativeEl){
+        trigEl.addEventListener('click',ev=>{
+          ev.stopPropagation();
+          showTimePicker(trigEl,nativeEl.value||'',function(val){tpSyncTrigger(trigEl,val);nativeEl.value=val||'';});
+        });
+        const clBtn=trigEl.querySelector('.tt-clear');
+        if(clBtn)clBtn.addEventListener('click',ev=>{ev.stopPropagation();tpSyncTrigger(trigEl,'');nativeEl.value='';});
+      }
+      return;
+    }
     const saveBtn=e.target.closest('.tpl-edit-save');
     if(saveBtn){const row=saveBtn.closest('.tpl-row');doSaveTplEdit(row.dataset.tplId,row);return;}
     const cancelBtn=e.target.closest('.tpl-edit-cancel');
