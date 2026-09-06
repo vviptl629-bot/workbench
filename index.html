@@ -58,6 +58,29 @@
   .side-btn:hover{color:var(--text);border-color:var(--accent)}
   .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
   .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
+  /* 侧边栏「全日总览」实时面板 */
+  .side-overview{margin-top:8px;border-top:1px dashed var(--border);padding-top:10px;display:flex;flex-direction:column;max-height:40vh;}
+  .so-head{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:6px;padding:0 4px;cursor:pointer;}
+  .so-head .so-cnt{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:var(--border);border-radius:20px;padding:1px 7px;}
+  .so-list{overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px;padding-right:2px;}
+  .so-item{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:9px;cursor:pointer;transition:.12s;}
+  .so-item:hover{background:var(--accent-soft);}
+  .so-item .so-time{font-size:11px;font-weight:700;color:var(--accent);width:42px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;}
+  .so-item .so-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .so-item .so-txt{flex:1;font-size:12.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .so-item .so-check{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
+  .so-item.done .so-txt{text-decoration:line-through;color:var(--muted);}
+  .so-item.done .so-check{background:var(--accent);border-color:var(--accent);}
+  .so-empty{font-size:12px;color:var(--muted);padding:6px 6px;}
+  /* 卡片内时间/完成时间 */
+  .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
+  .ovw-done{display:inline-flex;align-items:center;gap:3px;color:#10b981;font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
+  .ovw-head{font-size:14px;font-weight:700;color:var(--text);margin:2px 2px 12px;}
+  /* 编辑弹窗双时间行 */
+  .edit-times .et-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .edit-times .et-row:last-child{margin-bottom:0;}
+  .edit-times .et-row>span{width:34px;font-size:12.5px;color:var(--muted);flex-shrink:0;}
+  .edit-times .et-row input{flex:1;}
 
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:24px 28px 96px;display:flex;flex-direction:column;gap:20px}
@@ -577,6 +600,7 @@
     <div class="nav-item" data-view="upcoming"><span>📆</span> 即将到来 <span class="count" id="c-upcoming">0</span></div>
     <div class="nav-item" data-view="week"><span>🗓️</span> 本周 <span class="count" id="c-week">0</span></div>
     <div class="nav-item" data-view="idea"><span>💡</span> 灵感 <span class="count" id="c-idea">0</span></div>
+    <div class="nav-item" data-view="overview"><span>🕐</span> 全日总览</div>
     <div class="nav-label">任务分类</div>
     <div class="nav-item" data-view="temp"><span class="dot" style="background:#f59e0b"></span> 临时任务 <span class="count" id="c-temp">0</span></div>
     <div class="nav-item" data-view="work"><span class="dot" style="background:#3b82f6"></span> 工作 <span class="count" id="c-work">0</span></div>
@@ -591,6 +615,10 @@
     <div class="side-btn" id="btnTheme">🌙 深色模式</div>
     <div class="nav-label">分析</div>
     <div class="nav-item" data-view="stats"><span>📊</span> 统计分析</div>
+    <div class="side-overview" id="sideOverview">
+      <div class="so-head">🕐 全日总览 <span class="so-cnt">0/0</span></div>
+      <div class="so-list"></div>
+    </div>
     <div class="spacer"></div>
     <div class="side-btn" id="btnExportFile">📤 导出含数据文件</div>
     <div class="side-btn" id="btnExportJson">💾 备份(JSON)</div>
@@ -750,7 +778,8 @@
     <div class="edit-field">
       <label>时间（可选，24 小时制）</label>
       <div class="edit-times">
-        <div><input type="time" id="editStart"></div>
+        <div class="et-row"><span>开始</span><input type="time" id="editStart"></div>
+        <div class="et-row"><span>截止</span><input type="time" id="editEnd"></div>
       </div>
     </div>
     <div class="edit-field">
@@ -1501,6 +1530,76 @@ function renderTasks(isTodayMode,focusDate){
   wireTrash();
 }
 function toMin(hm){if(!hm||!/:/.test(hm))return 9999;const p=hm.split(':');return (+p[0])*60+(+p[1]);}
+// 统一时间显示格式：毫秒时间戳 → HH:mm（24 小时制）
+function fmtHM(ts){if(!ts)return '';const d=new Date(ts),p=n=>String(n).padStart(2,'0');return p(d.getHours())+':'+p(d.getMinutes());}
+// 取任务完成时间戳（非重复读 completedAt；重复读当日 checksAt）
+function doneAtOf(t){if(t.repeat&&t.repeat!=='none'){const d=todayStr();return (t.checksAt&&t.checksAt[d])||null;}return (t.done&&t.completedAt)?t.completedAt:null;}
+// 全日总览：当天所有任务（含已完成），按开始时间先后排序
+function dayOverviewTasks(){
+  const list=tasks.filter(t=>{
+    if(isMarkedOverdue(t))return false; // 手动逾期单独处理，不混入总览
+    return (isDueToday(t)||isOverdue(t)||!t.due||isRepeatActive(t)||isDoneToday(t));
+  });
+  list.sort((a,b)=>{
+    const sa=toMin(a.start), sb=toMin(b.start);
+    if(sa!==sb)return sa-sb;
+    return (a.text||'').localeCompare(b.text||'');
+  });
+  return list;
+}
+// 侧边栏实时面板
+function renderSidebarOverview(){
+  const box=document.getElementById('sideOverview');if(!box)return;
+  const list=dayOverviewTasks();
+  const done=list.filter(isDoneToday).length;
+  const cnt=box.querySelector('.so-cnt');if(cnt)cnt.textContent=done+'/'+list.length;
+  const ul=box.querySelector('.so-list');if(!ul)return;
+  if(!list.length){ul.innerHTML='<div class="so-empty">今天还没有任务</div>';return;}
+  ul.innerHTML=list.map(t=>{
+    const c=CATS[t.category]||{color:'#999'};
+    const time=t.start?'<div class="so-time">'+t.start+'</div>':'<div class="so-time">—</div>';
+    return '<div class="so-item'+(isDoneToday(t)?' done':'')+'" data-ovr-id="'+t.id+'">'+
+      time+'<span class="so-dot" style="background:'+c.color+'"></span>'+
+      '<span class="so-txt">'+escapeHtml(t.text)+'</span>'+
+      '<span class="so-check">'+(isDoneToday(t)?'✓':'')+'</span></div>';
+  }).join('');
+}
+// 全日总览完整视图（主区时间线）
+function renderOverviewView(){
+  const area=document.getElementById('listArea');
+  document.getElementById('taskAddBox').style.display='none';
+  document.getElementById('dayNav').style.display='none';
+  document.getElementById('searchBar').style.display='none';
+  const list=dayOverviewTasks();
+  if(!list.length){area.innerHTML='<div class="empty"><div class="big">🌱</div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
+  const timed=list.filter(t=>t.start).sort((a,b)=>toMin(a.start)-toMin(b.start));
+  const untimed=list.filter(t=>!t.start);
+  let html='<div class="ovw-head">🕐 全日总览 · 今天 '+list.length+' 项（已完成 '+list.filter(isDoneToday).length+'）</div>';
+  if(timed.length){
+    html+='<div class="timeline">'+timed.map(t=>{
+      const c=CATS[t.category]||{color:'#999',soft:'#eee',name:''};
+      let chipName=c.name,chipColor=c.color,chipSoft=c.soft;
+      if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
+      const tm=(t.start||'')+(t.end?('–'+t.end):'');
+      const da=doneAtOf(t);
+      return '<div class="tl-row'+(isDoneToday(t)?' done':'')+'">'+
+        '<div class="tl-time">'+tm+'</div>'+
+        '<div class="tl-rail"></div><div class="tl-node"></div>'+
+        '<div class="task tl-card'+(isDoneToday(t)?' done':'')+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
+          '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
+          '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+
+            '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+(da?' <span class="ovw-done">✅ '+fmtHM(da)+'</span>':'')+'</div></div>'+
+          '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'⭐':'☆')+'</div>'+
+            '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
+            '<div class="del" data-act="del" data-id="'+t.id+'">×</div></div>'+
+        '</div></div>';
+    }).join('')+'</div>';
+  }
+  if(untimed.length)html+='<div class="tl-untimed"><div class="section-title">🗒️ 未排时间 · '+untimed.length+'</div>'+items(untimed)+'</div>';
+  html+=renderTrashHtml();
+  area.innerHTML=html;
+  wireTrash();
+}
 function renderTimeline(isTodayMode,focusDate){
   const area=document.getElementById('listArea');
   const pre=(view==='work')?workTabsHtml():'';
@@ -1528,7 +1627,7 @@ function renderTimeline(isTodayMode,focusDate){
         '<div class="task tl-card'+(isDoneToday(t)?' done':'')+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
           '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
           '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+
-            '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+'</div></div>'+
+            '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+(t.end?' <span class="ovw-time">截止 '+t.end+'</span>':'')+(doneAtOf(t)?' <span class="ovw-done">✅ '+fmtHM(doneAtOf(t))+'</span>':'')+'</div></div>'+
           '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'⭐':'☆')+'</div>'+
             '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
             '<div class="del" data-act="del" data-id="'+t.id+'">×</div></div>'+
@@ -1572,10 +1671,13 @@ function items(arr){return '<div class="task-list">'+arr.map(t=>{
   const c=CATS[t.category]||{name:'',color:'#999',soft:'#eee'};
   let chipName=c.name,chipColor=c.color,chipSoft=c.soft;
   if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
+  const tmRange=(t.start||t.end)?' <span class="ovw-time">🕐 '+(t.start||'…')+(t.end?('–'+t.end):'')+'</span>':'';
+  const da=doneAtOf(t);
+  const doneSpan=da?' <span class="ovw-done">✅ '+fmtHM(da)+'</span>':'';
   return '<div class="task '+(t.done?'done':'')+'" data-id="'+t.id+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
     '<div class="drag-handle" title="长按拖拽排序">⋮</div>'+
     '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
-    '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+(t.note?'<div class="note-ind" data-act="edit" data-id="'+t.id+'"><span class="note-icon">📝</span>'+escapeHtml(t.note)+'</div>':'')+'<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+'</div></div>'+
+    '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+(t.note?'<div class="note-ind" data-act="edit" data-id="'+t.id+'"><span class="note-icon">📝</span>'+escapeHtml(t.note)+'</div>':'')+'<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+tmRange+doneSpan+'</div></div>'+
     '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'⭐':'☆')+'</div>'+
     (t.overdueMark
       ?'<div class="ovr" data-act="restore-ovr" data-id="'+t.id+'" title="从逾期恢复">↩</div>'
@@ -1783,6 +1885,7 @@ function showToast(msg,undoFn){
 /* ---------- main render ---------- */
 function render(){
   updateCounts();
+  renderSidebarOverview();
   applyActive();
   const tlBtn=document.getElementById('tlToggle');
   if(tlBtn){tlBtn.classList.toggle('active',tlMode);tlBtn.textContent=tlMode?'📋 列表':'📈 时间线';}
@@ -1796,6 +1899,7 @@ function render(){
   document.getElementById('listArea').style.display=(view==='stats')?'none':'';
   if(view==='stats'){renderStats();return;}
   if(view==='idea'){renderIdeas();return;}
+  if(view==='overview'){renderOverviewView();return;}
   if(view==='upcoming'){renderUpcoming();return;}
   if(view==='week'){renderWeek();return;}
   const isTodayMode=!selDate||selDate===todayStr();
@@ -1966,7 +2070,7 @@ function addTask(){
   document.getElementById('timeRow').classList.remove('show');
   saveTasks();render();
 }
-function toggle(id){const t=tasks.find(x=>x.id===id);if(!t)return;if(t.repeat&&t.repeat!=='none'){t.checks=t.checks||{};const d=todayStr();t.checks[d]=!t.checks[d];if(!t.checks[d])delete t.checks[d];}else{t.done=!t.done;}t.updated=Date.now();saveTasks();render();checkAllDone();}
+function toggle(id){const t=tasks.find(x=>x.id===id);if(!t)return;const now=Date.now();if(t.repeat&&t.repeat!=='none'){t.checks=t.checks||{};const d=todayStr();if(t.checks[d]){delete t.checks[d];if(t.checksAt)delete t.checksAt[d];}else{t.checks[d]=true;t.checksAt=t.checksAt||{};t.checksAt[d]=now;}}else{if(t.done){t.done=false;delete t.completedAt;}else{t.done=true;t.completedAt=now;}}t.updated=now;saveTasks();render();checkAllDone();}
 function toggleImp(id){const t=tasks.find(x=>x.id===id);if(t){t.imp=!t.imp;t.updated=Date.now();saveTasks();render();showToast(t.imp?'⭐ 已标记为重要':'已取消重要标记');}}
 /* 首页「重要任务」置顶卡（%圆环下方） */
 function renderImpCard(){
@@ -2023,6 +2127,7 @@ function openEdit(id){
   document.getElementById('editDue').value=t.due||todayStr();
   document.getElementById('editRepeat').value=t.repeat||'none';
   document.getElementById('editStart').value=t.start||'';
+  document.getElementById('editEnd').value=t.end||'';
   document.getElementById('editNote').value=t.note||'';
   document.getElementById('editModal').classList.add('show');
   setTimeout(()=>document.getElementById('editText').focus(),50);
@@ -2038,6 +2143,7 @@ function saveEdit(){
   t.due=document.getElementById('editDue').value||todayStr();
   t.repeat=document.getElementById('editRepeat').value||'none';
   t.start=document.getElementById('editStart').value||'';
+  t.end=document.getElementById('editEnd').value||'';
   const noteVal=document.getElementById('editNote').value.trim();
   t.note=noteVal||undefined;
   t.updated=Date.now();
@@ -2266,7 +2372,7 @@ function init(){
   document.getElementById('ideaEditText').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')saveIdeaEdit();});
   document.getElementById('ideaEditModal').addEventListener('click',e=>{if(e.target.id==='ideaEditModal')closeIdeaEdit();});
   document.getElementById('editCancel').onclick=closeEdit;
-  document.getElementById('editClearTime').onclick=()=>{document.getElementById('editStart').value='';};
+  document.getElementById('editClearTime').onclick=()=>{document.getElementById('editStart').value='';document.getElementById('editEnd').value='';};
   document.getElementById('editText').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
   document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit();});
   document.getElementById('searchInput').addEventListener('input',e=>{q=e.target.value.trim().toLowerCase();render();});
@@ -2275,6 +2381,12 @@ function init(){
     if(v==='waishi'||v==='coffee'||v==='trade')setWorkSub(v);
     else setView(v);
   });
+  // 侧边栏「全日总览」面板：点击项切换完成，点击表头进入完整视图
+  const so=document.getElementById('sideOverview');
+  if(so){
+    so.querySelector('.so-list').addEventListener('click',e=>{const it=e.target.closest('.so-item');if(it)toggle(it.dataset.ovrId);});
+    so.querySelector('.so-head').onclick=()=>setView('overview');
+  }
   document.querySelectorAll('.bn').forEach(n=>n.onclick=()=>setView(n.dataset.view));
   document.getElementById('btnExportFile').onclick=exportFile;
   document.getElementById('btnExportJson').onclick=exportJson;
