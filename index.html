@@ -58,20 +58,6 @@
   .side-btn:hover{color:var(--text);border-color:var(--accent)}
   .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
   .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
-  /* 侧边栏「全日总览」实时面板 */
-  .side-overview{margin-top:8px;border-top:1px dashed var(--border);padding-top:10px;display:flex;flex-direction:column;max-height:40vh;}
-  .so-head{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:6px;padding:0 4px;cursor:pointer;}
-  .so-head .so-cnt{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:var(--border);border-radius:20px;padding:1px 7px;}
-  .so-list{overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px;padding-right:2px;}
-  .so-item{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:9px;cursor:pointer;transition:.12s;}
-  .so-item:hover{background:var(--accent-soft);}
-  .so-item .so-time{font-size:11px;font-weight:700;color:var(--accent);width:42px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;}
-  .so-item .so-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .so-item .so-txt{flex:1;font-size:12.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .so-item .so-check{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
-  .so-item.done .so-txt{text-decoration:line-through;color:var(--muted);}
-  .so-item.done .so-check{background:var(--accent);border-color:var(--accent);}
-  .so-empty{font-size:12px;color:var(--muted);padding:6px 6px;}
   /* 卡片内时间/完成时间 */
   .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-done{display:inline-flex;align-items:center;gap:3px;color:#10b981;font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
@@ -615,10 +601,6 @@
     <div class="side-btn" id="btnTheme">🌙 深色模式</div>
     <div class="nav-label">分析</div>
     <div class="nav-item" data-view="stats"><span>📊</span> 统计分析</div>
-    <div class="side-overview" id="sideOverview">
-      <div class="so-head">🕐 全日总览 <span class="so-cnt">0/0</span></div>
-      <div class="so-list"></div>
-    </div>
     <div class="spacer"></div>
     <div class="side-btn" id="btnExportFile">📤 导出含数据文件</div>
     <div class="side-btn" id="btnExportJson">💾 备份(JSON)</div>
@@ -1548,23 +1530,7 @@ function dayOverviewTasks(){
   return list;
 }
 // 侧边栏实时面板
-function renderSidebarOverview(){
-  const box=document.getElementById('sideOverview');if(!box)return;
-  const list=dayOverviewTasks();
-  const done=list.filter(isDoneToday).length;
-  const cnt=box.querySelector('.so-cnt');if(cnt)cnt.textContent=done+'/'+list.length;
-  const ul=box.querySelector('.so-list');if(!ul)return;
-  if(!list.length){ul.innerHTML='<div class="so-empty">今天还没有任务</div>';return;}
-  ul.innerHTML=list.map(t=>{
-    const c=CATS[t.category]||{color:'#999'};
-    const time=t.start?'<div class="so-time">'+t.start+'</div>':'<div class="so-time">—</div>';
-    return '<div class="so-item'+(isDoneToday(t)?' done':'')+'" data-ovr-id="'+t.id+'">'+
-      time+'<span class="so-dot" style="background:'+c.color+'"></span>'+
-      '<span class="so-txt">'+escapeHtml(t.text)+'</span>'+
-      '<span class="so-check">'+(isDoneToday(t)?'✓':'')+'</span></div>';
-  }).join('');
-}
-// 全日总览完整视图（主区时间线）
+// 全日总览完整视图（主区时间线，独立显示于主区）
 function renderOverviewView(){
   const area=document.getElementById('listArea');
   document.getElementById('taskAddBox').style.display='none';
@@ -1885,7 +1851,6 @@ function showToast(msg,undoFn){
 /* ---------- main render ---------- */
 function render(){
   updateCounts();
-  renderSidebarOverview();
   applyActive();
   const tlBtn=document.getElementById('tlToggle');
   if(tlBtn){tlBtn.classList.toggle('active',tlMode);tlBtn.textContent=tlMode?'📋 列表':'📈 时间线';}
@@ -2381,12 +2346,6 @@ function init(){
     if(v==='waishi'||v==='coffee'||v==='trade')setWorkSub(v);
     else setView(v);
   });
-  // 侧边栏「全日总览」面板：点击项切换完成，点击表头进入完整视图
-  const so=document.getElementById('sideOverview');
-  if(so){
-    so.querySelector('.so-list').addEventListener('click',e=>{const it=e.target.closest('.so-item');if(it)toggle(it.dataset.ovrId);});
-    so.querySelector('.so-head').onclick=()=>setView('overview');
-  }
   document.querySelectorAll('.bn').forEach(n=>n.onclick=()=>setView(n.dataset.view));
   document.getElementById('btnExportFile').onclick=exportFile;
   document.getElementById('btnExportJson').onclick=exportJson;
