@@ -1104,8 +1104,9 @@ function initTimePicker(){
     const h=document.getElementById('tpHour').value;
     const m=document.getElementById('tpMin').value;
     const val=(h!==''&&m!=='')?tpGetVal():'';
-    hideTimePicker();
-    if(_tpCallback)_tpCallback(val);
+    const cb=typeof _tpCallback==='function'?_tpCallback:null; // 先取出回调
+    hideTimePicker();                                   // 再关闭（关闭会清空 _tpCallback）
+    if(cb)cb(val);                                      // 最后调用，确保写回成功
   });
   // 数字输入框：限制位数、自动跳转、实时更新预设高亮
   const hEl=document.getElementById('tpHour'), mEl=document.getElementById('tpMin');
