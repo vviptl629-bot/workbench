@@ -295,7 +295,6 @@
   .tpl-row.editing{border:2px solid var(--accent);background:var(--accent-soft);margin:2px 0;box-shadow:0 0 0 3px rgba(79,70,229,.08);}
   .tpl-edit{display:flex;flex-direction:column;gap:10px;padding:6px 4px;}
   .tpl-edit-text{padding:10px 13px;border:1px solid var(--border);border-radius:11px;font-size:15px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;}
-  .tpl-edit-note{padding:9px 13px;border:1px solid var(--border);border-radius:11px;font-size:14px;background:var(--bg);color:var(--text);box-sizing:border-box;width:100%;min-height:58px;resize:vertical;font-family:inherit;}
   .tpl-edit-row{display:flex;gap:8px;align-items:center;}
   .tpl-edit-row select{flex:1;padding:9px 11px;border:1px solid var(--border);border-radius:11px;font-size:14px;background:var(--bg);color:var(--text);}
   .tpl-edit-row .time-trigger{flex:1;}
@@ -1538,7 +1537,7 @@ function renderTplList(filter){
     if(editingTplId===tpl.id)return tplEditRowHtml(tpl);
     return '<div class="tpl-row'+(tpl.paused?' paused':'')+'" data-tpl-id="'+tpl.id+'">'+
       '<div class="tpl-info"><div class="tpl-text">'+escapeHtml(tpl.text)+'</div>'+
-      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · '+tpl.start:'')+(tpl.note?' · 📝'+escapeHtml(tpl.note):'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
+      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · '+tpl.start:'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
       '<div class="tpl-ops">'+
         '<span class="tpl-op" data-tpl-act="edit" data-id="'+tpl.id+'" title="编辑">✎</span>'+
         '<span class="tpl-op" data-tpl-act="up" data-id="'+tpl.id+'" title="上移">▲</span>'+
@@ -1593,10 +1592,9 @@ function tplEditRowHtml(tpl){
   return '<div class="tpl-row editing" data-tpl-id="'+tpl.id+'">'+
     '<div class="tpl-edit">'+
       '<input class="tpl-edit-text" type="text" maxlength="200" value="'+escapeHtml(tpl.text)+'" placeholder="任务名称">'+
-      '<textarea class="tpl-edit-note" maxlength="300" placeholder="描述（可选）">'+escapeHtml(tpl.note||'')+'</textarea>'+
       '<div class="tpl-edit-row">'+
         '<select class="tpl-edit-cat">'+opt('coffee')+opt('waishi')+opt('trade')+opt('study')+opt('life')+opt('temp')+'</select>'+
-        '<div id="tplStartTrigger_'+tpl.id+'"></div>'+
+        timeTriggerHtml('tplStartTrigger_'+tpl.id, tpl.start||'')+
         '<input class="tpl-edit-start hide-native-time" type="time" value="'+escapeHtml(tpl.start||'')+'" data-tpl-id="'+tpl.id+'">'+
       '</div>'+
       '<div class="tpl-edit-actions">'+
@@ -1612,13 +1610,11 @@ function doSaveTplEdit(id,row){
   if(!text){showToast('名称不能为空');return;}
   const raw=row.querySelector('.tpl-edit-cat').value;
   const isSub=['waishi','coffee','trade'].includes(raw);
-  const note=(row.querySelector('.tpl-edit-note').value||'').trim();
   const start=row.querySelector('.tpl-edit-start').value||'';
-  tpl.text=text;tpl.note=note;tpl.category=isSub?'work':raw;tpl.sub=isSub?raw:null;tpl.start=start;tpl.updated=Date.now();
+  tpl.text=text;tpl.category=isSub?'work':raw;tpl.sub=isSub?raw:null;tpl.start=start;tpl.updated=Date.now();
   tasks.forEach(t=>{
     if(t.tplId===id){
       t.text=text;t.category=isSub?'work':raw;t.sub=isSub?raw:null;t.start=start;
-      if(!t.note&&note)t.note=note;
       t.updated=Date.now();
     }
   });
@@ -1829,18 +1825,24 @@ function renderOverviewView(){
   document.getElementById('searchBar').style.display='none';
   const today=todayStr();
   const focus=selDate||today;
+  const dstr=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
   // 以参照日 focus 判定当日任务归属（focus=今天时即「当日」语义）
   const dueOn=t=>t.due===focus;
   const overdueOn=t=>t.due && !t.done && t.due<focus && !(t.repeat&&t.repeat!=='none');
-  const doneOn=t=>(t.repeat&&t.repeat!=='none')?!!(t.checks&&t.checks[focus]):!!t.done;
+  const openTask=t=>(t.repeat&&t.repeat!=='none')?!(t.checks&&t.checks[focus]):!t.done; // 当日是否仍未完成
+  // 今日已完成：非重复任务须完成时间落在 focus 当天；重复任务当天有勾选（避免把历史已完成全部计入）
+  const doneToday=t=>{
+    if(t.repeat&&t.repeat!=='none')return !!(t.checks&&t.checks[focus]);
+    return !!t.done && t.completedAt && dstr(t.completedAt)===focus;
+  };
   // 逾期 = 手动标记逾期 + 截止日期早于当日且仍未完成（当日结束时自动转入）
   const isOvr=t=>!!t.overdueMark||overdueOn(t);
-  const relevant=t=>isOvr(t)||dueOn(t)||!t.due||isRepeatActive(t)||doneOn(t);
+  const relevant=t=>isOvr(t)||doneToday(t)||(openTask(t)&&(dueOn(t)||!t.due||isRepeatActive(t)));
   const all=tasks.filter(relevant);
   if(!all.length){area.innerHTML='<div class="empty"><div class="big">🌱</div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
+  const done=all.filter(doneToday).sort((a,b)=>(doneAtOf(b)||0)-(doneAtOf(a)||0));
   const overdue=all.filter(isOvr).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
-  const pending=all.filter(t=>!doneOn(t)&&!isOvr(t)).sort((a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||''));
-  const done=all.filter(t=>doneOn(t)).sort((a,b)=>(doneAtOf(b)||0)-(doneAtOf(a)||0));
+  const pending=all.filter(t=>!doneToday(t)&&!isOvr(t)).sort((a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||''));
   const totalToday=pending.length+done.length;
   const pct=totalToday?Math.round(done.length/totalToday*100):0;
   let html='';
@@ -1855,12 +1857,12 @@ function renderOverviewView(){
   html+='<div class="ovw-prog-text">今日完成进度 '+pct+'% · 已完成 '+done.length+' / 当日共 '+totalToday+' 项'+(overdue.length?' · 逾期 '+overdue.length+' 项':'');
   if(pending.length===0&&overdue.length===0&&done.length>0)html+=' · 🎉 已全部完成';
   html+='</div>';
-  // 逾期：单独归类（红色，置顶）
-  if(overdue.length)html+='<div class="ovw-group ovr-group"><div class="section-title">🔴 逾期 · '+overdue.length+'</div>'+items(overdue)+'</div>';
-  // 待完成：默认展示
+  // 待完成：默认展示（置顶）
   if(pending.length)html+='<div class="ovw-group"><div class="section-title">📋 待完成 · '+pending.length+'</div>'+items(pending)+'</div>';
   else if(!overdue.length)html+='<div class="ovw-group"><div class="ovw-all-done">🎉 今日待办已全部完成，去加点新任务吧！</div></div>';
-  // 已完成：默认折叠（收起），点击展开
+  // 逾期：单独归类（红色，位于待完成下方）
+  if(overdue.length)html+='<div class="ovw-group ovr-group"><div class="section-title">🔴 逾期 · '+overdue.length+'</div>'+items(overdue)+'</div>';
+  // 今日已完成：仅当天完成（默认折叠），点击展开
   if(done.length){
     html+='<div class="ovw-group">'+
       '<div class="ovw-collapsed-head" data-act="ovw-toggle-done">'+
