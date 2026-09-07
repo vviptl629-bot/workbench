@@ -62,6 +62,24 @@
   .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-done{display:inline-flex;align-items:center;gap:3px;color:#10b981;font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-head{font-size:14px;font-weight:700;color:var(--text);margin:2px 2px 12px;}
+  /* 全日总览：状态统计 + 折叠已完成 */
+  .ovw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 2px 10px}
+  .ovw-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow)}
+  .ovw-stat .n{display:block;font-size:24px;font-weight:800;color:var(--text);line-height:1.1;font-variant-numeric:tabular-nums}
+  .ovw-stat .n.r{color:#10b981}
+  .ovw-stat .n.bad{color:#f43f5e}
+  .ovw-stat .l{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
+  .ovw-progress{height:8px;background:var(--card-2);border-radius:6px;overflow:hidden;margin:0 2px}
+  .ovw-progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#10b981);border-radius:6px;transition:width .3s}
+  .ovw-prog-text{font-size:12px;color:var(--muted);margin:6px 2px 14px}
+  .ovw-group{margin-top:6px}
+  .ovw-group .section-title{margin:16px 2px 8px}
+  .ovr-group .section-title{color:#f43f5e}
+  .ovw-all-done{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;color:var(--muted);font-size:13px}
+  .ovw-collapsed-head{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;margin-top:16px}
+  .ovw-collapsed-head .chev{color:var(--muted);font-size:14px;transition:transform .15s}
+  .ovw-collapsed-head:active{background:var(--card-2)}
+  .ovw-done-list{margin-top:10px}
   /* 编辑弹窗双时间行 */
   .edit-times .et-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
   .edit-times .et-row:last-child{margin-bottom:0;}
@@ -962,6 +980,7 @@ let showDoneIdea=false; // 灵感已完成折叠：false=收起(默认)，true=�
 let showOvr=false;  // 逾期任务折叠：false=收起(默认)，true=展开
 let showTrash=false; // 回收站折叠：false=收起(默认)，true=展开
 let tlMode=false; // 时间线视图开关：false=列表(默认)，true=时间线
+let ovwDoneOpen=false; // 全日总览「已完成」折叠：false=收起(默认)，true=展开
 let statsMode='week';
 let enDate='';
 let enCheck={};
@@ -1578,7 +1597,7 @@ function tplEditRowHtml(tpl){
       '<div class="tpl-edit-row">'+
         '<select class="tpl-edit-cat">'+opt('coffee')+opt('waishi')+opt('trade')+opt('study')+opt('life')+opt('temp')+'</select>'+
         '<div id="tplStartTrigger_'+tpl.id+'"></div>'+
-        '<input class="tpl-edit-start hide-native-time" type="time" value="'+escapeHtml(tpl.start||'')" data-tpl-id="'+tpl.id+'">'+
+        '<input class="tpl-edit-start hide-native-time" type="time" value="'+escapeHtml(tpl.start||'')+'" data-tpl-id="'+tpl.id+'">'+
       '</div>'+
       '<div class="tpl-edit-actions">'+
         '<button type="button" class="btn-ghost tpl-edit-cancel">取消</button>'+
@@ -1802,52 +1821,55 @@ function toMin(hm){if(!hm||!/:/.test(hm))return 9999;const p=hm.split(':');retur
 function fmtHM(ts){if(!ts)return '';const d=new Date(ts),p=n=>String(n).padStart(2,'0');return p(d.getHours())+':'+p(d.getMinutes());}
 // 取任务完成时间戳（非重复读 completedAt；重复读当日 checksAt）
 function doneAtOf(t){if(t.repeat&&t.repeat!=='none'){const d=todayStr();return (t.checksAt&&t.checksAt[d])||null;}return (t.done&&t.completedAt)?t.completedAt:null;}
-// 全日总览：当天所有任务（含已完成），按开始时间先后排序
-function dayOverviewTasks(){
-  const list=tasks.filter(t=>{
-    if(isMarkedOverdue(t))return false; // 手动逾期单独处理，不混入总览
-    return (isDueToday(t)||isOverdue(t)||!t.due||isRepeatActive(t)||isDoneToday(t));
-  });
-  list.sort((a,b)=>{
-    const sa=toMin(a.start), sb=toMin(b.start);
-    if(sa!==sb)return sa-sb;
-    return (a.text||'').localeCompare(b.text||'');
-  });
-  return list;
-}
-// 侧边栏实时面板
-// 全日总览完整视图（主区时间线，独立显示于主区）
+// 全日总览：默认展示当日未完成（待完成 + 逾期单独归类），已完成折叠可展开，并提供按状态分类统计
 function renderOverviewView(){
   const area=document.getElementById('listArea');
   document.getElementById('taskAddBox').style.display='none';
   document.getElementById('dayNav').style.display='none';
   document.getElementById('searchBar').style.display='none';
-  const list=dayOverviewTasks();
-  if(!list.length){area.innerHTML='<div class="empty"><div class="big">🌱</div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
-  const timed=list.filter(t=>t.start).sort((a,b)=>toMin(a.start)-toMin(b.start));
-  const untimed=list.filter(t=>!t.start);
-  let html='<div class="ovw-head">🕐 全日总览 · 今天 '+list.length+' 项（已完成 '+list.filter(isDoneToday).length+'）</div>';
-  if(timed.length){
-    html+='<div class="timeline">'+timed.map(t=>{
-      const c=CATS[t.category]||{color:'#999',soft:'#eee',name:''};
-      let chipName=c.name,chipColor=c.color,chipSoft=c.soft;
-      if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
-      const tm=(t.start||'')+(t.end?('–'+t.end):'');
-      const da=doneAtOf(t);
-      return '<div class="tl-row'+(isDoneToday(t)?' done':'')+'">'+
-        '<div class="tl-time">'+tm+'</div>'+
-        '<div class="tl-rail"></div><div class="tl-node"></div>'+
-        '<div class="task tl-card'+(isDoneToday(t)?' done':'')+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
-          '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
-          '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+
-            '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+(da?' <span class="ovw-done">✅ '+fmtHM(da)+'</span>':'')+'</div></div>'+
-          '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'⭐':'☆')+'</div>'+
-            '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
-            '<div class="del" data-act="del" data-id="'+t.id+'">×</div></div>'+
-        '</div></div>';
-    }).join('')+'</div>';
+  const today=todayStr();
+  const focus=selDate||today;
+  // 以参照日 focus 判定当日任务归属（focus=今天时即「当日」语义）
+  const dueOn=t=>t.due===focus;
+  const overdueOn=t=>t.due && !t.done && t.due<focus && !(t.repeat&&t.repeat!=='none');
+  const doneOn=t=>(t.repeat&&t.repeat!=='none')?!!(t.checks&&t.checks[focus]):!!t.done;
+  // 逾期 = 手动标记逾期 + 截止日期早于当日且仍未完成（当日结束时自动转入）
+  const isOvr=t=>!!t.overdueMark||overdueOn(t);
+  const relevant=t=>isOvr(t)||dueOn(t)||!t.due||isRepeatActive(t)||doneOn(t);
+  const all=tasks.filter(relevant);
+  if(!all.length){area.innerHTML='<div class="empty"><div class="big">🌱</div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
+  const overdue=all.filter(isOvr).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+  const pending=all.filter(t=>!doneOn(t)&&!isOvr(t)).sort((a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||''));
+  const done=all.filter(t=>doneOn(t)).sort((a,b)=>(doneAtOf(b)||0)-(doneAtOf(a)||0));
+  const totalToday=pending.length+done.length;
+  const pct=totalToday?Math.round(done.length/totalToday*100):0;
+  let html='';
+  // 状态分类统计
+  html+='<div class="ovw-head">🕐 全日总览 · '+(focus===today?'今天':fmtSel())+'</div>';
+  html+='<div class="ovw-stats">'+
+    '<div class="ovw-stat"><span class="n">'+pending.length+'</span><span class="l">待完成</span></div>'+
+    '<div class="ovw-stat"><span class="n r">'+done.length+'</span><span class="l">已完成</span></div>'+
+    '<div class="ovw-stat"><span class="n bad">'+overdue.length+'</span><span class="l">逾期</span></div>'+
+  '</div>';
+  html+='<div class="ovw-progress"><div class="bar" style="width:'+pct+'%"></div></div>';
+  html+='<div class="ovw-prog-text">今日完成进度 '+pct+'% · 已完成 '+done.length+' / 当日共 '+totalToday+' 项'+(overdue.length?' · 逾期 '+overdue.length+' 项':'');
+  if(pending.length===0&&overdue.length===0&&done.length>0)html+=' · 🎉 已全部完成';
+  html+='</div>';
+  // 逾期：单独归类（红色，置顶）
+  if(overdue.length)html+='<div class="ovw-group ovr-group"><div class="section-title">🔴 逾期 · '+overdue.length+'</div>'+items(overdue)+'</div>';
+  // 待完成：默认展示
+  if(pending.length)html+='<div class="ovw-group"><div class="section-title">📋 待完成 · '+pending.length+'</div>'+items(pending)+'</div>';
+  else if(!overdue.length)html+='<div class="ovw-group"><div class="ovw-all-done">🎉 今日待办已全部完成，去加点新任务吧！</div></div>';
+  // 已完成：默认折叠（收起），点击展开
+  if(done.length){
+    html+='<div class="ovw-group">'+
+      '<div class="ovw-collapsed-head" data-act="ovw-toggle-done">'+
+        '<span>✅ 今日已完成 · '+done.length+'</span>'+
+        '<span class="chev">'+(ovwDoneOpen?'▾':'▸')+'</span>'+
+      '</div>'+
+      (ovwDoneOpen?'<div class="ovw-done-list">'+items(done)+'</div>':'')+
+    '</div>';
   }
-  if(untimed.length)html+='<div class="tl-untimed"><div class="section-title">🗒️ 未排时间 · '+untimed.length+'</div>'+items(untimed)+'</div>';
   html+=renderTrashHtml();
   area.innerHTML=html;
   wireTrash();
@@ -2709,6 +2731,7 @@ function init(){
       if(el.dataset.act==='restore-ovr')restoreOverdue(id);
       if(el.dataset.act==='del')del(id);
       if(el.dataset.act==='edit')openEdit(id);
+      if(el.dataset.act==='ovw-toggle-done'){ovwDoneOpen=!ovwDoneOpen;render();return;}
       return;
     }
     const tel=e.target.closest('[data-t-act]');
