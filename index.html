@@ -105,7 +105,6 @@
   .time-trigger:hover{border-color:var(--accent)}
   .time-trigger:active{transform:scale(.98)}
   .time-trigger .tt-val{flex:1;font-variant-numeric:tabular-nums;}
-  .time-trigger .tt-icon{font-size:16px;color:var(--muted);flex-shrink:0}
   .time-trigger .tt-clear{display:none;font-size:13px;color:var(--muted);padding:2px 6px;border-radius:6px}
   .time-trigger.has-val .tt-clear{display:inline-block}
   .time-trigger .tt-clear:hover{color:#ef4444}
@@ -683,7 +682,7 @@
     <div class="brand" data-page-node-id="OA9U1F4x0RXNGwxzKGxbZh"><span class="logo" data-page-node-id="NnXH2Fh0KQt6V4acRXkiKc">🗂️</span> 我的工作台</div>
     <div class="nav-label" data-page-node-id="nkBgDrPTTpH0QhlWhoctUF">视图</div>
     <div class="nav-item active" data-view="today" data-page-node-id="leLjlRdVKEvxr5K7jmBrUO"><span data-page-node-id="VMG11K5NfWeF77c69BbX0A">📅</span> 今日待办 <span class="count" id="c-today" data-page-node-id="96MvcR9X3atdpJXdSngpGO">0</span></div>
-    <div class="nav-item" data-view="overview" data-page-node-id="gIaGHYALGduNWFBryNHpMA"><span data-page-node-id="hd4ra4wBLuCvE9Pr1R4gq4">🕐</span> 全日总览</div>
+    <div class="nav-item" data-view="overview" data-page-node-id="gIaGHYALGduNWFBryNHpMA">全日总览</div>
     <div class="nav-label" data-page-node-id="Ol8ispSFoh4k4433NwlIwj">任务分类</div>
     <div class="nav-item" data-view="temp" data-page-node-id="za5cZQDvhlonp5k6dhJ7Ch"><span class="dot" style="background:#f59e0b" data-page-node-id="J7pQDIjSMOBBuvb6vqQJjw"></span> 临时任务 <span class="count" id="c-temp" data-page-node-id="gR5OZnA3McBPDAT9AiSKRs">0</span></div>
     <div class="nav-item" data-view="work" data-page-node-id="DrmwjUGGe7LrXFrQh7U9QV"><span class="dot" style="background:#3b82f6" data-page-node-id="TsEZB6WwHwCfiFk1B4HJs3"></span> 工作 <span class="count" id="c-work" data-page-node-id="f2erfqvRUiJ0HJ8jpCiLpE">0</span></div>
@@ -1119,7 +1118,6 @@ function initTimePicker(){
 function timeTriggerHtml(id, val){
   return '<div class="time-trigger'+(val?' has-val':'')+'" id="'+id+'" data-tp-id="'+id+'">'+
     '<span class="tt-val">'+(val||'设置时间')+'</span>'+
-    '<span class="tt-icon">🕐</span>'+
     '<span class="tt-clear" data-tp-clear="'+id+'">✕</span>'+
     '</div>';
 }
@@ -1782,7 +1780,7 @@ function renderOverviewView(){
   const pct=totalToday?Math.round(done.length/totalToday*100):0;
   let html='';
   // 状态分类统计
-  html+='<div class="ovw-head">🕐 全日总览 · '+(focus===today?'今天':fmtSel())+'</div>';
+  html+='<div class="ovw-head">全日总览 · '+(focus===today?'今天':fmtSel())+'</div>';
   html+='<div class="ovw-stats">'+
     '<div class="ovw-stat"><span class="n">'+pending.length+'</span><span class="l">待完成</span></div>'+
     '<div class="ovw-stat"><span class="n r">'+done.length+'</span><span class="l">已完成</span></div>'+
@@ -1882,7 +1880,7 @@ function items(arr){return '<div class="task-list">'+arr.map(t=>{
   const c=CATS[t.category]||{name:'',color:'#999',soft:'#eee'};
   let chipName=c.name,chipColor=c.color,chipSoft=c.soft;
   if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
-  const tmRange=(t.start||t.end)?' <span class="ovw-time">🕐 '+(t.start||'…')+(t.end?('–'+t.end):'')+'</span>':'';
+  const tmRange=(t.start||t.end)?' <span class="ovw-time">'+(t.start||'…')+(t.end?('–'+t.end):'')+'</span>':'';
   const da=doneAtOf(t);
   const doneSpan=da?' <span class="ovw-done">✅ '+fmtHM(da)+'</span>':'';
   return '<div class="task '+(t.done?'done':'')+'" data-id="'+t.id+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
