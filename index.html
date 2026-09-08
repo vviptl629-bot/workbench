@@ -128,9 +128,10 @@
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:24px 28px 96px;display:flex;flex-direction:column;gap:20px}
   .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-  .greet h1{font-size:22px;font-weight:700}
-  .greet p{color:var(--muted);font-size:13.5px;margin-top:2px}
-  .topbar .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+  /* 标题与日期时间同行水平排布，核心信息更大更重 */
+  .greet{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+  .greet h1{font-size:24px;font-weight:800;letter-spacing:.2px;white-space:nowrap}
+  .greet p{color:var(--muted);font-size:13px;margin-top:0;font-weight:400;opacity:.85}
   .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--card);
     cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text);transition:.15s;}
   .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -178,15 +179,6 @@
   .ring .stat .num.over{color:#f43f5e}
 
   .addbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
-  .searchbar{margin:0 0 12px}
-  .searchbar input[type=search]{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:13px;background:var(--card-2);color:var(--text);font-size:14px;box-sizing:border-box;outline:none}
-  .searchbar input[type=search]:focus{border-color:var(--accent)}
-  .search-hint{font-size:13px;color:var(--muted);margin:8px 2px 0}
-  .up-head{font-size:16px;font-weight:700;margin:2px 2px 12px;display:flex;align-items:center;gap:8px}
-  .up-head .up-cnt{font-size:13px;background:var(--accent);color:#fff;padding:1px 9px;border-radius:20px}
-  .week-view{display:flex;flex-direction:column;gap:14px}
-  .week-view .section-title{margin:2px 2px 4px}
-  .week-view .task-list{gap:6px}
   .addbox .row1{display:flex;gap:10px}
   .addbox input[type=text]{flex:1;border:1px solid var(--border);background:var(--card-2);color:var(--text);
     border-radius:11px;padding:12px 14px;font-size:15px;outline:none;transition:.15s;}
@@ -221,7 +213,7 @@
     cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;color:#fff;font-size:14px;}
   .task.done .check{background:var(--cat,#10b981);border-color:var(--cat,#10b981)}
   .task .body{flex:1;min-width:0}
-  .task .txt{font-size:15px;word-break:break-word}
+  .task .txt{font-size:15.5px;font-weight:600;word-break:break-word;line-height:1.45}
   .task.done .txt{text-decoration:line-through;color:var(--muted)}
   .task .meta{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:nowrap}
   .chip{font-size:11.5px;padding:2px 9px;border-radius:20px;background:var(--cat-soft,#eee);color:var(--cat,#333);font-weight:600;white-space:nowrap;flex-shrink:0}
@@ -455,9 +447,9 @@
     .daynav{margin-top:4px}
     /* ---- 手机端放大字号，适配小屏 ---- */
     body{font-size:16px}
-    .greet h1{font-size:24px}
-    .greet p{font-size:15px}
-    .task .txt{font-size:17px}
+    .greet h1{font-size:22px;font-weight:800}
+    .greet p{font-size:13px}
+    .task .txt{font-size:17px;font-weight:600}
     .task .meta{gap:10px}
     .chip,.due{font-size:13px}
     .section-title{font-size:15px}
@@ -677,9 +669,6 @@
     <div class="brand"><span class="logo">🗂️</span> 我的工作台</div>
     <div class="nav-label">视图</div>
     <div class="nav-item active" data-view="today"><span>📅</span> 今日待办 <span class="count" id="c-today">0</span></div>
-    <div class="nav-item" data-view="upcoming"><span>📆</span> 即将到来 <span class="count" id="c-upcoming">0</span></div>
-    <div class="nav-item" data-view="week"><span>🗓️</span> 本周 <span class="count" id="c-week">0</span></div>
-    <div class="nav-item" data-view="idea"><span>💡</span> 灵感 <span class="count" id="c-idea">0</span></div>
     <div class="nav-item" data-view="overview"><span>🕐</span> 全日总览</div>
     <div class="nav-label">任务分类</div>
     <div class="nav-item" data-view="temp"><span class="dot" style="background:#f59e0b"></span> 临时任务 <span class="count" id="c-temp">0</span></div>
@@ -713,8 +702,6 @@
         <h1 id="greet">你好</h1>
         <p id="dateLine"></p>
       </div>
-      <div class="right">
-      </div>
     </div>
 
     <div class="ring" id="ringCard">
@@ -741,7 +728,6 @@
       <div class="row2">
         <select id="catInput">
           <option value="all">📋 全部</option>
-          <option value="idea">💡 灵感</option>
           <option value="temp">⚡ 临时任务</option>
           <option value="waishi">🏢 外事办</option>
           <option value="coffee">☕ 咖啡店</option>
@@ -770,9 +756,6 @@
       <input type="date" id="dayPicker">
     </div>
 
-    <div class="searchbar" id="searchBar">
-      <input type="search" id="searchInput" placeholder="🔍 搜索任务 / 灵感…" autocomplete="off">
-    </div>
     <div id="listArea"></div>
 
     <div id="statsArea" style="display:none">
@@ -828,7 +811,6 @@
         <option value="work">💼 工作</option>
         <option value="study">📚 学习</option>
         <option value="life">🏠 生活</option>
-        <option value="idea">💡 灵感</option>
       </select>
     </div>
     <div class="edit-field" id="editSubRow" style="display:none">
@@ -869,21 +851,6 @@
       <button class="save" id="editSave">保存</button>
     </div>
     <div class="edit-clear" id="editClearTime">清除时间</div>
-  </div>
-</div>
-
-<!-- idea edit modal -->
-<div class="modal-overlay" id="ideaEditModal">
-  <div class="edit-modal">
-    <h3>编辑灵感</h3>
-    <div class="edit-field">
-      <label>内容（支持多行）</label>
-      <textarea id="ideaEditText" maxlength="5000" placeholder="写下你的灵感…"></textarea>
-    </div>
-    <div class="edit-actions">
-      <button class="cancel" id="ideaEditCancel">取消</button>
-      <button class="save" id="ideaEditSave">保存</button>
-    </div>
   </div>
 </div>
 
@@ -975,11 +942,9 @@ let tasks=[], trash=[], templates=[], ideas=[], tombstones=[], editingTplId=null
 try{ideas=JSON.parse(lsGet('workbench_ideas')||'[]');if(!Array.isArray(ideas))ideas=[];}catch(e){ideas=[];}
 try{tombstones=JSON.parse(lsGet(TOMB_KEY)||'[]')||[];if(!Array.isArray(tombstones))tombstones=[];}catch(e){tombstones=[];}
 let view='today';
-let q=''; // 搜索关键字（小写），仅在任务/灵感视图本地过滤显示
 let selDate=''; // '' = 今天(智能模式)；否则 YYYY-MM-DD，按所选日期查看任务
 let workFilter='all'; // 工作视图下的子类筛选：all/waishi/coffee/trade
 let showDone=false; // 已完成任务折叠：false=收起(默认)，true=展开
-let showDoneIdea=false; // 灵感已完成折叠：false=收起(默认)，true=展开
 let showOvr=false;  // 逾期任务折叠：false=收起(默认)，true=展开
 let showTrash=false; // 回收站折叠：false=收起(默认)，true=展开
 let tlMode=false; // 时间线视图开关：false=列表(默认)，true=时间线
@@ -1663,61 +1628,9 @@ function visibleTasks(){
     if(isTodayMode)r=tasks.filter(t=>t.category===cat&&(sub?t.sub===sub:true)&&act(t));
     else r=tasks.filter(t=>t.category===cat&&(sub?t.sub===sub:true)&&(rep(t)||t.due===focusDate));
   }
-  if(q)r=r.filter(t=>t.text&&t.text.toLowerCase().indexOf(q)>=0);
   return r;
 }
-// 即将到来：列出今天之后（含排期）的未完成任务，按日期分组，解决逐日翻看痛点
-function fmtDueLabel(d){
-  const dt=new Date(d+'T00:00:00');
-  const w=['日','一','二','三','四','五','六'][dt.getDay()];
-  return (dt.getMonth()+1)+'月'+dt.getDate()+'日 周'+w;
-}
-function renderUpcoming(){
-  const today=todayStr();
-  let list=tasks.filter(t=>!t.done && t.due && t.due>today);
-  if(q)list=list.filter(t=>t.text&&t.text.toLowerCase().indexOf(q)>=0);
-  list.sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
-  let html='<div class="up-head">📆 即将到来 <span class="up-cnt">'+list.length+'</span></div>';
-  if(!list.length){
-    html+='<div class="empty"><div class="big">🌱</div>'+(q?'没有匹配「'+escapeHtml(q)+'」的未来任务':'未来没有排期任务，享受当下吧 ✨')+'</div>';
-  }else{
-    const groups={};
-    list.forEach(t=>{(groups[t.due]=groups[t.due]||[]).push(t);});
-    Object.keys(groups).sort().forEach(d=>{
-      html+=secTitle('📅 '+fmtDueLabel(d)+' · '+groups[d].length)+items(groups[d]);
-    });
-  }
-  html+=renderTrashHtml();
-  document.getElementById('listArea').innerHTML=html;
-  wireTrash();
-}
-function addDays(d,n){const dt=new Date(d+'T00:00:00');dt.setDate(dt.getDate()+n);const y=dt.getFullYear(),m=('0'+(dt.getMonth()+1)).slice(-2),day=('0'+dt.getDate()).slice(-2);return y+'-'+m+'-'+day;}
-function renderWeek(){
-  const today=todayStr();
-  const end=addDays(today,6);
-  const cw=document.getElementById('c-week');const total=cw?cw.textContent:'0';
-  let html='<div class="up-head">🗓️ 本周 · 今天至 '+fmtDueLabel(end)+' <span class="up-cnt">'+total+'</span></div>';
-  html+='<div class="week-view">';
-  let any=false;
-  for(let i=0;i<7;i++){
-    const d=addDays(today,i);
-    let label,list;
-    if(i===0){label='今天';list=tasks.filter(t=>(isOverdue(t)||isDueToday(t)||!t.due)&&!isMarkedOverdue(t));}
-    else if(i===1){label='明天';list=tasks.filter(t=>t.due===d&&!isMarkedOverdue(t));}
-    else{label=fmtDueLabel(d);list=tasks.filter(t=>t.due===d&&!isMarkedOverdue(t));}
-    if(q)list=list.filter(t=>t.text&&t.text.toLowerCase().indexOf(q)>=0);
-    if(!list.length)continue;
-    any=true;
-    html+=secTitle((i===0?'📍 ':'')+label+' · '+list.length)+items(list);
-  }
-  html+='</div>';
-  if(!any){
-    html+='<div class="empty"><div class="big">🌱</div>'+(q?'未来 7 天没有匹配「'+escapeHtml(q)+'」的任务':'未来 7 天很清爽，没有排期 ✨')+'</div>';
-  }
-  html+=renderTrashHtml();
-  document.getElementById('listArea').innerHTML=html;
-  wireTrash();
-}
+
 function updateCounts(){
   const open=tasks.filter(t=>!t.done);
   const act=t=>isOverdue(t)||isDueToday(t)||!t.due||isRepeatActive(t);
@@ -1729,9 +1642,6 @@ function updateCounts(){
     const c=document.getElementById('c-'+k);if(c)c.textContent=cnt[k];
     const b=document.getElementById('b-'+k);if(b)b.textContent=cnt[k];
   });
-  const ci=document.getElementById('c-idea');if(ci)ci.textContent=ideas.filter(x=>!x.done).length;
-  const cu=document.getElementById('c-upcoming');if(cu)cu.textContent=tasks.filter(t=>!t.done&&t.due&&t.due>todayStr()).length;
-  const cw=document.getElementById('c-week');if(cw){const tw=todayStr(),te=addDays(tw,6);cw.textContent=tasks.filter(t=>!t.done&&!isMarkedOverdue(t)&&((isOverdue(t)||isDueToday(t)||!t.due)||(t.due&&t.due>=tw&&t.due<=te))).length;}
   updateStoreStatus();
 }
 
@@ -1750,7 +1660,7 @@ function updateStoreStatus(){
     if(pct>=80)warnHTML='<br><span class="store-warn">⚠️ 存储已用 '+pct+'%('+usedKB+'KB)，建议导出备份后清理</span>';
     else if(pct>=50)warnHTML='<br><span style="color:#f59e0b">存储已用 '+pct+'% ('+usedKB+'KB)</span>';
   }catch(e){}
-  el.innerHTML='本地'+(lsOK?'✓':'✗')+' · 任务'+n(tasks)+' 灵感'+n(ideas)+' 目标'+n(goals)+warnHTML+'<br>'+cloud+' · '+location.origin;
+  el.innerHTML='本地'+(lsOK?'✓':'✗')+' · 任务'+n(tasks)+' 目标'+n(goals)+warnHTML+'<br>'+cloud+' · '+location.origin;
 }
 
 function renderTasks(isTodayMode,focusDate){
@@ -1767,8 +1677,7 @@ function renderTasks(isTodayMode,focusDate){
     const msg=view==='today'
       ?(isTodayMode?'今天还没有任务，添加一条开始吧':'「'+dt+'」还没有任务')
       :(isTodayMode?'这个分类下还没有任务':'「'+dt+'」这个分类下还没有任务');
-    const qhint=q?'<div class="search-hint">🔍 搜索「'+escapeHtml(q)+'」无匹配，清空搜索框查看全部</div>':'';
-    area.innerHTML=pre+'<div class="empty"><div class="big">🌱</div>'+msg+'</div>'+qhint+renderTrashHtml();
+    area.innerHTML=pre+'<div class="empty"><div class="big">🌱</div>'+msg+'</div>'+renderTrashHtml();
     if(view==='work')wireWorkTabs();
     wireTrash();
     return;
@@ -1776,14 +1685,9 @@ function renderTasks(isTodayMode,focusDate){
   let html='';
   // ---- 未完成任务 ----
   if(view==='today'&&isTodayMode){
-    const rep=openList.filter(isRepeatActive);
-    const over=openList.filter(t=>!isRepeatActive(t)&&isOverdue(t)&&daysOverdue(t)>0);
-    const tod=openList.filter(t=>!isRepeatActive(t)&&isDueToday(t));
-    const none=openList.filter(t=>!isRepeatActive(t)&&!t.due);
-    if(rep.length)html+=secTitle('🔁 每日重复',rep.length)+items(rep);
-    if(over.length)html+=secTitle('⚠️ 已逾期',over.length)+items(over);
-    if(tod.length)html+=secTitle('📌 今天',tod.length)+items(tod);
-    if(none.length)html+=secTitle('🗓️ 未排期',none.length)+items(none);
+    // 首页：不分组建组标题，统一按创建/更新时间倒序（最近添加/更新的在前）
+    const byTime=(a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0);
+    html+=items([...openList].sort(byTime));
   }else if(openList.length){
     html=isTodayMode?items(openList):secTitle('📅 '+dt+' · '+openList.length)+items(openList);
   }
@@ -1840,7 +1744,6 @@ function renderOverviewView(){
   const area=document.getElementById('listArea');
   document.getElementById('taskAddBox').style.display='none';
   document.getElementById('dayNav').style.display='none';
-  document.getElementById('searchBar').style.display='none';
   const today=todayStr();
   const focus=selDate||today;
   const dstr=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
@@ -2187,14 +2090,13 @@ function render(){
   renderImpCard();
   document.getElementById('taskAddBox').style.display=taskView?'flex':'none';
   document.getElementById('dayNav').style.display=taskView?'flex':'none';
-  document.getElementById('searchBar').style.display=(view==='stats')?'none':'';
+  // 「回到今天」按钮仅首页显示，其他视图（分类/统计/总览）不显示
+  const bt=document.getElementById('dayToday');
+  if(bt)bt.style.display=(view==='today')?'':'none';
   document.getElementById('statsArea').style.display=(view==='stats')?'block':'none';
   document.getElementById('listArea').style.display=(view==='stats')?'none':'';
   if(view==='stats'){renderStats();return;}
-  if(view==='idea'){renderIdeas();return;}
   if(view==='overview'){renderOverviewView();return;}
-  if(view==='upcoming'){renderUpcoming();return;}
-  if(view==='week'){renderWeek();return;}
   const isTodayMode=!selDate||selDate===todayStr();
   const focusDate=selDate||todayStr();
   let todays,doneTod;
@@ -2241,109 +2143,8 @@ function render(){
 /* ---------- 目标管理数据层（UI 已移除，保留以便 Gist 同步兼容） ---------- */
 function saveGoals(){lsSet('workbench_goals',JSON.stringify(goals));updateCounts();}
 
-/* ---------- 灵感笔记视图 ---------- */
-function fmtIdeaTime(ts){
-  const d=new Date(ts),p=n=>String(n).padStart(2,'0');
-  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
-}
-function saveIdeas(){lsSet('workbench_ideas',JSON.stringify(ideas));updateCounts();}
-function addIdea(){
-  const ta=document.getElementById('ideaInput');if(!ta)return;
-  const text=ta.value.trim();
-  if(!text){showToast('写点什么再保存吧');return;}
-  ideas.push({id:'i'+Date.now()+'-'+Math.floor(Math.random()*999),text,ts:Date.now(),updated:Date.now(),done:0});
-  saveIdeas();renderIdeas();showToast('💡 灵感已记录');
-}
-function delIdea(id){
-  if(!confirm('删除这条灵感？'))return;
-  ideas=ideas.filter(x=>x.id!==id);addTomb(id,'idea');
-  saveIdeas();renderIdeas();
-}
-function editIdea(id){
-  const it=ideas.find(x=>x.id===id);if(!it)return;ideaEditId=id;
-  document.getElementById('ideaEditText').value=it.text||'';
-  document.getElementById('ideaEditModal').classList.add('show');
-  setTimeout(()=>document.getElementById('ideaEditText').focus(),50);
-}
-function saveIdeaEdit(){
-  const it=ideas.find(x=>x.id===ideaEditId);if(!it){closeIdeaEdit();return;}
-  const t=document.getElementById('ideaEditText').value.trim();
-  if(!t){closeIdeaEdit();delIdea(ideaEditId);return;}
-  it.text=t;it.ts=Date.now();it.updated=Date.now();
-  saveIdeas();renderIdeas();closeIdeaEdit();
-}
-function closeIdeaEdit(){ideaEditId=null;document.getElementById('ideaEditModal').classList.remove('show');}
-function renderIdeas(){
-  const all=ideas.slice().sort((a,b)=>b.ts-a.ts);
-  const qf=x=>!q||(x.text&&x.text.toLowerCase().indexOf(q)>=0);
-  const openList=all.filter(x=>!x.done&&qf(x));
-  const doneList=all.filter(x=>x.done&&qf(x));
-  let html='';
-  html+='<div class="idea-box">';
-  html+='<div class="idea-head">💡 灵感记录 <span class="idea-hint">随时记下闪现的念头，支持长文（Ctrl/⌘+Enter 保存）</span></div>';
-  html+='<textarea class="idea-input" id="ideaInput" placeholder="此刻的灵感…（可写多行长文）"></textarea>';
-  html+='<div class="idea-actions"><button class="idea-save" id="ideaSave">保存灵感</button><span class="idea-count" id="ideaCharCnt"></span></div>';
-  html+='</div>';
-  // ---- 未完成灵感 ----
-  if(!openList.length){
-    html+='<div class="idea-empty">还没有灵感记录，上方输入框随时可写 ✍️</div>';
-  }else{
-    html+='<div class="idea-list">';
-    openList.forEach(it=>{
-      html+='<div class="idea-item" data-id="'+it.id+'">';
-      html+='<div class="idea-text">'+escapeHtml(it.text)+'</div>';
-      html+='<div class="idea-meta"><span class="idea-time">'+fmtIdeaTime(it.ts)+'</span>';
-      html+='<span class="idea-btns"><button class="idea-done" data-idea-act="done" data-id="'+it.id+'">✓ 完成</button>';
-      html+='<button class="idea-edit" data-idea-act="edit" data-id="'+it.id+'">编辑</button>';
-      html+='<button class="idea-del" data-idea-act="del" data-id="'+it.id+'">删除</button></span></div>';
-      html+='</div>';
-    });
-    html+='</div>';
-  }
-  // ---- 已完成灵感（折叠收纳）----
-  if(doneList.length){
-    html+='<div class="done-bar" id="doneIdeaBar">'+
-      '<span class="db-icon">✅</span>'+
-      '<span class="db-text">已完成</span>'+
-      '<span class="db-count">'+doneList.length+'</span>'+
-      '<span class="db-arrow'+(showDoneIdea?' open':'')+'">'+(showDoneIdea?'▲':'▼')+'</span>'+
-      '</div>';
-    html+='<div id="doneIdeaList" class="'+(showDoneIdea?'':'done-collapsed')+'">';
-    if(showDoneIdea){
-      doneList.forEach(it=>{
-        html+='<div class="idea-item done" data-id="'+it.id+'">';
-        html+='<div class="idea-text">'+escapeHtml(it.text)+'</div>';
-        html+='<div class="idea-meta"><span class="idea-time">'+fmtIdeaTime(it.ts)+'</span>';
-        html+='<span class="idea-btns"><button class="idea-restore" data-idea-act="restore" data-id="'+it.id+'">↩ 恢复</button>';
-        html+='<button class="idea-del" data-idea-act="del" data-id="'+it.id+'">删除</button></span></div>';
-        html+='</div>';
-      });
-    }
-    html+='</div>';
-  }
-  document.getElementById('listArea').innerHTML=html;
-  bindIdeas();
-}
-function bindIdeas(){
-  const ta=document.getElementById('ideaInput');
-  const cnt=document.getElementById('ideaCharCnt');
-  if(ta){
-    ta.addEventListener('input',()=>{if(cnt)cnt.textContent=ta.value.length+' 字';});
-    ta.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')addIdea();});
-  }
-  const sv=document.getElementById('ideaSave');if(sv)sv.onclick=addIdea;
-  document.querySelectorAll('#listArea .idea-del').forEach(b=>b.onclick=()=>delIdea(b.dataset.id));
-  document.querySelectorAll('#listArea .idea-edit').forEach(b=>b.onclick=()=>editIdea(b.dataset.id));
-  document.querySelectorAll('#listArea .idea-done').forEach(b=>b.onclick=()=>toggleIdeaDone(b.dataset.id));
-  document.querySelectorAll('#listArea .idea-restore').forEach(b=>b.onclick=()=>toggleIdeaDone(b.dataset.id));
-  const bar=document.getElementById('doneIdeaBar');
-  if(bar)bar.onclick=()=>{showDoneIdea=!showDoneIdea;renderIdeas();updateCounts();};
-}
-function toggleIdeaDone(id){
-  const it=ideas.find(x=>x.id===id);if(!it)return;
-  it.done=it.done?0:1;it.updated=Date.now();
-  saveIdeas();renderIdeas();updateCounts();
-}
+/* ---------- 灵感数据层（UI 已移除；保留以兼容 Gist 同步与历史数据） ---------- */
+function saveIdeas(){lsSet('workbench_ideas',JSON.stringify(ideas));}
 
 /* ---------- task actions ---------- */
 function addTask(){
@@ -2408,7 +2209,7 @@ function restoreOverdue(id){
   delete t.overdueMark;delete t.overdueMarkAt;t.updated=Date.now();
   saveTasks();render();showToast('已从逾期恢复');
 }
-let editId=null, ideaEditId=null;
+let editId=null;
 function openEdit(id){
   const t=tasks.find(x=>x.id===id);if(!t)return;editId=id;
   document.getElementById('editText').value=t.text||'';
@@ -2528,10 +2329,8 @@ function syncCatInput(){
     sel.value=(workFilter!=='all')?workFilter:'waishi'; // work主视图默认外事办
     return;
   }
-  // study/life/temp 直接匹配；灵感是笔记入口，select 上始终重置为 all，
-  // 避免误创建 category=idea 的任务（侧边栏高亮已经能反映灵感视图）。
+  // study/life/temp 直接匹配
   if(['study','life','temp'].includes(view)){sel.value=view;return;}
-  if(view==='idea'){sel.value='all';return;}
   sel.value='temp';
 }
 function closeSidebar(){
@@ -2656,13 +2455,16 @@ function init(){
   document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
   document.getElementById('dayPrev').onclick=()=>shiftDay(-1);
   document.getElementById('dayNext').onclick=()=>shiftDay(1);
-  document.getElementById('dayToday').onclick=()=>{selDate='';updateDayNav();render();};
+  document.getElementById('dayToday').onclick=()=>{
+    selDate='';updateDayNav();render();
+    // 平滑滚动定位到今天的任务列表（时间线/列表顶部）
+    setTimeout(()=>{const la=document.getElementById('listArea');if(la)la.scrollIntoView({behavior:'smooth',block:'start'});},60);
+  };
   document.getElementById('dayLabel').onclick=()=>{const p=document.getElementById('dayPicker');if(p.showPicker)p.showPicker();else p.click();};
   document.getElementById('dayPicker').onchange=e=>{selDate=e.target.value||'';updateDayNav();render();};
   document.getElementById('catInput').addEventListener('change',e=>{
     const cat=e.target.value;
     if(cat==='all'){setView('today');return;}
-    if(cat==='idea'){setView('idea');e.target.value='all';return;} // 灵感是笔记入口，不是任务分类
     if(['waishi','coffee','trade'].includes(cat))setWorkSub(cat);
     else setView(cat);
   });
@@ -2673,10 +2475,6 @@ function init(){
   // 统计视图已改为单页「逾期分析」，不再有周/月切换 tab
   document.getElementById('editSave').onclick=saveEdit;
   document.getElementById('editCat').onchange=()=>{document.getElementById('editSubRow').style.display=document.getElementById('editCat').value==='work'?'':'none';};
-  document.getElementById('ideaEditSave').onclick=saveIdeaEdit;
-  document.getElementById('ideaEditCancel').onclick=closeIdeaEdit;
-  document.getElementById('ideaEditText').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')saveIdeaEdit();});
-  document.getElementById('ideaEditModal').addEventListener('click',e=>{if(e.target.id==='ideaEditModal')closeIdeaEdit();});
   document.getElementById('editCancel').onclick=closeEdit;
   document.getElementById('editClearTime').onclick=()=>{
     document.getElementById('editStart').value='';
@@ -2686,7 +2484,6 @@ function init(){
   };
   document.getElementById('editText').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
   document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit();});
-  document.getElementById('searchInput').addEventListener('input',e=>{q=e.target.value.trim().toLowerCase();render();});
   document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
     const v=n.dataset.view;
     if(v==='waishi'||v==='coffee'||v==='trade')setWorkSub(v);
@@ -2772,7 +2569,6 @@ function init(){
       return;
     }
     if(e.key==='n'||e.key==='N'){e.preventDefault();const inp=document.getElementById('taskInput');if(inp){inp.focus();inp.scrollIntoView({behavior:'smooth',block:'center'});}}
-    else if(e.key==='/'){e.preventDefault();const si=document.getElementById('searchInput');if(si){si.focus();}}
     else if(e.key==='t'||e.key==='T'){e.preventDefault();selDate='';setView('today');}
     else if(e.key==='l'||e.key==='L'){e.preventDefault();tlMode=!tlMode;render();}
     else if(e.key==='d'||e.key==='D'){e.preventDefault();toggleTheme();}
@@ -2801,12 +2597,10 @@ if(document.readyState!=='loading')init();else document.addEventListener('DOMCon
     <h3>⌨️ 键盘快捷键</h3>
     <div class="kbd-list">
       <div class="kbd-row"><span class="kbd-desc">快速添加任务</span><span class="kbd-key">N</span></div>
-      <div class="kbd-row"><span class="kbd-desc">搜索任务</span><span class="kbd-key">/</span></div>
       <div class="kbd-row"><span class="kbd-desc">回到今天</span><span class="kbd-key">T</span></div>
       <div class="kbd-row"><span class="kbd-desc">切换时间线/列表</span><span class="kbd-key">L</span></div>
       <div class="kbd-row"><span class="kbd-desc">切换深色/浅色</span><span class="kbd-key">D</span></div>
       <div class="kbd-row"><span class="kbd-desc">查看快捷键</span><span class="kbd-key">?</span></div>
-      <div class="kbd-row"><span class="kbd-desc">保存灵感</span><span class="kbd-key">Ctrl+Enter</span></div>
     </div>
     <button class="kbd-close" id="kbdClose">知道了</button>
   </div>
