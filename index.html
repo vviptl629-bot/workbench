@@ -1,29 +1,43 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<html lang="zh-CN" data-theme="light" data-page-node-id="5BEYoRKitXQAGpstxPK6yZ">
+<head data-page-node-id="SxC0oOqS6iIIglvJxHc4XJ">
+<meta charset="UTF-8" data-page-node-id="wUIDhSx4J4APvTCBy0qale">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" data-page-node-id="nQxjur44YuGgWbuC6zZA4x">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" data-page-node-id="qA9pga1nG8yH5ywonuqCSn">
+<meta http-equiv="Pragma" content="no-cache" data-page-node-id="8gXoqAZkRYxnHCaWBuoTTu">
+<meta http-equiv="Expires" content="0" data-page-node-id="P7VM6gukXefEjE8J9iEr7H">
 <title>我的工作台</title>
-<meta name="theme-color" content="#8b5cf6">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="工作台">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./icon-512.png">
+<meta name="theme-color" content="#8b5cf6" data-page-node-id="PiCeBWhbuFG7nJxLKstRHk">
+<meta name="apple-mobile-web-app-capable" content="yes" data-page-node-id="qp46GP7XGxvFlRamf5rA8l">
+<meta name="mobile-web-app-capable" content="yes" data-page-node-id="D6aMBgQ0X7EC3ef45MqNKY">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="DxgNWwK2m9JjNVzsuwktRJ">
+<meta name="apple-mobile-web-app-title" content="工作台" data-page-node-id="0uqRRhpaLNy5LhMi7mFTTr">
+<link rel="manifest" href="./manifest.webmanifest" data-page-node-id="8kRpOGQRcdu5cuXjVPex2L">
+<link rel="apple-touch-icon" href="./icon-512.png" data-page-node-id="1vjVcCM0WKOYxyRGb7eGUv">
 <style>
   :root{
-    --bg:#f4f6fb; --card:#ffffff; --card-2:#f8fafc; --text:#1f2937;
-    --muted:#6b7280; --border:#e5e7eb; --accent:#4f46e5; --accent-soft:#eef2ff;
-    --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+    --bg:#eef1ec; --card:#ffffff; --card-2:#f7f9f5; --text:#1a2e2a;
+    --muted:#6b8078; --border:#dce3db; --accent:#3d6b5f; --accent-soft:#e4ede8;
+    --shadow:0 1px 3px rgba(45,70,60,.04),0 8px 24px rgba(45,70,60,.06);
+    --chip-work:#e8f0f4; --chip-work-text:#2d5a7c;
+    --chip-life:#e4f0e4; --chip-life-text:#3d6b4f;
+    --chip-study:#ebe4f0; --chip-study-text:#5d4d6b;
+    --chip-coffee:#f5ece4; --chip-coffee-text:#8b6940;
+    --chip-waishi:#e8ecf4; --chip-waishi-text:#4d5a7c;
+    --chip-trade:#f0e4e4; --chip-trade-text:#8b5050;
+    --btn-primary:#3d6b5f; --btn-primary-hover:#2d5549;
   }
   :root[data-theme="dark"]{
-    --bg:#0f172a; --card:#1e293b; --card-2:#273449; --text:#e5e7eb;
-    --muted:#94a3b8; --border:#334155; --accent:#818cf8; --accent-soft:#3730a3;
+    --bg:#141f1a; --card:#1a2822; --card-2:#21302a; --text:#d4e4dc;
+    --muted:#8aa89e; --border:#2d4038; --accent:#5fa98f; --accent-soft:#1a3028;
     --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --chip-work:#1a2835; --chip-work-text:#7ab8e0;
+    --chip-life:#1a2e22; --chip-life-text:#7ebf8f;
+    --chip-study:#2a1e32; --chip-study-text:#b08fcf;
+    --chip-coffee:#2e241a; --chip-coffee-text:#d4a573;
+    --chip-waishi:#1a1e2e; --chip-waishi-text:#8f9fd0;
+    --chip-trade:#2e1a1a; --chip-trade-text:#d08080;
+    --btn-primary:#5fa98f; --btn-primary-hover:#7fc4af;
   }
   :root[data-theme="dark"] body{color-scheme:dark}
   :root[data-theme="dark"] .goal-now-input{background:var(--card-2);color:#fca5a5;border-color:#ef4444}
@@ -43,34 +57,34 @@
   .sidebar{width:230px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);
     padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .brand{display:flex;align-items:center;gap:10px;padding:6px 10px 14px;font-weight:700;font-size:18px}
-  .brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#3d6b5f,#5a9a8a);display:flex;align-items:center;justify-content:center;font-size:16px}
   .nav-label{font-size:11px;color:var(--muted);padding:14px 12px 4px;letter-spacing:.08em;text-transform:uppercase}
-  .nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:11px;cursor:pointer;
-    color:var(--text);font-size:14.5px;font-weight:500;transition:.15s;user-select:none;position:relative;}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;cursor:pointer;
+    color:var(--text);font-size:14.5px;font-weight:500;transition:.18s;user-select:none;position:relative;}
   .nav-item:hover{background:var(--card-2)}
   .nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
   .nav-item .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
   .nav-item .count{margin-left:auto;font-size:12px;background:var(--border);color:var(--muted);padding:1px 8px;border-radius:20px;min-width:22px;text-align:center;}
   .nav-item.active .count{background:var(--accent);color:#fff}
   .sidebar .spacer{flex:1}
-  .side-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;cursor:pointer;
-    color:var(--muted);font-size:13.5px;border:1px dashed var(--border);margin-top:6px;transition:.15s;}
+  .side-btn{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;cursor:pointer;
+    color:var(--muted);font-size:13.5px;border:1.5px dashed var(--border);margin-top:6px;transition:.18s;}
   .side-btn:hover{color:var(--text);border-color:var(--accent)}
   .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
   .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
   /* 卡片内时间/完成时间 */
   .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
-  .ovw-done{display:inline-flex;align-items:center;gap:3px;color:#10b981;font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
+  .ovw-done{display:inline-flex;align-items:center;gap:3px;color:#5a9a8a;font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-head{font-size:14px;font-weight:700;color:var(--text);margin:2px 2px 12px;}
   /* 全日总览：状态统计 + 折叠已完成 */
   .ovw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 2px 10px}
-  .ovw-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow)}
+  .ovw-stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
   .ovw-stat .n{display:block;font-size:24px;font-weight:800;color:var(--text);line-height:1.1;font-variant-numeric:tabular-nums}
   .ovw-stat .n.r{color:#10b981}
   .ovw-stat .n.bad{color:#f43f5e}
   .ovw-stat .l{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
-  .ovw-progress{height:8px;background:var(--card-2);border-radius:6px;overflow:hidden;margin:0 2px}
-  .ovw-progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#10b981);border-radius:6px;transition:width .3s}
+  .ovw-progress{height:8px;background:var(--card-2);border-radius:8px;overflow:hidden;margin:0 2px}
+  .ovw-progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#5a9a8a);border-radius:8px;transition:width .3s}
   .ovw-prog-text{font-size:12px;color:var(--muted);margin:6px 2px 14px}
   .ovw-group{margin-top:6px}
   .ovw-group .section-title{margin:16px 2px 8px}
@@ -100,7 +114,7 @@
 
   /* 时间选择器弹窗 */
   #timePickerModal{z-index:90}
-  #timePickerModal .tp-body{background:var(--card);border-radius:20px;padding:24px 22px 20px;width:92%;max-width:340px;box-shadow:0 24px 64px rgba(0,0,0,.3);border:1px solid var(--border);position:relative}
+  #timePickerModal .tp-body{background:var(--card);border-radius:22px;padding:26px 24px 22px;width:92%;max-width:340px;box-shadow:0 24px 64px rgba(45,70,60,.2);border:1px solid var(--border);position:relative}
   .tp-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:18px;text-align:center}
   .tp-digits{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px}
   .tp-digit{width:72px;height:56px;border:2px solid var(--border);border-radius:14px;background:var(--bg);color:var(--text);font-size:28px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;outline:none;transition:.15s;font-family:inherit;
@@ -118,10 +132,10 @@
   .tp-preset.active{background:var(--accent);color:#fff;border-color:var(--accent)}
   /* 操作按钮 */
   .tp-actions{display:flex;gap:10px}
-  .tp-actions button{flex:1;border:none;border-radius:12px;padding:11px;font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s}
+  .tp-actions button{flex:1;border:none;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;cursor:pointer;transition:.18s}
   .tp-btn-clear{background:var(--card-2);color:var(--muted);border:1px solid var(--border)}
   .tp-btn-cancel{background:var(--card-2);color:var(--text);border:1px solid var(--border)}
-  .tp-btn-ok{background:var(--accent);color:#fff}
+  .tp-btn-ok{background:var(--btn-primary);color:#fff}
   .tp-btn-ok:active{filter:brightness(1.1)}
   .tp-btn-clear:active,.tp-btn-cancel:active{transform:scale(.97)}
 
@@ -156,8 +170,8 @@
   .task .star:hover{color:#f59e0b;opacity:1;background:var(--card-2)}
   .task .star.on{opacity:1}
   /* 首页重要任务卡 */
-  .imp-card{background:var(--card);border:1px solid var(--border);border-left:4px solid #f59e0b;border-radius:14px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
-  .imp-title{font-size:12.5px;font-weight:700;color:#b45309;margin-bottom:8px;letter-spacing:.3px}
+  .imp-card{background:var(--card);border:1px solid var(--border);border-left:4px solid #c9a84c;border-radius:16px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .imp-title{font-size:12.5px;font-weight:700;color:#8b7020;margin-bottom:8px;letter-spacing:.3px}
   .imp-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border)}
   .imp-item:last-child{border-bottom:none;padding-bottom:2px}
   .imp-item .check{width:19px;height:19px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:.15s}
@@ -178,11 +192,11 @@
   .ring .stat .num.done{color:#10b981}
   .ring .stat .num.over{color:#f43f5e}
 
-  .addbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+  .addbox{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
   .addbox .row1{display:flex;gap:10px}
-  .addbox input[type=text]{flex:1;border:1px solid var(--border);background:var(--card-2);color:var(--text);
-    border-radius:11px;padding:12px 14px;font-size:15px;outline:none;transition:.15s;}
-  .addbox input[type=text]:focus{border-color:var(--accent);background:var(--card)}
+  .addbox input[type=text]{flex:1;border:1.5px solid var(--border);background:var(--card-2);color:var(--text);
+    border-radius:14px;padding:13px 16px;font-size:15.5px;outline:none;transition:.18s;}
+  .addbox input[type=text]:focus{border-color:var(--accent);background:var(--card);box-shadow:0 0 0 3px var(--accent-soft)}
   .addbox .row2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .addbox select,.addbox input[type=date]{border:1px solid var(--border);background:var(--card-2);color:var(--text);
     border-radius:10px;padding:9px 11px;font-size:13.5px;outline:none}
@@ -200,30 +214,30 @@
   .dn-btn:hover{border-color:var(--accent);color:var(--accent)}
   .dn-date{flex:1;text-align:center;font-size:15px;font-weight:600;border:none;background:none;color:var(--text);cursor:pointer;padding:8px;font-family:inherit}
   .dn-date:hover{color:var(--accent)}
-  .dn-today{margin-left:auto;background:var(--accent-soft);color:var(--accent);border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;transition:.15s}
+  .dn-today{margin-left:auto;background:var(--accent-soft);color:var(--accent);border:none;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;transition:.18s}
   .dn-today:hover{filter:brightness(1.05)}
   #dayPicker{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
 
   .section-title{font-size:13px;color:var(--muted);font-weight:600;margin:4px 2px -4px;display:flex;align-items:center;gap:8px}
   .task-list{display:flex;flex-direction:column;gap:10px}
-  .task{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;
-    display:flex;align-items:flex-start;gap:13px;box-shadow:var(--shadow);transition:.15s;border-left:4px solid var(--cat,#ccc);user-select:none;-webkit-user-select:none}
-  .task:hover{border-color:var(--cat,#ccc)}
-  .task .check{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;margin-top:2px;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;color:#fff;font-size:14px;}
-  .task.done .check{background:var(--cat,#10b981);border-color:var(--cat,#10b981)}
+  .task{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:15px 18px;
+    display:flex;align-items:flex-start;gap:13px;box-shadow:var(--shadow);transition:.18s;border-left:4px solid var(--cat,#ccc);user-select:none;-webkit-user-select:none}
+  .task:hover{border-color:var(--cat,#ccc);box-shadow:0 4px 16px rgba(45,70,60,.1)}
+  .task .check{width:23px;height:23px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;margin-top:2px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;color:#fff;font-size:14px;}
+  .task.done .check{background:var(--cat,#5a9a8a);border-color:var(--cat,#5a9a8a)}
   .task .body{flex:1;min-width:0}
-  .task .txt{font-size:15.5px;font-weight:600;word-break:break-word;line-height:1.45}
+  .task .txt{font-size:15.5px;font-weight:600;word-break:break-word;line-height:1.5;color:var(--text)}
   .task.done .txt{text-decoration:line-through;color:var(--muted)}
-  .task .meta{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:nowrap}
-  .chip{font-size:11.5px;padding:2px 9px;border-radius:20px;background:var(--cat-soft,#eee);color:var(--cat,#333);font-weight:600;white-space:nowrap;flex-shrink:0}
+  .task .meta{display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:nowrap}
+  .chip{font-size:11.5px;padding:3px 11px;border-radius:20px;background:var(--cat-soft,var(--chip-work));color:var(--cat,var(--chip-work-text));font-weight:600;white-space:nowrap;flex-shrink:0}
   .due{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .due.over{color:#f43f5e;font-weight:600}
   .due.today{color:var(--accent);font-weight:600}
   .task .del{margin-left:auto;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:8px;flex-shrink:0;opacity:.5;transition:.15s}
   .task .del:hover{color:#f43f5e;opacity:1;background:var(--card-2)}
   /* 回收站 */
-  .trash-bar{display:flex;align-items:center;gap:8px;margin:18px 0 6px;padding:10px 14px;border:1px dashed var(--border);border-radius:12px;background:var(--card-2);cursor:pointer;font-weight:600;color:var(--muted)}
+  .trash-bar{display:flex;align-items:center;gap:8px;margin:18px 0 6px;padding:12px 16px;border:1.5px dashed var(--border);border-radius:14px;background:var(--card-2);cursor:pointer;font-weight:600;color:var(--muted)}
   .trash-bar .tb-icon{font-size:16px}
   .trash-bar .tb-text{flex:1}
   .trash-bar .tb-count{background:var(--border);border-radius:20px;padding:1px 9px;font-size:12px}
@@ -273,8 +287,8 @@
   .btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:10px;font-size:14px;cursor:pointer}
   .btn-ghost:active{transform:scale(.97)}
   .sync-status{margin-top:12px;font-size:12.5px;min-height:16px;color:var(--muted)}
-  .sync-status.ok{color:#10b981}
-  .sync-status.err{color:#ef4444}
+  .sync-status.ok{color:#5a9a8a}
+  .sync-status.err{color:#c06060}
   .sync-gist{font-size:12px;color:var(--muted);margin-top:10px;word-break:break-all;line-height:1.6}
   .sync-gist a{color:var(--accent)}
   /* 例行任务模板 */
@@ -324,8 +338,8 @@
   .edit-times .time-trigger{width:100%;}
   .edit-times input[type=time]{position:absolute;opacity:0;pointer-events:none;}
   .edit-actions{display:flex;gap:10px;margin-top:6px}
-  .edit-actions button{flex:1;border:none;border-radius:11px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
-  .edit-actions .save{background:var(--accent);color:#fff}
+  .edit-actions button{flex:1;border:none;border-radius:14px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+  .edit-actions .save{background:var(--btn-primary);color:#fff}
   .edit-actions .cancel{background:var(--card-2);color:var(--text);border:1px solid var(--border)}
   .edit-clear{font-size:12.5px;color:var(--muted);cursor:pointer;margin-top:10px;text-align:center;text-decoration:underline}
   /* completed tasks collapse */
@@ -354,9 +368,9 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   /* ---------- 统计分析 ---------- */
   .stats-tabs{display:flex;gap:10px;margin-bottom:16px}
-  .stab{flex:1;border:1px solid var(--border);background:var(--card-2);color:var(--muted);
-    border-radius:12px;padding:11px 8px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s}
-  .stab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .stab{flex:1;border:1.5px solid var(--border);background:var(--card-2);color:var(--muted);
+    border-radius:14px;padding:12px 10px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.18s}
+  .stab.active{background:var(--btn-primary);color:#fff;border-color:var(--btn-primary)}
   .stats-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
   .stats-summary .sbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
   .stats-summary .sbox .n{font-size:24px;font-weight:800;color:var(--text);line-height:1.1}
@@ -367,7 +381,7 @@
   .stats-summary .sbox.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
   .stats-summary .sbox.clickable:active{transform:translateY(0)}
   .stats-summary .sbox .l{font-size:11.5px;color:var(--muted);margin-top:4px}
-  .stats-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .stats-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
   .stats-card .card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px}
   .ovr-item{background:var(--card-2);border:1px solid var(--border);border-left:3px solid #f43f5e;border-radius:10px;padding:10px 12px;margin-bottom:10px}
   .ovr-item.chronic{border-left-color:#b91c1c;background:rgba(244,63,94,.07)}
@@ -380,7 +394,7 @@
   .ovr-item.merged{border-left-color:#dc2626;border-left-width:4px}
   .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:6px}
   .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
-  .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#7c74f0);border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
+  .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#7aa898);border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
   .bar-col.zero .bar{background:var(--border)}
   .bar-col .bv{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
   .bar-col .bl{font-size:10px;color:var(--muted);margin-top:6px;white-space:nowrap;line-height:1.2}
@@ -654,271 +668,271 @@
 @keyframes bootLoad{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
 </style>
 </head>
-<body style="background:#f4f6fb">
+<body style="background:#f4f6fb" data-page-node-id="fcgMQxcTJeTthh8V1gF9EE">
 <script>{try{const t=localStorage.getItem('workbench_theme');if(t==='dark')document.body.style.background='#0f172a';}catch(e){}}</script>
-<div id="bootScreen">
-  <div class="boot-card">
-    <div class="boot-ring">🗂️</div>
-    <div class="boot-title">我的工作台</div>
-    <div class="boot-sub">个人效率中心</div>
-    <div class="boot-bar"><i></i></div>
+<div id="bootScreen" data-page-node-id="A1vECzBE1pEt73WFM2oeLD">
+  <div class="boot-card" data-page-node-id="pVCPdhYhvp4XUKQ3pGNiN3">
+    <div class="boot-ring" data-page-node-id="hRQNHi9cDY7xc8be1Y5JQo">🗂️</div>
+    <div class="boot-title" data-page-node-id="eXvr4gfFCH1o94DL9IDVpH">我的工作台</div>
+    <div class="boot-sub" data-page-node-id="ktIOkH8msAjWcxzsLwL1FQ">个人效率中心</div>
+    <div class="boot-bar" data-page-node-id="Y9ECiHuw59VGZGuaIWywUx"><i data-page-node-id="nAhO7qourDRLdtl9xDxEEt"></i></div>
   </div>
 </div>
-<div class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><span class="logo">🗂️</span> 我的工作台</div>
-    <div class="nav-label">视图</div>
-    <div class="nav-item active" data-view="today"><span>📅</span> 今日待办 <span class="count" id="c-today">0</span></div>
-    <div class="nav-item" data-view="overview"><span>🕐</span> 全日总览</div>
-    <div class="nav-label">任务分类</div>
-    <div class="nav-item" data-view="temp"><span class="dot" style="background:#f59e0b"></span> 临时任务 <span class="count" id="c-temp">0</span></div>
-    <div class="nav-item" data-view="work"><span class="dot" style="background:#3b82f6"></span> 工作 <span class="count" id="c-work">0</span></div>
-    <div class="nav-sub">
-      <div class="nav-item sub" data-view="waishi"><span class="dot" style="background:#3b82f6"></span> 外事办 <span class="count" id="c-waishi">0</span></div>
-      <div class="nav-item sub" data-view="coffee"><span class="dot" style="background:#b45309"></span> 咖啡店 <span class="count" id="c-coffee">0</span></div>
-      <div class="nav-item sub" data-view="trade"><span class="dot" style="background:#db2777"></span> 自营交易 <span class="count" id="c-trade">0</span></div>
+<div class="app" data-page-node-id="37lWfoh1xNTl6NmFeae1Mw">
+  <aside class="sidebar" id="sidebar" data-page-node-id="OkAh7bjS1eOP60F8WpGsTE">
+    <div class="brand" data-page-node-id="OA9U1F4x0RXNGwxzKGxbZh"><span class="logo" data-page-node-id="NnXH2Fh0KQt6V4acRXkiKc">🗂️</span> 我的工作台</div>
+    <div class="nav-label" data-page-node-id="nkBgDrPTTpH0QhlWhoctUF">视图</div>
+    <div class="nav-item active" data-view="today" data-page-node-id="leLjlRdVKEvxr5K7jmBrUO"><span data-page-node-id="VMG11K5NfWeF77c69BbX0A">📅</span> 今日待办 <span class="count" id="c-today" data-page-node-id="96MvcR9X3atdpJXdSngpGO">0</span></div>
+    <div class="nav-item" data-view="overview" data-page-node-id="gIaGHYALGduNWFBryNHpMA"><span data-page-node-id="hd4ra4wBLuCvE9Pr1R4gq4">🕐</span> 全日总览</div>
+    <div class="nav-label" data-page-node-id="Ol8ispSFoh4k4433NwlIwj">任务分类</div>
+    <div class="nav-item" data-view="temp" data-page-node-id="za5cZQDvhlonp5k6dhJ7Ch"><span class="dot" style="background:#f59e0b" data-page-node-id="J7pQDIjSMOBBuvb6vqQJjw"></span> 临时任务 <span class="count" id="c-temp" data-page-node-id="gR5OZnA3McBPDAT9AiSKRs">0</span></div>
+    <div class="nav-item" data-view="work" data-page-node-id="DrmwjUGGe7LrXFrQh7U9QV"><span class="dot" style="background:#3b82f6" data-page-node-id="TsEZB6WwHwCfiFk1B4HJs3"></span> 工作 <span class="count" id="c-work" data-page-node-id="f2erfqvRUiJ0HJ8jpCiLpE">0</span></div>
+    <div class="nav-sub" data-page-node-id="b5Dgm4VulSz9NoTa5hqvDw">
+      <div class="nav-item sub" data-view="waishi" data-page-node-id="Drl8keeNJemug5aAh5qDlH"><span class="dot" style="background:#3b82f6" data-page-node-id="Iy2DocSHG9Gk3CheJdBU6T"></span> 外事办 <span class="count" id="c-waishi" data-page-node-id="ALnZFWVL6puzqlDUXB8KyW">0</span></div>
+      <div class="nav-item sub" data-view="coffee" data-page-node-id="JFzpeUSPF2Dzke7JtmwidJ"><span class="dot" style="background:#b45309" data-page-node-id="CHqi2AWNwTGBYb2awDF7nf"></span> 咖啡店 <span class="count" id="c-coffee" data-page-node-id="ZEjQGLT0DtELQOLIjyHNqO">0</span></div>
+      <div class="nav-item sub" data-view="trade" data-page-node-id="CEhTzKvZvYw4O8WrrjDBl1"><span class="dot" style="background:#db2777" data-page-node-id="SFB3fcPFN8r1f8bXvgXLnc"></span> 自营交易 <span class="count" id="c-trade" data-page-node-id="K2vnWvpOojaYk1ddwZ1LLd">0</span></div>
     </div>
-    <div class="nav-item" data-view="study"><span class="dot" style="background:#8b5cf6"></span> 学习 <span class="count" id="c-study">0</span></div>
-    <div class="nav-item" data-view="life"><span class="dot" style="background:#10b981"></span> 生活 <span class="count" id="c-life">0</span></div>
-    <div class="side-btn" id="btnTpl">🔁 例行任务</div>
-    <div class="side-btn" id="btnTheme">🌙 深色模式</div>
-    <div class="nav-label">分析</div>
-    <div class="nav-item" data-view="stats"><span>📊</span> 统计分析</div>
-    <div class="spacer"></div>
-    <div class="side-btn" id="btnExportFile">📤 导出含数据文件</div>
-    <div class="side-btn" id="btnExportJson">💾 备份(JSON)</div>
-    <div class="side-btn" id="btnExportCsv">📋 导出CSV</div>
-    <div class="side-btn" id="btnImport">📥 导入(JSON)</div>
-    <div class="store-status" id="storeStatus"></div>
-    <div class="side-btn" id="btnSync">☁️ 云端同步</div>
-    <div class="side-btn" id="btnClear">🗑️ 清空全部</div>
+    <div class="nav-item" data-view="study" data-page-node-id="WkQR2h9LRCXUmMFukpfCCH"><span class="dot" style="background:#8b5cf6" data-page-node-id="41TPetex2TH3xTJ4uEgHuf"></span> 学习 <span class="count" id="c-study" data-page-node-id="SfLXRLBHsZrvwqL0yhC0NR">0</span></div>
+    <div class="nav-item" data-view="life" data-page-node-id="nIg4xINTSywcE41FFCSBaj"><span class="dot" style="background:#10b981" data-page-node-id="pxLuDqkmdd8QOmYW0VhWww"></span> 生活 <span class="count" id="c-life" data-page-node-id="gTdXrxD2nriONHFMj6DGfE">0</span></div>
+    <div class="side-btn" id="btnTpl" data-page-node-id="ywRA9jKJPdCIWWkOzrrr0T">🔁 例行任务</div>
+    <div class="side-btn" id="btnTheme" data-page-node-id="89NwoxtHzlVIU8Ac3QixfQ">🌙 深色模式</div>
+    <div class="nav-label" data-page-node-id="Cwqrr6MaBzt6MW3Zy6kHhw">分析</div>
+    <div class="nav-item" data-view="stats" data-page-node-id="AFgds7qLx5yBj4freHauyK"><span data-page-node-id="V7w9YI9lgtivvrQVPtmwFu">📊</span> 统计分析</div>
+    <div class="spacer" data-page-node-id="WE1okqEIvb50hNSrmBhPh4"></div>
+    <div class="side-btn" id="btnExportFile" data-page-node-id="MjKAaHVkPDRNziS4c3RecO">📤 导出含数据文件</div>
+    <div class="side-btn" id="btnExportJson" data-page-node-id="SnjzVvsS1QVpF7jJmPXPgv">💾 备份(JSON)</div>
+    <div class="side-btn" id="btnExportCsv" data-page-node-id="cMjLEweFmaO9OYtBcgV5OZ">📋 导出CSV</div>
+    <div class="side-btn" id="btnImport" data-page-node-id="GO9gLrktLw9dIVsGNywZzk">📥 导入(JSON)</div>
+    <div class="store-status" id="storeStatus" data-page-node-id="4bkVFlAs7aLmd8EErzJR9r"></div>
+    <div class="side-btn" id="btnSync" data-page-node-id="qipihd5r3Jnng72sgse1hP">☁️ 云端同步</div>
+    <div class="side-btn" id="btnClear" data-page-node-id="Rfpsx21jksOKKiprGOEk3F">🗑️ 清空全部</div>
   </aside>
-  <div class="overlay" id="overlay"></div>
+  <div class="overlay" id="overlay" data-page-node-id="FuR5IucCvkmvd9AZZqy1FO"></div>
 
-  <main class="main">
-    <div class="topbar">
-      <button class="icon-btn menu-btn" id="menuBtn">☰</button>
-      <div class="greet">
-        <h1 id="greet">你好</h1>
-        <p id="dateLine"></p>
+  <main class="main" data-page-node-id="BwDZyRXzdQyRjGJeAOjzg2">
+    <div class="topbar" data-page-node-id="GDKwsOC1MNLauqbf5wixP9">
+      <button class="icon-btn menu-btn" id="menuBtn" data-page-node-id="yk0rry2fw40szt1BLxcTF3">☰</button>
+      <div class="greet" data-page-node-id="9v9mRTc7vgwfsKVR7kAimx">
+        <h1 id="greet" data-page-node-id="5mkDGqnn76uo3N2wJNJyAI">你好</h1>
+        <p id="dateLine" data-page-node-id="aB6llRiDjPbBeBgZHLLM3B"></p>
       </div>
     </div>
 
-    <div class="ring" id="ringCard">
-      <svg width="64" height="64" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="27" fill="none" stroke="var(--border)" stroke-width="7"/>
+    <div class="ring" id="ringCard" data-page-node-id="4cjVJAUIfhxJb7aeGqM6BF">
+      <svg width="64" height="64" viewBox="0 0 64 64" data-page-node-id="3oCMnmv0yMUDdAnT4EoKDu">
+        <circle cx="32" cy="32" r="27" fill="none" stroke="var(--border)" stroke-width="7" data-page-node-id="7YuBCAZGBrDbD6nfCFEslF"/>
         <circle id="ringFg" cx="32" cy="32" r="27" fill="none" stroke="var(--accent)" stroke-width="7"
-          stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 32 32)"/>
-        <text id="ringTxt" x="32" y="37" text-anchor="middle" font-size="15" font-weight="700" fill="var(--text)">0%</text>
+          stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 32 32)" data-page-node-id="v9yK3sU9JST5jTyKa8L5zE"/>
+        <text id="ringTxt" x="32" y="37" text-anchor="middle" font-size="15" font-weight="700" fill="var(--text)" data-page-node-id="A6ouM1SzLHyQAOdbfTY6zR">0%</text>
       </svg>
-      <div class="stats">
-        <div class="stat"><div class="num" id="stTotal">0</div><div class="lbl">今日任务</div></div>
-        <div class="stat"><div class="num" id="stOpen">0</div><div class="lbl">未完成</div></div>
-        <div class="stat"><div class="num done" id="stDone">0</div><div class="lbl">已完成</div></div>
-        <div class="stat"><div class="num over" id="stOver">0</div><div class="lbl">已逾期</div></div>
+      <div class="stats" data-page-node-id="DIryTpLLq1bsY088g5MkSF">
+        <div class="stat" data-page-node-id="LEsEzuFfGoC43KhPoJnc8B"><div class="num" id="stTotal" data-page-node-id="EQRLVeo1FcyUsY6yr01mT7">0</div><div class="lbl" data-page-node-id="xS3P67X4a6DHYdoJdf46qJ">今日任务</div></div>
+        <div class="stat" data-page-node-id="ad5UJSuRGBsPDYlYmoP7ru"><div class="num" id="stOpen" data-page-node-id="JjykmIEMcEmeisNpxjafOJ">0</div><div class="lbl" data-page-node-id="jHgyja2PJSI1bthPB6aKfo">未完成</div></div>
+        <div class="stat" data-page-node-id="XUyPhkTApEz67KPwAHTczU"><div class="num done" id="stDone" data-page-node-id="Y7pr7U08HhaXLeQtiasPvP">0</div><div class="lbl" data-page-node-id="3Dm8ZrveDkZ9pExsywSrTM">已完成</div></div>
+        <div class="stat" data-page-node-id="dCECHYDay89oDL31g2beDM"><div class="num over" id="stOver" data-page-node-id="yMidvbWZBi8Zp6uu35dEt8">0</div><div class="lbl" data-page-node-id="AeHRYKkVLUlXW9pQA7ePto">已逾期</div></div>
       </div>
     </div>
 
-    <div class="imp-card" id="impCard" style="display:none"></div>
+    <div class="imp-card" id="impCard" style="display:none" data-page-node-id="HNdFUzniL985U25ohZb9eb"></div>
 
-    <div class="addbox" id="taskAddBox">
-      <div class="row1">
-        <input type="text" id="taskInput" placeholder="今天要做什么？输入后回车添加…" maxlength="200">
+    <div class="addbox" id="taskAddBox" data-page-node-id="B3QFuhCUXchd7SpvV4NGTu">
+      <div class="row1" data-page-node-id="x6eHp3SIbPoBcDRYmEz07I">
+        <input type="text" id="taskInput" placeholder="今天要做什么？输入后回车添加…" maxlength="200" data-page-node-id="gcmGqlS6vHDsmO7Ey1TCn4">
       </div>
-      <div class="row2">
-        <select id="catInput">
-          <option value="all">📋 全部</option>
-          <option value="temp">⚡ 临时任务</option>
-          <option value="waishi">🏢 外事办</option>
-          <option value="coffee">☕ 咖啡店</option>
-          <option value="trade">📈 自营交易</option>
-          <option value="study">📚 学习</option>
-          <option value="life">🏠 生活</option>
+      <div class="row2" data-page-node-id="5OluApxSm3q3Dsxzp539ty">
+        <select id="catInput" data-page-node-id="3OSdOwM3PufctgVBt30Yjn">
+          <option value="all" data-page-node-id="YjB6yPVG9l1cBl3qwepmoD">📋 全部</option>
+          <option value="temp" data-page-node-id="VCwcPo6LU0MMFUtZAnwRVc">⚡ 临时任务</option>
+          <option value="waishi" data-page-node-id="1L4sf5oHjmuY7mBfuM7H44">🏢 外事办</option>
+          <option value="coffee" data-page-node-id="X6DPzmm2HUXPFKhCHJsESi">☕ 咖啡店</option>
+          <option value="trade" data-page-node-id="4LlXROZnqCFEHtycd68RDL">📈 自营交易</option>
+          <option value="study" data-page-node-id="xCzgGovwwLf6YGvI4cbY6U">📚 学习</option>
+          <option value="life" data-page-node-id="HiqnW9T2zbW5e3oK2Ah52N">🏠 生活</option>
         </select>
-        <button class="btn-add" id="addBtn">添加任务</button>
+        <button class="btn-add" id="addBtn" data-page-node-id="UrOQm36aasWkfaotUEye7X">添加任务</button>
       </div>
-      <div class="row3">
-        <label class="time-chk"><input type="checkbox" id="timeChk"> ⏰ 设置时间</label>
+      <div class="row3" data-page-node-id="3KbOUueZNEkZuoPllcFhFa">
+        <label class="time-chk" data-page-node-id="n1CcNGOnaYACHbFP1DFjjj"><input type="checkbox" id="timeChk" data-page-node-id="8Y2R19zC46RcvM7PbH5NdW"> ⏰ 设置时间</label>
       </div>
-      <div class="row4" id="timeRow">
-        <span class="lbl">⏰ 时间</span>
-        <div id="timeStartTrigger"></div>
-        <input type="time" id="timeStart" class="hide-native-time">
+      <div class="row4" id="timeRow" data-page-node-id="wCKfPRZXGAv8zaLPdDUmIa">
+        <span class="lbl" data-page-node-id="AHP6kTPUnsBaE1Rt8CXeMR">⏰ 时间</span>
+        <div id="timeStartTrigger" data-page-node-id="VmTTg5g8KCwkEJ9HGFcqkl"></div>
+        <input type="time" id="timeStart" class="hide-native-time" data-page-node-id="lL9CpZRU4urD8dp5hFIeGp">
       </div>
     </div>
 
-    <div class="daynav" id="dayNav">
-      <button class="dn-btn" id="dayPrev" title="前一天">‹</button>
-      <button class="dn-date" id="dayLabel">今天</button>
-      <button class="dn-btn" id="dayNext" title="后一天">›</button>
-      <button class="dn-today" id="dayToday">回到今天</button>
-      <button class="dn-btn tl" id="tlToggle" title="切换时间线视图">📈 时间线</button>
-      <input type="date" id="dayPicker">
+    <div class="daynav" id="dayNav" data-page-node-id="dbihXdDdcDZV7g7OsE8i2J">
+      <button class="dn-btn" id="dayPrev" title="前一天" data-page-node-id="SdCJlEReKV8PCjaQosqpj0">‹</button>
+      <button class="dn-date" id="dayLabel" data-page-node-id="Stwt5SDLHy3lEFEe7E2W2e">今天</button>
+      <button class="dn-btn" id="dayNext" title="后一天" data-page-node-id="mb1e4YN2tQdAHzvJvBnDJZ">›</button>
+      <button class="dn-today" id="dayToday" data-page-node-id="XSXDeo1DawGDc1QmBw1CPY">回到今天</button>
+      <button class="dn-btn tl" id="tlToggle" title="切换时间线视图" data-page-node-id="FIk5z41doR9DcTN4jgTYry">📈 时间线</button>
+      <input type="date" id="dayPicker" data-page-node-id="JVNNDP2oQSykCXOa77IrTp">
     </div>
 
-    <div id="listArea"></div>
+    <div id="listArea" data-page-node-id="KDgA7Jr5KH7HcDP85bzwnu"></div>
 
-    <div id="statsArea" style="display:none">
-      <div class="stats-summary" id="statsSummary"></div>
-      <div class="stats-card" id="maxOvrDetailCard" style="display:none">
-        <div class="card-title">🔴 最长逾期任务详情</div>
-        <div id="maxOvrDetail"></div>
+    <div id="statsArea" style="display:none" data-page-node-id="JGGVERB8VYm476QVJ0FNLa">
+      <div class="stats-summary" id="statsSummary" data-page-node-id="trRXBNXGDz0cuEhjgZUB59"></div>
+      <div class="stats-card" id="maxOvrDetailCard" style="display:none" data-page-node-id="cPLPRfDZYCuz92sa8nCgRn">
+        <div class="card-title" data-page-node-id="F4LEEc8xrQWQ4Ppq1IypiC">🔴 最长逾期任务详情</div>
+        <div id="maxOvrDetail" data-page-node-id="8gGkxrjmYCfJNqiAw0YBJQ"></div>
       </div>
-      <div class="stats-card" id="ovrListCard">
-        <div class="card-title">🚨 当前逾期清单（按逾期天数排序）</div>
-        <div id="ovrList"></div>
+      <div class="stats-card" id="ovrListCard" data-page-node-id="OQh7AMbcD4wH4CxFI3bQu8">
+        <div class="card-title" data-page-node-id="sYbN72yEBOF9rjgYY6Z0wB">🚨 当前逾期清单（按逾期天数排序）</div>
+        <div id="ovrList" data-page-node-id="41aCCQPp3IkgHwBQihvENh"></div>
       </div>
-      <div class="stats-card analysis">
-        <div class="card-title">📌 改进建议</div>
-        <div id="statsAdvice"></div>
+      <div class="stats-card analysis" data-page-node-id="WFjDlsvBCdDnxetwWCAOyO">
+        <div class="card-title" data-page-node-id="wyCt9l4RVG4UTzijwPQiQC">📌 改进建议</div>
+        <div id="statsAdvice" data-page-node-id="wlUHhHtUjIWeGABvFCODTa"></div>
       </div>
     </div>
   </main>
 </div>
 
-<nav class="bottom-nav" id="bottomNav">
-  <div class="bn" data-view="temp"><span class="ic">⚡</span>临时<span class="count" id="b-temp">0</span></div>
-  <div class="bn" data-view="work"><span class="ic">💼</span>工作<span class="count" id="b-work">0</span></div>
-  <div class="bn active" data-view="today"><span class="ic">📅</span><span id="bTodayNum">31</span><span class="count" id="b-today">0</span></div>
-  <div class="bn" data-view="study"><span class="ic">📚</span>学习<span class="count" id="b-study">0</span></div>
-  <div class="bn" data-view="life"><span class="ic">🏠</span>生活<span class="count" id="b-life">0</span></div>
+<nav class="bottom-nav" id="bottomNav" data-page-node-id="FtEmH4JGSs7N1iS6vB5lzQ">
+  <div class="bn" data-view="temp" data-page-node-id="2fRXuGEb9VOB9JjeOmFkW3"><span class="ic" data-page-node-id="UEMgHre81RIAYQWQnD1w8b">⚡</span>临时<span class="count" id="b-temp" data-page-node-id="uIeADG7tjK7EwpmKT4soTF">0</span></div>
+  <div class="bn" data-view="work" data-page-node-id="h5HcT71kAOSGNHdl2qdFzR"><span class="ic" data-page-node-id="ALIXYbjIqwl62LsSXxDFy0">💼</span>工作<span class="count" id="b-work" data-page-node-id="PbJuDyEV6D4reXAimZhES6">0</span></div>
+  <div class="bn active" data-view="today" data-page-node-id="LiI1jA4uWmehFHFflfpxFP"><span class="ic" data-page-node-id="UcR5SnnwkvbTBxSEi6kgqK">📅</span><span id="bTodayNum" data-page-node-id="ec7XHrG6H9p37jqj2HZufu">31</span><span class="count" id="b-today" data-page-node-id="CbUUujkPqYEMA61fS9hBlV">0</span></div>
+  <div class="bn" data-view="study" data-page-node-id="MCtfyX0BaQcMN72fs1B8Wc"><span class="ic" data-page-node-id="86AZu3wMqddt55yA57fzQo">📚</span>学习<span class="count" id="b-study" data-page-node-id="cmw6c3IKq4LJtg0qytJQFr">0</span></div>
+  <div class="bn" data-view="life" data-page-node-id="G7IsuPdvwNf1XQLbapxHP6"><span class="ic" data-page-node-id="A5CxqUVqT8WBM9ElgIvUHv">🏠</span>生活<span class="count" id="b-life" data-page-node-id="ni7YzR5D7dNPcoC0jitbpJ">0</span></div>
 </nav>
 
-<div id="toast"></div>
+<div id="toast" data-page-node-id="0XzoD5AshNwh8yVinL6gxS"></div>
 
 <!-- celebration modal -->
-<div class="modal-overlay" id="celebrateModal">
-  <div class="celebrate">
-    <div class="trophy">🏆</div>
-    <h2>全部完成！</h2>
-    <p>全部完成，今天满分！</p>
-    <button class="btn-ok" id="celebrateOk">✨ 明天继续加油</button>
+<div class="modal-overlay" id="celebrateModal" data-page-node-id="WurIL4ogcgCEAriEf32Gcz">
+  <div class="celebrate" data-page-node-id="8hqG3vn2yInbcVb0aqDbQq">
+    <div class="trophy" data-page-node-id="XAU7G2TSQ6YQTCDkfBiEO0">🏆</div>
+    <h2 data-page-node-id="FldTz3vZBQBdDbnjg94FqU">全部完成！</h2>
+    <p data-page-node-id="noyaxYBw3DCEW4MsLHCRqM">全部完成，今天满分！</p>
+    <button class="btn-ok" id="celebrateOk" data-page-node-id="e7OoAJI43BDMUq2LwFhEAv">✨ 明天继续加油</button>
   </div>
 </div>
 
 <!-- edit task modal -->
-<div class="modal-overlay" id="editModal">
-  <div class="edit-modal">
-    <h3>编辑任务</h3>
-    <div class="edit-field">
-      <label>内容</label>
-      <input type="text" id="editText" maxlength="200">
+<div class="modal-overlay" id="editModal" data-page-node-id="2I3oxCMfEzfXbLYxHPDjbz">
+  <div class="edit-modal" data-page-node-id="HwfLDQyQ7M7bctnSqRS0rL">
+    <h3 data-page-node-id="rXteXp0emgCDXlBhBa8ML4">编辑任务</h3>
+    <div class="edit-field" data-page-node-id="a5wkQRLedSCRxs1g8bKRnD">
+      <label data-page-node-id="BGDZ4tnKgr8aBIyC6U6U9Z">内容</label>
+      <input type="text" id="editText" maxlength="200" data-page-node-id="h94Eg3PmdhdIbBfIZSbKPw">
     </div>
-    <div class="edit-field">
-      <label>分类</label>
-      <select id="editCat">
-        <option value="temp">⚡ 临时任务</option>
-        <option value="work">💼 工作</option>
-        <option value="study">📚 学习</option>
-        <option value="life">🏠 生活</option>
+    <div class="edit-field" data-page-node-id="84TEfBbes8V8llNs5lExf3">
+      <label data-page-node-id="tpR2NRUMXuABzSENLUHvne">分类</label>
+      <select id="editCat" data-page-node-id="d8MVLZwCv8nfC8fP7jEhI4">
+        <option value="temp" data-page-node-id="bFiSSeKfeXzz8xaSet3JPd">⚡ 临时任务</option>
+        <option value="work" data-page-node-id="Sc0tk0qmp6tkY1RiH2hebi">💼 工作</option>
+        <option value="study" data-page-node-id="8x5YxXVd9zTwNQlOnqE9bT">📚 学习</option>
+        <option value="life" data-page-node-id="WZTgbiZ5oMcQFmsT7HpM3f">🏠 生活</option>
       </select>
     </div>
-    <div class="edit-field" id="editSubRow" style="display:none">
-      <label>子类（工作下细分）</label>
-      <select id="editSub">
-        <option value="waishi">🏢 外事办</option>
-        <option value="coffee">☕ 咖啡店</option>
-        <option value="trade">📈 自营交易</option>
+    <div class="edit-field" id="editSubRow" style="display:none" data-page-node-id="3noMuQmInJdNRZg3w8JCiP">
+      <label data-page-node-id="9qxodHmyG7r2Dmo9kJ4NHQ">子类（工作下细分）</label>
+      <select id="editSub" data-page-node-id="B9cHIUJyxlLu8TR4eR6DwD">
+        <option value="waishi" data-page-node-id="oTzXRBoItGFjO4H6rygTGG">🏢 外事办</option>
+        <option value="coffee" data-page-node-id="41tXY1Hx0Htrw7UuuHxFkP">☕ 咖啡店</option>
+        <option value="trade" data-page-node-id="u3l9L6zWXLqN0uvSyzrvTL">📈 自营交易</option>
       </select>
     </div>
-    <div class="edit-field">
-      <label>截止日期（在哪天显示该任务）</label>
-      <input type="date" id="editDue">
+    <div class="edit-field" data-page-node-id="e6PhVIa716SnPxyVTrREwL">
+      <label data-page-node-id="yNzDEOfSjuJOtRkNZnJAct">截止日期（在哪天显示该任务）</label>
+      <input type="date" id="editDue" data-page-node-id="ZPrZkRFRzDwgqIgccHfF9H">
     </div>
-    <div class="edit-field">
-      <label>重复</label>
-      <select id="editRepeat">
-        <option value="none">不重复</option>
-        <option value="daily">每天</option>
-        <option value="weekday">工作日（周一~周五）</option>
-        <option value="weekly">每周</option>
-        <option value="monthly">每月</option>
+    <div class="edit-field" data-page-node-id="F65Qm9JQ4E1kq338RZF1MV">
+      <label data-page-node-id="dzEpU8w9nvtHFM76ztPpPm">重复</label>
+      <select id="editRepeat" data-page-node-id="7czELKFAmukqQtFfEuy3mS">
+        <option value="none" data-page-node-id="dVkKKQLEEHQdJiAsgwsUOM">不重复</option>
+        <option value="daily" data-page-node-id="80sUX5T8VpHcToYAzknvZW">每天</option>
+        <option value="weekday" data-page-node-id="x4ZtmoYRz4tuqmIt31DNif">工作日（周一~周五）</option>
+        <option value="weekly" data-page-node-id="cYJmxMydUoqxzs9zUfDgt2">每周</option>
+        <option value="monthly" data-page-node-id="TCG5nFJSffhYQtQKllHFud">每月</option>
       </select>
     </div>
-    <div class="edit-field">
-      <label>时间（可选，24 小时制）</label>
-      <div class="edit-times">
-        <div class="et-row"><span>开始</span><div id="editStartTrigger"></div><input type="time" id="editStart" class="hide-native-time"></div>
-        <div class="et-row"><span>截止</span><div id="editEndTrigger"></div><input type="time" id="editEnd" class="hide-native-time"></div>
+    <div class="edit-field" data-page-node-id="PzexaLZNNR3byhpFgMl9P6">
+      <label data-page-node-id="o99HUwlhhtYZOQYLiD1E0n">时间（可选，24 小时制）</label>
+      <div class="edit-times" data-page-node-id="Muprr8HLv3RjcQjzTlLeXk">
+        <div class="et-row" data-page-node-id="f1ap3Cv4kM38BzFvaI1SYe"><span data-page-node-id="BvfCv4HzyZkmdeLZuWKueU">开始</span><div id="editStartTrigger" data-page-node-id="ecRUR7ifr4gaHGEkLwQibh"></div><input type="time" id="editStart" class="hide-native-time" data-page-node-id="h21MF8B7kjArNALpCtIDsF"></div>
+        <div class="et-row" data-page-node-id="mLh8vucdXOFe3NBzpZ7CmP"><span data-page-node-id="KdAZ2nw1aHJkWAsHw2Tdka">截止</span><div id="editEndTrigger" data-page-node-id="xOb9tcgEC6v1CWkdn0c504"></div><input type="time" id="editEnd" class="hide-native-time" data-page-node-id="1BV9HmJQvIB7mH68LvGPEt"></div>
       </div>
     </div>
-    <div class="edit-field">
-      <label>备注（可选）</label>
+    <div class="edit-field" data-page-node-id="IkBvlRG0xMRf5lpoJbUBBb">
+      <label data-page-node-id="0QG59aYF2sBSyVG6DcB15a">备注（可选）</label>
       <textarea class="edit-note" id="editNote" maxlength="1000" placeholder="补充说明、细节、上下文…"></textarea>
     </div>
-    <div class="edit-actions">
-      <button class="cancel" id="editCancel">取消</button>
-      <button class="save" id="editSave">保存</button>
+    <div class="edit-actions" data-page-node-id="ppcfnf26xlXuctlBuulGfG">
+      <button class="cancel" id="editCancel" data-page-node-id="WOXYFMBAWl5Am6OEySDLST">取消</button>
+      <button class="save" id="editSave" data-page-node-id="XLObsXfLR0WBeGdDl10yka">保存</button>
     </div>
-    <div class="edit-clear" id="editClearTime">清除时间</div>
+    <div class="edit-clear" id="editClearTime" data-page-node-id="hDAG3F9fr0fN3SPJGsE2pG">清除时间</div>
   </div>
 </div>
 
 <!-- cloud sync modal -->
-<div class="modal-overlay" id="syncModal">
-  <div class="edit-modal">
-    <h3>☁️ 云端同步（GitHub Gist）</h3>
-    <p class="sync-tip">在 GitHub 生成一个带 <b>gist</b> 权限的 Personal Access Token，粘贴到下方，即可让<b>手机端与网页端共享同一份数据</b>。Token 仅保存在本机浏览器，不会随文件导出或上传到别处。</p>
-    <label class="fld">Token（ghp_...）</label>
-    <input type="password" id="syncToken" placeholder="粘贴 GitHub Token" autocomplete="off">
-    <label class="fld">Gist ID（可留空，首次同步自动创建私有 Gist）</label>
-    <input type="text" id="syncGistId" placeholder="留空则自动新建">
-    <div class="sync-actions">
-      <button class="btn-add" id="syncEnable">启用并同步</button>
-      <button class="btn-ghost" id="syncNow">立即同步</button>
-      <button class="btn-ghost" id="syncClose">关闭</button>
+<div class="modal-overlay" id="syncModal" data-page-node-id="L6uR8CDTfUjxON4V9auZuB">
+  <div class="edit-modal" data-page-node-id="zZevbhQ9DAR2sqgB515LcE">
+    <h3 data-page-node-id="4rCdbz5eiuBSNQmbSfcnEe">☁️ 云端同步（GitHub Gist）</h3>
+    <p class="sync-tip" data-page-node-id="Q6aoEhSe1ee27QZfIsJ45h">在 GitHub 生成一个带 <b data-page-node-id="Vma8iikt2uQTfPHxIMNQIB">gist</b> 权限的 Personal Access Token，粘贴到下方，即可让<b data-page-node-id="R4Ve7qqfYkK70PLBjJpnlR">手机端与网页端共享同一份数据</b>。Token 仅保存在本机浏览器，不会随文件导出或上传到别处。</p>
+    <label class="fld" data-page-node-id="tgCgNkAQssIJKhiQLJDYif">Token（ghp_...）</label>
+    <input type="password" id="syncToken" placeholder="粘贴 GitHub Token" autocomplete="off" data-page-node-id="CNNZ2ADGFPJVaAhiIU5muE">
+    <label class="fld" data-page-node-id="TsOtB4hPnCWM5MYbKnmJEk">Gist ID（可留空，首次同步自动创建私有 Gist）</label>
+    <input type="text" id="syncGistId" placeholder="留空则自动新建" data-page-node-id="V3MvHoJKY1ZwC3HmyNJQYE">
+    <div class="sync-actions" data-page-node-id="DOgGfKoJ5ebFo73TCXeTzS">
+      <button class="btn-add" id="syncEnable" data-page-node-id="Tn8WWhNwbpdlqknX9BQ6FE">启用并同步</button>
+      <button class="btn-ghost" id="syncNow" data-page-node-id="74mszYoyhZLPU93WbQBA5I">立即同步</button>
+      <button class="btn-ghost" id="syncClose" data-page-node-id="sjqXwjrd4OefE1ArF0ilwk">关闭</button>
     </div>
-    <div class="sync-status" id="syncStatus"></div>
-    <div class="sync-gist" id="syncGistInfo"></div>
+    <div class="sync-status" id="syncStatus" data-page-node-id="y8b7Uo6bYHYEhZx6ebQed4"></div>
+    <div class="sync-gist" id="syncGistInfo" data-page-node-id="MUGW8FD6dME0CI5sCF01tz"></div>
   </div>
 </div>
 
 <!-- routine template modal -->
-<div class="modal-overlay" id="tplModal">
-  <div class="edit-modal">
-    <h3>🔁 例行任务</h3>
-    <p class="sync-tip">固定重复的工作（如咖啡店日常）设为例行任务后，<b>每天自动生成当天的任务</b>，一次设置永久生效，不用再手动输入。</p>
-    <div class="tpl-add">
-      <input type="text" id="tplText" maxlength="200" placeholder="例：开店清洁 / 盘点物料 / 对账">
-      <div class="tpl-add-row">
-        <select id="tplCat">
-          <option value="coffee" selected>☕ 咖啡店</option>
-          <option value="waishi">🏢 外事办</option>
-          <option value="trade">📈 自营交易</option>
-          <option value="study">📚 学习</option>
-          <option value="life">🏠 生活</option>
-          <option value="temp">⚡ 临时任务</option>
+<div class="modal-overlay" id="tplModal" data-page-node-id="aCZeHdaIIvgehYcoJn8WHt">
+  <div class="edit-modal" data-page-node-id="KcuZpEXDo6Df4KiJhx32sh">
+    <h3 data-page-node-id="IDCAS5gGMgaZxsjV4MU4Nl">🔁 例行任务</h3>
+    <p class="sync-tip" data-page-node-id="P6tQJv5XxG4HpiCo1B1FH1">固定重复的工作（如咖啡店日常）设为例行任务后，<b data-page-node-id="rmLmcNqGcyrMAkwjqf3KdO">每天自动生成当天的任务</b>，一次设置永久生效，不用再手动输入。</p>
+    <div class="tpl-add" data-page-node-id="t15lnWEWx4Ni8UsKDJjWAD">
+      <input type="text" id="tplText" maxlength="200" placeholder="例：开店清洁 / 盘点物料 / 对账" data-page-node-id="AZC4ODdnvnO0ArpJRLW8nP">
+      <div class="tpl-add-row" data-page-node-id="THjC6usMx8znxegu1c3IVe">
+        <select id="tplCat" data-page-node-id="2FXIFv98btCh5C9su7HyQE">
+          <option value="coffee" selected data-page-node-id="IyGBKu2xNUl5k2tDswDafG">☕ 咖啡店</option>
+          <option value="waishi" data-page-node-id="0Fmii9MoxZqor1BWiGwBsa">🏢 外事办</option>
+          <option value="trade" data-page-node-id="GNOnXepY5uMwDaGjvmKRwn">📈 自营交易</option>
+          <option value="study" data-page-node-id="upngz00HiHKIUpDaRcrLqN">📚 学习</option>
+          <option value="life" data-page-node-id="BSpHciKfGKPrD3XL7mtpcD">🏠 生活</option>
+          <option value="temp" data-page-node-id="gOPRyTDov9xH6EV7hac89r">⚡ 临时任务</option>
         </select>
-        <button class="btn-add" id="tplAddBtn">添加</button>
+        <button class="btn-add" id="tplAddBtn" data-page-node-id="tHviMI0mxfu9iP9lCEAtmr">添加</button>
       </div>
-      <div class="tpl-add-time" id="tplAddTime"></div>
+      <div class="tpl-add-time" id="tplAddTime" data-page-node-id="2jGpzD3Lnj6JeeDEJZQUkX"></div>
     </div>
-    <div class="tpl-list" id="tplList"></div>
-    <div class="sync-actions"><button class="btn-ghost" id="tplClose">关闭</button></div>
+    <div class="tpl-list" id="tplList" data-page-node-id="St1VJQLjGX8Aosu5JtUpEJ"></div>
+    <div class="sync-actions" data-page-node-id="GGCJwVcx1VOuCAwu1Jv6FR"><button class="btn-ghost" id="tplClose" data-page-node-id="PYmSKimAiB88N9GQisNvIM">关闭</button></div>
   </div>
 </div>
 
 <!-- custom time picker modal -->
-<div class="modal-overlay" id="timePickerModal">
-  <div class="tp-body">
-    <div class="tp-title">设置时间</div>
-    <div class="tp-digits">
-      <input class="tp-digit" id="tpHour" type="number" min="0" max="23" placeholder="00" inputmode="numeric" pattern="[0-9]*">
-      <span class="tp-colon">:</span>
-      <input class="tp-digit" id="tpMin" type="number" min="0" max="59" placeholder="00" inputmode="numeric" pattern="[0-9]*">
+<div class="modal-overlay" id="timePickerModal" data-page-node-id="QAP4crlZJFVfvMoYlKW0Fd">
+  <div class="tp-body" data-page-node-id="UHVK4XiIEyb5T33YCNOzU9">
+    <div class="tp-title" data-page-node-id="OMCttrwmoBxr3H7XzLaIe9">设置时间</div>
+    <div class="tp-digits" data-page-node-id="FjfXwFFBf59q4Xd9kzAy6s">
+      <input class="tp-digit" id="tpHour" type="number" min="0" max="23" placeholder="00" inputmode="numeric" pattern="[0-9]*" data-page-node-id="aY4p0Agyy8TplUd79NfgLe">
+      <span class="tp-colon" data-page-node-id="7kERiGNYxaOWHKkCg3Ka0w">:</span>
+      <input class="tp-digit" id="tpMin" type="number" min="0" max="59" placeholder="00" inputmode="numeric" pattern="[0-9]*" data-page-node-id="jwHtLFDf9vRQxOZn0o2ygb">
     </div>
-    <div class="tp-labels"><span>时</span><span>分</span></div>
-    <div class="tp-presets" id="tpPresets">
-      <button class="tp-preset" data-h="6" data-m="0">06:00</button>
-      <button class="tp-preset" data-h="9" data-m="0">09:00</button>
-      <button class="tp-preset" data-h="12" data-m="0">12:00</button>
-      <button class="tp-preset" data-h="18" data-m="0">18:00</button>
-      <button class="tp-preset" data-h="21" data-m="0">21:00</button>
+    <div class="tp-labels" data-page-node-id="Nqa97xbBdKjeDHLF7Scy1n"><span data-page-node-id="P9bFw8UuqBwh8ogDSSTlCk">时</span><span data-page-node-id="1xCkonFjjGDYmHuyweCC5W">分</span></div>
+    <div class="tp-presets" id="tpPresets" data-page-node-id="FEIEMIznLfHZ2RBgCjiM92">
+      <button class="tp-preset" data-h="6" data-m="0" data-page-node-id="Vn8TGAOySPb0IPD0POIphi">06:00</button>
+      <button class="tp-preset" data-h="9" data-m="0" data-page-node-id="MTZA1hSs7s9xwY0bU7UyBd">09:00</button>
+      <button class="tp-preset" data-h="12" data-m="0" data-page-node-id="9ahsi0icA67fL4VcKaH0E8">12:00</button>
+      <button class="tp-preset" data-h="18" data-m="0" data-page-node-id="1jMJL9DI04zlGTBQlErSDZ">18:00</button>
+      <button class="tp-preset" data-h="21" data-m="0" data-page-node-id="f2BdZQqHKqeZxSSUlIEPGY">21:00</button>
     </div>
-    <div class="tp-actions">
-      <button class="tp-btn-clear" id="tpBtnClear">清除</button>
-      <button class="tp-btn-cancel" id="tpBtnCancel">取消</button>
-      <button class="tp-btn-ok" id="tpBtnOk">设置</button>
+    <div class="tp-actions" data-page-node-id="ZIAsbSCgK6UrfsBSKiQSHn">
+      <button class="tp-btn-clear" id="tpBtnClear" data-page-node-id="EH7JIYiqBTCuThYhqeZo2J">清除</button>
+      <button class="tp-btn-cancel" id="tpBtnCancel" data-page-node-id="fAKVXO5zBJwZyIxL4Mzm8c">取消</button>
+      <button class="tp-btn-ok" id="tpBtnOk" data-page-node-id="HldCH5PWTz14Y4GvQud65g">设置</button>
     </div>
   </div>
 </div>
@@ -927,15 +941,15 @@
 
 <script>
 const CATS={
-  temp:{name:'临时任务',color:'#f59e0b',soft:'#fffbeb'},
-  work:{name:'工作',color:'#3b82f6',soft:'#eff6ff'},
-  study:{name:'学习',color:'#8b5cf6',soft:'#f5f3ff'},
-  life:{name:'生活',color:'#10b981',soft:'#ecfdf5'}
+  temp:{name:'临时任务',color:'#b08d4a',soft:'#faf6ed'},
+  work:{name:'工作',color:#4a7a8c,soft:'#e4eef2'},
+  study:{name:'学习',color:'#7a5a9c',soft:'#eee8f4'},
+  life:{name:'生活',color:'#4a8c6a',soft:'#e4f0e8'}
 };
 const SUBS={work:[
-  {key:'waishi',name:'外事办',color:'#3b82f6'},
-  {key:'coffee',name:'咖啡店',color:'#b45309'},
-  {key:'trade',name:'自营交易',color:'#db2777'}
+  {key:'waishi',name:'外事办',color:'#5a7a9c',soft:'#e8eef4'},
+  {key:'coffee',name:'咖啡店',color:'#a07840',soft:'#f5ede4'},
+  {key:'trade',name:'自营交易',color:'#9c5a6a',soft:'#f4e8ec'}
 ]};
 const STORE_KEY='workbench_tasks_v1', TRASH_KEY='workbench_trash_v1', TPL_KEY='workbench_tpl_v1', TOMB_KEY='workbench_tomb_v1';
 let tasks=[], trash=[], templates=[], ideas=[], tombstones=[], editingTplId=null;
@@ -1507,7 +1521,7 @@ function renderTplList(filter){
     if(editingTplId===tpl.id)return tplEditRowHtml(tpl);
     return '<div class="tpl-row'+(tpl.paused?' paused':'')+'" data-tpl-id="'+tpl.id+'">'+
       '<div class="tpl-info"><div class="tpl-text">'+escapeHtml(tpl.text)+'</div>'+
-      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · <span class="tpl-time">🕐 '+tpl.start+'</span>':'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
+      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · <span class="tpl-time">'+tpl.start+'</span>':'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
       '<div class="tpl-ops">'+
         '<span class="tpl-op" data-tpl-act="edit" data-id="'+tpl.id+'" title="编辑">✎</span>'+
         '<span class="tpl-op" data-tpl-act="up" data-id="'+tpl.id+'" title="上移">▲</span>'+
@@ -1685,8 +1699,8 @@ function renderTasks(isTodayMode,focusDate){
   let html='';
   // ---- 未完成任务 ----
   if(view==='today'&&isTodayMode){
-    // 首页：不分组建组标题，统一按创建/更新时间倒序（最近添加/更新的在前）
-    const byTime=(a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0);
+    // 首页：按计划时间（start）从小到大排列，无时间的排最后
+    const byTime=(a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||'');
     html+=items([...openList].sort(byTime));
   }else if(openList.length){
     html=isTodayMode?items(openList):secTitle('📅 '+dt+' · '+openList.length)+items(openList);
@@ -1817,7 +1831,7 @@ function renderTimeline(isTodayMode,focusDate){
     html+='<div class="timeline">'+timed.map(t=>{
       const c=CATS[t.category]||{color:'#999',soft:'#eee',name:''};
       let chipName=c.name,chipColor=c.color,chipSoft=c.soft;
-      if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
+      if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;chipSoft=s.soft;}}
       return '<div class="tl-row">'+
         '<div class="tl-time">'+t.start+'</div>'+
         '<div class="tl-rail"></div><div class="tl-node"></div>'+
@@ -2583,26 +2597,26 @@ window.addEventListener('load',()=>setTimeout(hideBoot,1300));
 // 等 DOM 完全解析后再初始化（kbdOverlay 等元素在脚本之后，需确保已存在）
 if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
 </script>
-<div id="installHint" class="install-hint">
-  <div class="ih-icon">📲</div>
-  <div class="ih-text">
-    <strong>添加到主屏幕</strong>
-    <span>获得 APP 般体验：离线可用、不被微信吞数据</span>
+<div id="installHint" class="install-hint" data-page-node-id="yiHflEEzURTF7GlMPhZ0od">
+  <div class="ih-icon" data-page-node-id="X9k36bnvp75gZJlN9r18mC">📲</div>
+  <div class="ih-text" data-page-node-id="wA13TTP6fx1VB7FlCNsPGA">
+    <strong data-page-node-id="bOPnkCfzdQt1MHNcr99k4C">添加到主屏幕</strong>
+    <span data-page-node-id="4WzoYn71lLx1KpXuOwxPPR">获得 APP 般体验：离线可用、不被微信吞数据</span>
   </div>
-  <button class="ih-btn" id="ihAdd">添加</button>
-  <button class="ih-close" id="ihClose" aria-label="关闭">×</button>
+  <button class="ih-btn" id="ihAdd" data-page-node-id="FZhFGZciUAKBg91eHqH36R">添加</button>
+  <button class="ih-close" id="ihClose" aria-label="关闭" data-page-node-id="niDpuOVKRUfbmnEUXWhcGJ">×</button>
 </div>
-<div class="kbd-overlay" id="kbdOverlay">
-  <div class="kbd-box">
-    <h3>⌨️ 键盘快捷键</h3>
-    <div class="kbd-list">
-      <div class="kbd-row"><span class="kbd-desc">快速添加任务</span><span class="kbd-key">N</span></div>
-      <div class="kbd-row"><span class="kbd-desc">回到今天</span><span class="kbd-key">T</span></div>
-      <div class="kbd-row"><span class="kbd-desc">切换时间线/列表</span><span class="kbd-key">L</span></div>
-      <div class="kbd-row"><span class="kbd-desc">切换深色/浅色</span><span class="kbd-key">D</span></div>
-      <div class="kbd-row"><span class="kbd-desc">查看快捷键</span><span class="kbd-key">?</span></div>
+<div class="kbd-overlay" id="kbdOverlay" data-page-node-id="3lFPQOrB6BTDp1hV7sFckn">
+  <div class="kbd-box" data-page-node-id="pBs10MbVzC7F6g53nqtjs6">
+    <h3 data-page-node-id="jHZag8Ce0GF0OKvucdjxNH">⌨️ 键盘快捷键</h3>
+    <div class="kbd-list" data-page-node-id="AnEzLdXwrUHAhhpajRNKQU">
+      <div class="kbd-row" data-page-node-id="5b5bDC4KAmLuMlv4GagEJI"><span class="kbd-desc" data-page-node-id="UgFRwGosfdwgjwZEFxExCj">快速添加任务</span><span class="kbd-key" data-page-node-id="11Dwin89AnCUYpOZCizj3E">N</span></div>
+      <div class="kbd-row" data-page-node-id="9sGhlIFnaAkpau69OvhCCV"><span class="kbd-desc" data-page-node-id="NDYVEIviPkjlRTxEl6mC57">回到今天</span><span class="kbd-key" data-page-node-id="Plmj8VES0uB6uv8vTK6DGV">T</span></div>
+      <div class="kbd-row" data-page-node-id="Z4aOq9IVWxjrUKIJGCQNcO"><span class="kbd-desc" data-page-node-id="C01C8Gp7UQUa7BxMAVZEDu">切换时间线/列表</span><span class="kbd-key" data-page-node-id="5GJK0ZCJbGmP8vSd0UMESl">L</span></div>
+      <div class="kbd-row" data-page-node-id="bJEynx5zKLvF75vWz19AFN"><span class="kbd-desc" data-page-node-id="0SBO6qe6NEyuvf5UlVkeGK">切换深色/浅色</span><span class="kbd-key" data-page-node-id="XJgyGGVytPLC15n89T8Wsj">D</span></div>
+      <div class="kbd-row" data-page-node-id="TqR5WFeSZWvywFS62QTvcW"><span class="kbd-desc" data-page-node-id="t3DyqgHWdCqVlpTHywCDiQ">查看快捷键</span><span class="kbd-key" data-page-node-id="CAPcjJjsTZOUicvxLRRMEl">?</span></div>
     </div>
-    <button class="kbd-close" id="kbdClose">知道了</button>
+    <button class="kbd-close" id="kbdClose" data-page-node-id="2jA1PGTPY2qVQcCgxc88qk">知道了</button>
   </div>
 </div>
 </body>
