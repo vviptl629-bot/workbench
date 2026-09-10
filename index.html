@@ -1912,7 +1912,7 @@ function items(arr){return '<div class="task-list">'+arr.map(t=>{
     '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'★':'☆')+'</div>'+
     (t.overdueMark
       ?'<div class="ovr" data-act="restore-ovr" data-id="'+t.id+'" title="从逾期恢复">↩</div>'
-      :'<div class="ovr" data-act="overdue" data-id="'+t.id+'" title="移入逾期"></div>')+
+      :'<div class="ovr" data-act="overdue" data-id="'+t.id+'" title="移入逾期"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>')+
     '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
     '<div class="del" data-act="del" data-id="'+t.id+'">×</div></div></div>';
 }).join('')+'</div>';}
