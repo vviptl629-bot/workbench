@@ -54,7 +54,6 @@
   :root[data-theme="dark"] .goal-now-input{background:var(--card-2);color:var(--error);border-color:var(--error)}
   :root[data-theme="dark"] .idea-input,
   :root[data-theme="dark"] .edit-modal textarea{background:var(--card-2)}
-  :root[data-theme="dark"] .imp-card{border-left-color:var(--warning)}
   :root[data-theme="dark"] .imp-title{color:var(--warning)}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -79,10 +78,10 @@
   .nav-item.active .count{background:var(--accent);color:#fff}
   .sidebar .spacer{flex:1}
   .side-btn{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;cursor:pointer;
-    color:var(--muted);font-size:13.5px;border:1.5px dashed var(--border);margin-top:6px;transition:.18s;}
-  .side-btn:hover{color:var(--text);border-color:var(--accent)}
-  .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
-  .store-status{font-size:11px;color:var(--muted);line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed var(--border);}
+    color:var(--muted);font-size:13.5px;margin-top:6px;transition:.18s;}
+  .side-btn:hover{color:var(--text);background:var(--card-2)}
+  .side-btn.on{color:var(--accent);background:var(--accent-soft)}
+  .store-status{font-size:11px;color:var(--muted);line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;}
   /* 卡片内时间/完成时间 */
   .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-done{display:inline-flex;align-items:center;gap:3px;color:var(--accent);font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
@@ -180,9 +179,9 @@
   .task .star:hover{color:var(--warning);opacity:1;background:var(--card-2)}
   .task .star.on{opacity:1}
   /* 首页重要任务卡 */
-  .imp-card{background:var(--card);border:1px solid var(--border);border-left:4px solid #c9a84c;border-radius:12px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .imp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
   .imp-title{font-size:12.5px;font-weight:700;color:#8b7020;margin-bottom:8px;letter-spacing:.3px}
-  .imp-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border)}
+  .imp-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
   .imp-item:last-child{border-bottom:none;padding-bottom:2px}
   .imp-item .check{width:19px;height:19px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:.15s}
   .imp-item .check:hover{border-color:var(--cat,var(--warning))}
@@ -193,7 +192,7 @@
   .nav-sub{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px 16px}
   .nav-item.sub{padding:8px 12px;font-size:13.5px}
   .subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px}
-  .subtab{border:1px solid var(--border);background:var(--card-2);color:var(--muted);padding:6px 13px;border-radius:20px;font-size:13px;cursor:pointer}
+  .subtab{background:var(--card-2);color:var(--muted);padding:6px 13px;border-radius:20px;font-size:13px;cursor:pointer}
   .subtab.active{background:var(--btn-primary);color:#fff;border-color:transparent}
   .subtab-cnt{font-size:11px;font-weight:700;opacity:.75}
   .subtab.active .subtab-cnt{opacity:1}
@@ -231,7 +230,7 @@
   .section-title{font-size:13px;color:var(--muted);font-weight:600;margin:4px 2px -4px;display:flex;align-items:center;gap:8px}
   .task-list{display:flex;flex-direction:column;gap:10px}
   .task{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px 18px;
-    display:flex;align-items:flex-start;gap:13px;box-shadow:var(--shadow);transition:.18s;border-left:4px solid var(--cat,#ccc);user-select:none;-webkit-user-select:none}
+    display:flex;align-items:flex-start;gap:13px;box-shadow:var(--shadow);transition:.18s;user-select:none;-webkit-user-select:none}
   .task:hover{border-color:var(--cat,#ccc);box-shadow:0 4px 16px rgba(43,84,216,.1)}
   .task .check{width:23px;height:23px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;margin-top:2px;
     cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;color:#fff;font-size:14px;}
@@ -247,7 +246,7 @@
   .task .del{margin-left:auto;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:8px;flex-shrink:0;opacity:.5;transition:.15s}
   .task .del:hover{color:var(--error);opacity:1;background:var(--card-2)}
   /* 回收站 */
-  .trash-bar{display:flex;align-items:center;gap:8px;margin:18px 0 6px;padding:12px 16px;border:1.5px dashed var(--border);border-radius:14px;background:var(--card-2);cursor:pointer;font-weight:600;color:var(--muted)}
+  .trash-bar{display:flex;align-items:center;gap:8px;margin:18px 0 6px;padding:12px 16px;border-radius:14px;background:var(--card-2);cursor:pointer;font-weight:600;color:var(--muted)}
   .trash-bar .tb-icon{font-size:16px}
   .trash-bar .tb-text{flex:1}
   .trash-bar .tb-count{background:var(--border);border-radius:20px;padding:1px 9px;font-size:12px}
@@ -393,7 +392,7 @@
   .stats-summary .sbox .l{font-size:11.5px;color:var(--muted);margin-top:4px}
   .stats-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
   .stats-card .card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px}
-  .ovr-item{background:var(--card-2);border:1px solid var(--border);border-left:3px solid var(--error);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+  .ovr-item{background:var(--card-2);border-left:3px solid var(--error);border-radius:10px;padding:10px 12px;margin-bottom:10px}
   .ovr-item.chronic{border-left-color:#b91c1c;background:rgba(244,63,94,.07)}
   .ovr-main{display:flex;align-items:center;gap:8px}
   .ovr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -570,7 +569,7 @@
     .goal-progress-line .danger{color:var(--error);font-weight:700}
     .goal-bar{height:6px;background:var(--card-2);border-radius:3px;overflow:hidden;margin-bottom:10px}
     .goal-bar-fg{height:100%;border-radius:3px;transition:width .25s}
-    .goal-pillbox{border-left:3px solid var(--accent);background:rgba(43,84,216,.06);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px;font-size:13px;line-height:1.7;color:var(--text)}
+    .goal-pillbox{background:var(--accent-soft);padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:13px;line-height:1.7;color:var(--text)}
     .goal-pillbox b{color:var(--accent);font-weight:700;margin-right:4px}
     .goal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
     .goal-actions .label{margin-right:auto}
