@@ -43,7 +43,7 @@
     --chip-trade:#2a1622; --chip-trade-text:#e09bc0;
     --btn-primary:linear-gradient(135deg,#5B7EF0,#2B54D8); --btn-primary-hover:linear-gradient(135deg,#4a6fe0,#1E40B0);
   }
-  :root[data-theme="dark"] body{color-scheme:dark}
+  :root[data-theme="dark"] body{color-scheme:dark;background:linear-gradient(180deg,#12121e 0%,#1a1a28 50%,#12121e 100%)}
   :root[data-theme="dark"] .goal-now-input{background:var(--card-2);color:#fca5a5;border-color:#ef4444}
   :root[data-theme="dark"] .idea-input,
   :root[data-theme="dark"] .edit-modal textarea{background:var(--card-2)}
@@ -75,7 +75,7 @@
     color:var(--muted);font-size:13.5px;border:1.5px dashed var(--border);margin-top:6px;transition:.18s;}
   .side-btn:hover{color:var(--text);border-color:var(--accent)}
   .side-btn.on{color:var(--accent);border-color:var(--accent);border-style:solid;background:var(--accent-soft)}
-  .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
+  .store-status{font-size:11px;color:var(--muted);line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed var(--border);}
   /* 卡片内时间/完成时间 */
   .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-done{display:inline-flex;align-items:center;gap:3px;color:var(--accent);font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
@@ -2440,16 +2440,19 @@ function showInstallHint(){
 function hideInstallHint(){const el=document.getElementById('installHint');if(el)el.style.display='none';}
 
 /* ---------- init ---------- */
+const ICON_SUN='<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';const ICON_MOON='<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg>';
 function applyTheme(){
   const t=lsGet('workbench_theme');
   if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
-  const btn=document.getElementById('btnTheme');if(btn)btn.textContent=(t==='dark')?'☀ 浅色模式':'<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式';
+  const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=(t==='dark')?'#12121e':'#2B54D8';
+  const btn=document.getElementById('btnTheme');if(btn)btn.innerHTML=(t==='dark')?ICON_SUN+' 浅色模式':ICON_MOON+' 深色模式';
 }
 function toggleTheme(){
   const dark=!document.documentElement.getAttribute('data-theme');
   if(dark)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
   lsSet('workbench_theme',dark?'dark':'light');
-  const btn=document.getElementById('btnTheme');if(btn)btn.textContent=dark?'☀ 浅色模式':'<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式';
+  const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=dark?'#12121e':'#2B54D8';
+  const btn=document.getElementById('btnTheme');if(btn)btn.innerHTML=dark?ICON_SUN+' 浅色模式':ICON_MOON+' 深色模式';
 }
 function hideBoot(){
 
