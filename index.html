@@ -185,7 +185,7 @@
   .imp-item:last-child{border-bottom:none;padding-bottom:2px}
   .imp-item .check{width:19px;height:19px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:.15s}
   .imp-item .check:hover{border-color:var(--cat,var(--warning))}
-  .imp-txt{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .imp-txt{flex:1;min-width:0;font-size:14px;font-weight:800;line-height:1.45;overflow-wrap:anywhere;word-break:break-word}
   .imp-chip{font-size:11px;font-weight:600;flex-shrink:0}
   .imp-item .star{cursor:pointer;font-size:13px;flex-shrink:0;padding:2px 4px;border-radius:6px}
   .imp-item .star:hover{background:var(--card-2)}
@@ -237,6 +237,7 @@
   .task.done .check{background:var(--cat,var(--accent));border-color:var(--cat,var(--accent))}
   .task .body{flex:1;min-width:0}
   .task .txt{font-size:15.5px;font-weight:600;word-break:break-word;line-height:1.5;color:var(--text)}
+  .task .txt.imp{font-weight:800}
   .task.done .txt{text-decoration:line-through;color:var(--muted)}
   .task .meta{display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:nowrap}
   .chip{font-size:11.5px;padding:3px 11px;border-radius:20px;background:var(--cat-soft,var(--chip-work));color:var(--cat,var(--chip-work-text));font-weight:600;white-space:nowrap;flex-shrink:0}
@@ -1858,7 +1859,7 @@ function renderTimeline(isTodayMode,focusDate){
         '<div class="tl-rail"></div><div class="tl-node"></div>'+
         '<div class="task tl-card'+(isDoneToday(t)?' done':'')+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
           '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
-          '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+
+          '<div class="body"><div class="txt'+(t.imp?' imp':'')+'">'+escapeHtml(t.text)+'</div>'+
             '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">↻ '+repLabel(t.repeat)+'</span>':'')+(t.end?' <span class="ovw-time">截止 '+t.end+'</span>':'')+(doneAtOf(t)?' <span class="ovw-done">✓ '+fmtHM(doneAtOf(t))+'</span>':'')+'</div></div>'+
           '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'★':'☆')+'</div>'+
             '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
@@ -1909,7 +1910,7 @@ function items(arr){return '<div class="task-list">'+arr.map(t=>{
   return '<div class="task '+(t.done?'done':'')+'" data-id="'+t.id+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
     '<div class="drag-handle" title="长按拖拽排序">⋮</div>'+
     '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
-    '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+(t.note?'<div class="note-ind" data-act="edit" data-id="'+t.id+'"><span class="note-icon">✎</span>'+escapeHtml(t.note)+'</div>':'')+'<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">↻ '+repLabel(t.repeat)+'</span>':'')+tmRange+doneSpan+'</div></div>'+
+    '<div class="body"><div class="txt'+(t.imp?' imp':'')+'">'+escapeHtml(t.text)+'</div>'+(t.note?'<div class="note-ind" data-act="edit" data-id="'+t.id+'"><span class="note-icon">✎</span>'+escapeHtml(t.note)+'</div>':'')+'<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">↻ '+repLabel(t.repeat)+'</span>':'')+tmRange+doneSpan+'</div></div>'+
     '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'★':'☆')+'</div>'+
     (t.overdueMark
       ?'<div class="ovr" data-act="restore-ovr" data-id="'+t.id+'" title="从逾期恢复">↩</div>'
