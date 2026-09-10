@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" data-page-node-id="8gXoqAZkRYxnHCaWBuoTTu">
 <meta http-equiv="Expires" content="0" data-page-node-id="P7VM6gukXefEjE8J9iEr7H">
 <title>我的工作台</title>
-<meta name="theme-color" content="#3BAFA0" data-page-node-id="PiCeBWhbuFG7nJxLKstRHk">
+<meta name="theme-color" content="#2B54D8" data-page-node-id="PiCeBWhbuFG7nJxLKstRHk">
 <meta name="apple-mobile-web-app-capable" content="yes" data-page-node-id="qp46GP7XGxvFlRamf5rA8l">
 <meta name="mobile-web-app-capable" content="yes" data-page-node-id="D6aMBgQ0X7EC3ef45MqNKY">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="DxgNWwK2m9JjNVzsuwktRJ">
@@ -16,28 +16,32 @@
 <link rel="apple-touch-icon" href="./icon-512.png" data-page-node-id="1vjVcCM0WKOYxyRGb7eGUv">
 <style>
   :root{
-    --bg:#f5faf9; --card:#ffffff; --card-2:#f0f6f4; --text:#1a2e28;
-    --muted:#8e8ea0; --border:#e8eaf0; --accent:#3BAFA0; --accent-soft:#E2F4F1;
-    --shadow:0 1px 3px rgba(59,175,160,.05),0 8px 24px rgba(59,175,160,.06);
-    --chip-work:#e8f0f6; --chip-work-text:#4a6a8c;
-    --chip-life:#e8f6f0; --chip-life-text:#4a8c6a;
-    --chip-study:#f0e8f6; --chip-study-text:#7a5a9c;
-    --chip-coffee:#f6f0e8; --chip-coffee-text:#8b6940;
-    --chip-waishi:#e8ecf6; --chip-waishi-text:#5a6a8c;
-    --chip-trade:#f6e8e8; --chip-trade-text:#8b5050;
-    --btn-primary:linear-gradient(135deg,#3BAFA0,#2A9D8F); --btn-primary-hover:linear-gradient(135deg,#2A9D8F,#248E80);
+    --bg:#f4f6f9; --card:#ffffff; --card-2:#f5f7fa; --text:#11151C;
+    --muted:#6B7280; --border:#E7E9EE; --accent:#2B54D8; --accent-soft:#EAEFFC;
+    --accent-strong:#1E40B0; --accent-tint:#EAEFFC;
+    --shadow:0 1px 3px rgba(16,24,40,.05),0 8px 24px rgba(16,24,40,.04);
+    --chip-temp:#FBF3E2; --chip-temp-text:#B9801F;
+    --chip-work:#EAEFFC; --chip-work-text:#2B54D8;
+    --chip-life:#E2F4EC; --chip-life-text:#138A5E;
+    --chip-study:#ECEAF8; --chip-study-text:#5B53C9;
+    --chip-coffee:#F6ECDD; --chip-coffee-text:#9A6326;
+    --chip-waishi:#EAEFFC; --chip-waishi-text:#2B54D8;
+    --chip-trade:#FBEAF2; --chip-trade-text:#B23B7A;
+    --btn-primary:linear-gradient(135deg,#2B54D8,#1E40B0); --btn-primary-hover:linear-gradient(135deg,#1E40B0,#15349a);
   }
   :root[data-theme="dark"]{
     --bg:#12121e; --card:#1a1a28; --card-2:#222234; --text:#e8e8f0;
-    --muted:#8a8a9e; --border:#2a2a3e; --accent:#4DB6AC; --accent-soft:#1A332E;
+    --muted:#8a8a9e; --border:#2a2a3e; --accent:#5B7EF0; --accent-soft:#1B2A52;
+    --accent-strong:#7B97F4; --accent-tint:#1B2A52;
     --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
-    --chip-work:#1a2235; --chip-work-text:#8ab8e0;
-    --chip-life:#1a2e22; --chip-life-text:#7ebf8f;
-    --chip-study:#2a1e32; --chip-study-text:#b08fcf;
-    --chip-coffee:#2e241a; --chip-coffee-text:#d4a573;
-    --chip-waishi:#1a1e2e; --chip-waishi-text:#8f9fd0;
-    --chip-trade:#2e1a1a; --chip-trade-text:#d08080;
-    --btn-primary:linear-gradient(135deg,#4DB6AC,#2A9D8F); --btn-primary-hover:linear-gradient(135deg,#3BAFA0,#248E80);
+    --chip-temp:#2a2013; --chip-temp-text:#d7b483;
+    --chip-work:#1a2240; --chip-work-text:#9db4f0;
+    --chip-life:#13281f; --chip-life-text:#7ec9a3;
+    --chip-study:#211a33; --chip-study-text:#b3a6ef;
+    --chip-coffee:#2a2013; --chip-coffee-text:#d7b483;
+    --chip-waishi:#1a2240; --chip-waishi-text:#9db4f0;
+    --chip-trade:#2a1622; --chip-trade-text:#e09bc0;
+    --btn-primary:linear-gradient(135deg,#5B7EF0,#2B54D8); --btn-primary-hover:linear-gradient(135deg,#4a6fe0,#1E40B0);
   }
   :root[data-theme="dark"] body{color-scheme:dark}
   :root[data-theme="dark"] .goal-now-input{background:var(--card-2);color:#fca5a5;border-color:#ef4444}
@@ -49,7 +53,7 @@
   html,body{height:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
-    background:linear-gradient(180deg,#ffffff 0%,#f0f7f5 40%,#e8f4f2 100%);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:linear-gradient(180deg,#ffffff 0%,#f4f7fb 45%,#eef2f8 100%);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
   }
   .app{display:flex;min-height:100vh;max-width:1200px;margin:0 auto}
 
@@ -57,7 +61,7 @@
   .sidebar{width:230px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);
     padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .brand{display:flex;align-items:center;gap:10px;padding:6px 10px 14px;font-weight:700;font-size:18px}
-  .brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#3BAFA0,#5DC4B6);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#5b7ef0);display:flex;align-items:center;justify-content:center;font-size:16px}
   .nav-label{font-size:11px;color:var(--muted);padding:14px 12px 4px;letter-spacing:.08em;text-transform:uppercase}
   .nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;cursor:pointer;
     color:var(--text);font-size:14.5px;font-weight:500;transition:.18s;user-select:none;position:relative;}
@@ -74,17 +78,17 @@
   .store-status{font-size:11px;color:#94a3b8;line-height:1.5;padding:8px 10px;margin-top:4px;word-break:break-all;border-top:1px dashed #e2e8f0;}
   /* 卡片内时间/完成时间 */
   .ovw-time{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-left:6px;font-variant-numeric:tabular-nums;}
-  .ovw-done{display:inline-flex;align-items:center;gap:3px;color:#3BAFA0;font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
+  .ovw-done{display:inline-flex;align-items:center;gap:3px;color:var(--accent);font-size:11px;margin-left:6px;font-variant-numeric:tabular-nums;}
   .ovw-head{font-size:14px;font-weight:700;color:var(--text);margin:2px 2px 12px;}
   /* 全日总览：状态统计 + 折叠已完成 */
   .ovw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 2px 10px}
-  .ovw-stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
+  .ovw-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
   .ovw-stat .n{display:block;font-size:24px;font-weight:800;color:var(--text);line-height:1.1;font-variant-numeric:tabular-nums}
-  .ovw-stat .n.r{color:#3BAFA0}
+  .ovw-stat .n.r{color:var(--accent)}
   .ovw-stat .n.bad{color:#f43f5e}
   .ovw-stat .l{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
   .ovw-progress{height:8px;background:var(--card-2);border-radius:8px;overflow:hidden;margin:0 2px}
-  .ovw-progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#5DC4B6);border-radius:8px;transition:width .3s}
+  .ovw-progress .bar{height:100%;background:linear-gradient(90deg,var(--accent),#5b7ef0);border-radius:8px;transition:width .3s}
   .ovw-prog-text{font-size:12px;color:var(--muted);margin:6px 2px 14px}
   .ovw-group{margin-top:6px}
   .ovw-group .section-title{margin:16px 2px 8px}
@@ -113,7 +117,7 @@
 
   /* 时间选择器弹窗 */
   #timePickerModal{z-index:90}
-  #timePickerModal .tp-body{background:var(--card);border-radius:22px;padding:26px 24px 22px;width:92%;max-width:340px;box-shadow:0 24px 64px rgba(59,175,160,.15);border:1px solid var(--border);position:relative}
+  #timePickerModal .tp-body{background:var(--card);border-radius:22px;padding:26px 24px 22px;width:92%;max-width:340px;box-shadow:0 24px 64px rgba(43,84,216,.15);border:1px solid var(--border);position:relative}
   .tp-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:18px;text-align:center}
   .tp-digits{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px}
   .tp-digit{width:72px;height:56px;border:2px solid var(--border);border-radius:14px;background:var(--bg);color:var(--text);font-size:28px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;outline:none;transition:.15s;font-family:inherit;
@@ -150,7 +154,7 @@
   .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
 
   .ring{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);
-    border-radius:16px;padding:16px 20px;box-shadow:var(--shadow)}
+    border-radius:12px;padding:16px 20px;box-shadow:var(--shadow)}
   .ring svg{flex-shrink:0}
   .ring .stats{display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-start}
   .stat{cursor:default}
@@ -169,7 +173,7 @@
   .task .star:hover{color:#f59e0b;opacity:1;background:var(--card-2)}
   .task .star.on{opacity:1}
   /* 首页重要任务卡 */
-  .imp-card{background:var(--card);border:1px solid var(--border);border-left:4px solid #c9a84c;border-radius:16px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .imp-card{background:var(--card);border:1px solid var(--border);border-left:4px solid #c9a84c;border-radius:12px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
   .imp-title{font-size:12.5px;font-weight:700;color:#8b7020;margin-bottom:8px;letter-spacing:.3px}
   .imp-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border)}
   .imp-item:last-child{border-bottom:none;padding-bottom:2px}
@@ -188,10 +192,10 @@
   .subtab.active .subtab-cnt{opacity:1}
   .ring .stat .num{font-size:22px;font-weight:700}
   .ring .stat .lbl{font-size:12px;color:var(--muted)}
-  .ring .stat .num.done{color:#3BAFA0}
+  .ring .stat .num.done{color:var(--accent)}
   .ring .stat .num.over{color:#f43f5e}
 
-  .addbox{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+  .addbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
   .addbox .row1{display:flex;gap:10px}
   .addbox input[type=text]{flex:1;border:1.5px solid var(--border);background:var(--card-2);color:var(--text);
     border-radius:14px;padding:13px 16px;font-size:15.5px;outline:none;transition:.18s;}
@@ -219,12 +223,12 @@
 
   .section-title{font-size:13px;color:var(--muted);font-weight:600;margin:4px 2px -4px;display:flex;align-items:center;gap:8px}
   .task-list{display:flex;flex-direction:column;gap:10px}
-  .task{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:15px 18px;
+  .task{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px 18px;
     display:flex;align-items:flex-start;gap:13px;box-shadow:var(--shadow);transition:.18s;border-left:4px solid var(--cat,#ccc);user-select:none;-webkit-user-select:none}
-  .task:hover{border-color:var(--cat,#ccc);box-shadow:0 4px 16px rgba(59,175,160,.1)}
+  .task:hover{border-color:var(--cat,#ccc);box-shadow:0 4px 16px rgba(43,84,216,.1)}
   .task .check{width:23px;height:23px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;margin-top:2px;
     cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;color:#fff;font-size:14px;}
-  .task.done .check{background:var(--cat,#3BAFA0);border-color:var(--cat,#3BAFA0)}
+  .task.done .check{background:var(--cat,var(--accent));border-color:var(--cat,var(--accent))}
   .task .body{flex:1;min-width:0}
   .task .txt{font-size:15.5px;font-weight:600;word-break:break-word;line-height:1.5;color:var(--text)}
   .task.done .txt{text-decoration:line-through;color:var(--muted)}
@@ -276,7 +280,7 @@
   .tl-card{flex:1;margin-left:14px}
   .tl-untimed{margin-top:4px}
   /* 编辑弹窗 */
-  .edit-modal{background:var(--card);border-radius:18px;padding:22px 22px 18px;width:92%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--border)}
+  .edit-modal{background:var(--card);border-radius:14px;padding:22px 22px 18px;width:92%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--border)}
   .edit-modal h3{margin:0 0 14px;font-size:17px}
   .sync-tip{font-size:12.5px;color:var(--muted);line-height:1.6;margin:-4px 0 14px}
   .sync-tip b{color:var(--text)}
@@ -286,7 +290,7 @@
   .btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:10px;font-size:14px;cursor:pointer}
   .btn-ghost:active{transform:scale(.97)}
   .sync-status{margin-top:12px;font-size:12.5px;min-height:16px;color:var(--muted)}
-  .sync-status.ok{color:#3BAFA0}
+  .sync-status.ok{color:var(--accent)}
   .sync-status.err{color:#c06060}
   .sync-gist{font-size:12px;color:var(--muted);margin-top:10px;word-break:break-all;line-height:1.6}
   .sync-gist a{color:var(--accent)}
@@ -346,7 +350,7 @@
   .done-bar:hover{background:var(--card-2)}
   .done-bar .db-icon{font-size:15px}
   .done-bar .db-text{font-size:13.5px;color:var(--muted);font-weight:600}
-  .done-bar .db-count{background:#3BAFA0;color:#fff;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px}
+  .done-bar .db-count{background:var(--accent);color:#fff;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px}
   .done-bar .db-arrow{margin-left:auto;font-size:12px;color:var(--muted);transition:.2s}
   .done-bar .db-arrow.open{transform:rotate(180deg)}
   /* overdue tasks collapse */
@@ -374,13 +378,13 @@
   .stats-summary .sbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
   .stats-summary .sbox .n{font-size:24px;font-weight:800;color:var(--text);line-height:1.1}
   .stats-summary .sbox .n.g{color:var(--accent)}
-  .stats-summary .sbox .n.r{color:#3BAFA0}
+  .stats-summary .sbox .n.r{color:var(--accent)}
   .stats-summary .sbox .n.bad{color:#f43f5e}
   .stats-summary .sbox.clickable{cursor:pointer;transition:transform .15s,box-shadow .15s}
   .stats-summary .sbox.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
   .stats-summary .sbox.clickable:active{transform:translateY(0)}
   .stats-summary .sbox .l{font-size:11.5px;color:var(--muted);margin-top:4px}
-  .stats-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .stats-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
   .stats-card .card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px}
   .ovr-item{background:var(--card-2);border:1px solid var(--border);border-left:3px solid #f43f5e;border-radius:10px;padding:10px 12px;margin-bottom:10px}
   .ovr-item.chronic{border-left-color:#b91c1c;background:rgba(244,63,94,.07)}
@@ -393,7 +397,7 @@
   .ovr-item.merged{border-left-color:#dc2626;border-left-width:4px}
   .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:6px}
   .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
-  .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#5DC4B6);border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
+  .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#5b7ef0);border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
   .bar-col.zero .bar{background:var(--border)}
   .bar-col .bv{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
   .bar-col .bl{font-size:10px;color:var(--muted);margin-top:6px;white-space:nowrap;line-height:1.2}
@@ -414,7 +418,7 @@
   .analysis li{font-size:13.5px;color:var(--text);line-height:1.7;margin-bottom:8px}
   .analysis li:last-child{margin-bottom:0}
   .analysis .hl{color:var(--accent);font-weight:700}
-  .analysis .good{color:#3BAFA0;font-weight:700}
+  .analysis .good{color:var(--accent);font-weight:700}
   .analysis .bad{color:#f43f5e;font-weight:700}
   @media(max-width:480px){
     .stats-summary{grid-template-columns:repeat(2,1fr)}
@@ -431,7 +435,7 @@
   @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
   .celebrate h2{font-size:22px;font-weight:800;margin-bottom:6px}
   .celebrate p{color:var(--muted);font-size:14px;margin-bottom:22px}
-  .celebrate .btn-ok{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#3BAFA0,#2A9D8F);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
+  .celebrate .btn-ok{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent),#1E40B0);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
   .celebrate .btn-ok:hover{filter:brightness(1.08)}
   .celebrate .btn-ok:active{transform:scale(.96)}
   .menu-btn{display:none}
@@ -447,7 +451,7 @@
       border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;}
     .bn{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);
       padding:4px 6px;border-radius:10px;cursor:pointer;flex:1;position:relative}
-    .bn .ic{font-size:19px}
+    .bn .ic{width:21px;height:21px}
     .bn.active{color:var(--accent);background:var(--accent-soft);border-radius:12px}
     #bTodayNum{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.2}
     .bn.active #bTodayNum{color:var(--accent)}
@@ -469,7 +473,7 @@
     .addbox input[type=text],.addbox select,.addbox input[type=date],.addbox input[type=time]{font-size:16px;padding:12px 12px}
     .btn-add{font-size:16px;padding:12px 16px}
     .bn{font-size:12.5px}
-    .bn .ic{font-size:22px}
+    .bn .ic{width:22px;height:22px}
     .bn .count{font-size:10px}
     .daynav button,.daynav input{font-size:14px;padding:9px 10px}
     #bTodayNum{font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.2}
@@ -488,7 +492,7 @@
     .tp-preset{padding:8px 12px;font-size:13px;}
     .time-trigger{padding:10px 12px;font-size:15px;}
     /* 编辑弹窗移动端 */
-    .edit-modal{border-radius:18px;padding:20px 18px 16px;width:94%;}
+    .edit-modal{border-radius:14px;padding:20px 18px 16px;width:94%;}
     .edit-modal h3{font-size:17px;margin-bottom:12px;}
   }
 
@@ -535,7 +539,7 @@
     .idea-edit,.idea-del{background:var(--card-2);border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer}
     .idea-del:hover{color:#ef4444;border-color:#ef4444}
 .idea-item.done .idea-text{text-decoration:line-through;opacity:.55}
-  .idea-done{background:rgba(59,175,160,.12);border:1px solid var(--ok,#3BAFA0);color:var(--ok,#3BAFA0);border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer}
+  .idea-done{background:rgba(43,84,216,.12);border:1px solid var(--ok,var(--accent));color:var(--ok,var(--accent));border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer}
   .idea-restore{background:rgba(59,130,246,.12);border:1px solid var(--accent);color:var(--accent);border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer}
     @media(max-width:760px){
       textarea.idea-input{min-height:110px}
@@ -559,8 +563,8 @@
     .goal-progress-line .danger{color:#dc2626;font-weight:700}
     .goal-bar{height:6px;background:var(--card-2);border-radius:3px;overflow:hidden;margin-bottom:10px}
     .goal-bar-fg{height:100%;border-radius:3px;transition:width .25s}
-    .goal-pillbox{border-left:3px solid var(--accent);background:rgba(139,92,246,.06);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px;font-size:13px;line-height:1.7;color:var(--text)}
-    .goal-pillbox b{color:#8b5cf6;font-weight:700;margin-right:4px}
+    .goal-pillbox{border-left:3px solid var(--accent);background:rgba(43,84,216,.06);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px;font-size:13px;line-height:1.7;color:var(--text)}
+    .goal-pillbox b{color:var(--accent);font-weight:700;margin-right:4px}
     .goal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
     .goal-actions .label{margin-right:auto}
     .goal-now{cursor:pointer;background:#ef4444;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700}
@@ -583,15 +587,15 @@
     .gcal-cell.today{border-color:var(--accent);font-weight:700;color:var(--text)}
     .gcal-cell .gcal-num{font-size:12.5px;font-weight:600}
     .gcal-cell .gcal-v{font-size:10.5px;margin-top:2px;color:inherit}
-    .gcal-cell.lvl1{background:#ede9fe;color:#7c3aed}
-    .gcal-cell.lvl2{background:#ddd6fe;color:#6d28d9}
-    .gcal-cell.lvl3{background:#c4b5fd;color:#5b21b6}
-    .gcal-cell.lvl4{background:#a78bfa;color:#fff}
+    .gcal-cell.lvl1{background:#e8edfd;color:#3a5bd0}
+    .gcal-cell.lvl2{background:#d3ddfb;color:#2B54D8}
+    .gcal-cell.lvl3{background:#b9c8f8;color:#1E40B0}
+    .gcal-cell.lvl4{background:#5b7ef0;color:#fff}
     .gcal-legend{font-size:11.5px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
     .gcal-legend .lg{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 4px 0 8px;vertical-align:middle}
     .gfm-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
     .gfm-mask.show{display:flex}
-    .gfm-box{background:var(--card);border-radius:16px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:22px 22px 18px;box-sizing:border-box}
+    .gfm-box{background:var(--card);border-radius:12px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:22px 22px 18px;box-sizing:border-box}
     .gfm-title{font-weight:700;font-size:18px;margin-bottom:14px}
     .gfm-field{margin-bottom:12px}
     .gfm-label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
@@ -603,7 +607,7 @@
     .gfm-color{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s}
     .gfm-color.on{border-color:#000}
     .gfm-actions{display:flex;gap:10px;margin-top:18px}
-    .gfm-primary{flex:1;background:#8b5cf6;color:#fff;border:none;border-radius:9px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer}
+    .gfm-primary{flex:1;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer}
     .gfm-cancel{background:var(--card-2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:11px 18px;font-size:14px;cursor:pointer}
     @media(max-width:760px){
       .goal-add-btn{padding:14px}
@@ -637,7 +641,7 @@
   /* ---------- 键盘快捷键面板 ---------- */
   .kbd-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:85;align-items:center;justify-content:center}
   .kbd-overlay.show{display:flex}
-  .kbd-box{background:var(--card);border-radius:18px;padding:24px 24px 20px;width:92%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--border)}
+  .kbd-box{background:var(--card);border-radius:14px;padding:24px 24px 20px;width:92%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--border)}
   .kbd-box h3{margin:0 0 16px;font-size:17px}
   .kbd-list{display:flex;flex-direction:column;gap:10px}
   .kbd-row{display:flex;align-items:center;justify-content:space-between;font-size:14px}
@@ -649,7 +653,7 @@
   .trend-row .trend-label{flex:1;color:var(--muted)}
   .trend-row .trend-val{font-weight:700;font-size:16px}
   .trend-row .trend-arrow{font-size:18px}
-  .trend-row.up .trend-val{color:#3BAFA0}
+  .trend-row.up .trend-val{color:var(--accent)}
   .trend-row.down .trend-val{color:#f43f5e}
   /* ---------- 存储预警 ---------- */
   .store-warn{color:#f59e0b;font-weight:600}
@@ -657,21 +661,33 @@
 #bootScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .55s ease,visibility .55s ease;opacity:1}
 #bootScreen.boot-hide{opacity:0;visibility:hidden;pointer-events:none}
 .boot-card{display:flex;flex-direction:column;align-items:center;animation:bootIn .6s cubic-bezier(.2,.8,.2,1)}
-.boot-ring{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,var(--accent),#a78bfa);box-shadow:0 10px 30px rgba(99,102,241,.35);animation:bootPulse 1.6s ease-in-out infinite}
-.boot-title{margin-top:22px;font-size:24px;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--accent),#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.boot-ring{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,var(--accent),#5b7ef0);box-shadow:0 10px 30px rgba(99,102,241,.35);animation:bootPulse 1.6s ease-in-out infinite}
+.boot-title{margin-top:22px;font-size:24px;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--accent),#5b7ef0);-webkit-background-clip:text;background-clip:text;color:transparent}
 .boot-sub{margin-top:6px;font-size:13px;color:var(--muted)}
 .boot-bar{margin-top:26px;width:180px;height:4px;border-radius:2px;background:var(--card-2);overflow:hidden}
-.boot-bar i{display:block;height:100%;width:40%;border-radius:2px;background:linear-gradient(90deg,var(--accent),#a78bfa);animation:bootLoad 1.1s ease-in-out infinite}
+.boot-bar i{display:block;height:100%;width:40%;border-radius:2px;background:linear-gradient(90deg,var(--accent),#5b7ef0);animation:bootLoad 1.1s ease-in-out infinite}
 @keyframes bootIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes bootPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @keyframes bootLoad{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+  /* ---- 图标（统一描边 SVG） ---- */
+  .ic-svg{width:18px;height:18px;flex-shrink:0;display:inline-block;vertical-align:middle}
+  .nav-item>svg{width:18px;height:18px;flex-shrink:0;color:var(--muted)}
+  .nav-item.active>svg{color:var(--accent)}
+  .side-btn svg{width:16px;height:16px;flex-shrink:0}
+  .brand .logo{display:flex;align-items:center;justify-content:center}
+  .brand .logo svg{width:18px;height:18px}
+  .menu-btn svg{width:20px;height:20px}
+  .dn-btn.tl svg{width:16px;height:16px}
+  .trophy svg{width:52px;height:52px}
+  .brand .logo{font-size:0}
 </style>
 </head>
 <body style="background:#f4f6fb" data-page-node-id="fcgMQxcTJeTthh8V1gF9EE">
 <script>{try{const t=localStorage.getItem('workbench_theme');if(t==='dark')document.body.style.background='#0f172a';}catch(e){}}</script>
 <div id="bootScreen" data-page-node-id="A1vECzBE1pEt73WFM2oeLD">
   <div class="boot-card" data-page-node-id="pVCPdhYhvp4XUKQ3pGNiN3">
-    <div class="boot-ring" data-page-node-id="hRQNHi9cDY7xc8be1Y5JQo">🗂️</div>
+    <div class="boot-ring" data-page-node-id="hRQNHi9cDY7xc8be1Y5JQo"><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg></div>
     <div class="boot-title" data-page-node-id="eXvr4gfFCH1o94DL9IDVpH">我的工作台</div>
     <div class="boot-sub" data-page-node-id="ktIOkH8msAjWcxzsLwL1FQ">个人效率中心</div>
     <div class="boot-bar" data-page-node-id="Y9ECiHuw59VGZGuaIWywUx"><i data-page-node-id="nAhO7qourDRLdtl9xDxEEt"></i></div>
@@ -679,38 +695,38 @@
 </div>
 <div class="app" data-page-node-id="37lWfoh1xNTl6NmFeae1Mw">
   <aside class="sidebar" id="sidebar" data-page-node-id="OkAh7bjS1eOP60F8WpGsTE">
-    <div class="brand" data-page-node-id="OA9U1F4x0RXNGwxzKGxbZh"><span class="logo" data-page-node-id="NnXH2Fh0KQt6V4acRXkiKc">🗂️</span> 我的工作台</div>
+    <div class="brand" data-page-node-id="OA9U1F4x0RXNGwxzKGxbZh"><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg> 我的工作台</div>
     <div class="nav-label" data-page-node-id="nkBgDrPTTpH0QhlWhoctUF">视图</div>
-    <div class="nav-item active" data-view="today" data-page-node-id="leLjlRdVKEvxr5K7jmBrUO"><span data-page-node-id="VMG11K5NfWeF77c69BbX0A">📅</span> 今日待办 <span class="count" id="c-today" data-page-node-id="96MvcR9X3atdpJXdSngpGO">0</span></div>
+    <div class="nav-item active" data-view="today" data-page-node-id="leLjlRdVKEvxr5K7jmBrUO"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg> 今日待办 <span class="count" id="c-today" data-page-node-id="96MvcR9X3atdpJXdSngpGO">0</span></div>
     <div class="nav-item" data-view="overview" data-page-node-id="gIaGHYALGduNWFBryNHpMA">全日总览</div>
     <div class="nav-label" data-page-node-id="Ol8ispSFoh4k4433NwlIwj">任务分类</div>
-    <div class="nav-item" data-view="temp" data-page-node-id="za5cZQDvhlonp5k6dhJ7Ch"><span class="dot" style="background:#f59e0b" data-page-node-id="J7pQDIjSMOBBuvb6vqQJjw"></span> 临时任务 <span class="count" id="c-temp" data-page-node-id="gR5OZnA3McBPDAT9AiSKRs">0</span></div>
-    <div class="nav-item" data-view="work" data-page-node-id="DrmwjUGGe7LrXFrQh7U9QV"><span class="dot" style="background:#3b82f6" data-page-node-id="TsEZB6WwHwCfiFk1B4HJs3"></span> 工作 <span class="count" id="c-work" data-page-node-id="f2erfqvRUiJ0HJ8jpCiLpE">0</span></div>
+    <div class="nav-item" data-view="temp" data-page-node-id="za5cZQDvhlonp5k6dhJ7Ch"><span class="dot" style="background:#B9801F" data-page-node-id="J7pQDIjSMOBBuvb6vqQJjw"></span> 临时任务 <span class="count" id="c-temp" data-page-node-id="gR5OZnA3McBPDAT9AiSKRs">0</span></div>
+    <div class="nav-item" data-view="work" data-page-node-id="DrmwjUGGe7LrXFrQh7U9QV"><span class="dot" style="background:#2B54D8" data-page-node-id="TsEZB6WwHwCfiFk1B4HJs3"></span> 工作 <span class="count" id="c-work" data-page-node-id="f2erfqvRUiJ0HJ8jpCiLpE">0</span></div>
     <div class="nav-sub" data-page-node-id="b5Dgm4VulSz9NoTa5hqvDw">
-      <div class="nav-item sub" data-view="waishi" data-page-node-id="Drl8keeNJemug5aAh5qDlH"><span class="dot" style="background:#3b82f6" data-page-node-id="Iy2DocSHG9Gk3CheJdBU6T"></span> 外事办 <span class="count" id="c-waishi" data-page-node-id="ALnZFWVL6puzqlDUXB8KyW">0</span></div>
-      <div class="nav-item sub" data-view="coffee" data-page-node-id="JFzpeUSPF2Dzke7JtmwidJ"><span class="dot" style="background:#b45309" data-page-node-id="CHqi2AWNwTGBYb2awDF7nf"></span> 咖啡店 <span class="count" id="c-coffee" data-page-node-id="ZEjQGLT0DtELQOLIjyHNqO">0</span></div>
-      <div class="nav-item sub" data-view="trade" data-page-node-id="CEhTzKvZvYw4O8WrrjDBl1"><span class="dot" style="background:#db2777" data-page-node-id="SFB3fcPFN8r1f8bXvgXLnc"></span> 自营交易 <span class="count" id="c-trade" data-page-node-id="K2vnWvpOojaYk1ddwZ1LLd">0</span></div>
+      <div class="nav-item sub" data-view="waishi" data-page-node-id="Drl8keeNJemug5aAh5qDlH"><span class="dot" style="background:#2B54D8" data-page-node-id="Iy2DocSHG9Gk3CheJdBU6T"></span> 外事办 <span class="count" id="c-waishi" data-page-node-id="ALnZFWVL6puzqlDUXB8KyW">0</span></div>
+      <div class="nav-item sub" data-view="coffee" data-page-node-id="JFzpeUSPF2Dzke7JtmwidJ"><span class="dot" style="background:#9A6326" data-page-node-id="CHqi2AWNwTGBYb2awDF7nf"></span> 咖啡店 <span class="count" id="c-coffee" data-page-node-id="ZEjQGLT0DtELQOLIjyHNqO">0</span></div>
+      <div class="nav-item sub" data-view="trade" data-page-node-id="CEhTzKvZvYw4O8WrrjDBl1"><span class="dot" style="background:#B23B7A" data-page-node-id="SFB3fcPFN8r1f8bXvgXLnc"></span> 自营交易 <span class="count" id="c-trade" data-page-node-id="K2vnWvpOojaYk1ddwZ1LLd">0</span></div>
     </div>
-    <div class="nav-item" data-view="study" data-page-node-id="WkQR2h9LRCXUmMFukpfCCH"><span class="dot" style="background:#8b5cf6" data-page-node-id="41TPetex2TH3xTJ4uEgHuf"></span> 学习 <span class="count" id="c-study" data-page-node-id="SfLXRLBHsZrvwqL0yhC0NR">0</span></div>
-    <div class="nav-item" data-view="life" data-page-node-id="nIg4xINTSywcE41FFCSBaj"><span class="dot" style="background:#10b981" data-page-node-id="pxLuDqkmdd8QOmYW0VhWww"></span> 生活 <span class="count" id="c-life" data-page-node-id="gTdXrxD2nriONHFMj6DGfE">0</span></div>
-    <div class="side-btn" id="btnTpl" data-page-node-id="ywRA9jKJPdCIWWkOzrrr0T">🔁 例行任务</div>
-    <div class="side-btn" id="btnTheme" data-page-node-id="89NwoxtHzlVIU8Ac3QixfQ">🌙 深色模式</div>
+    <div class="nav-item" data-view="study" data-page-node-id="WkQR2h9LRCXUmMFukpfCCH"><span class="dot" style="background:#5B53C9" data-page-node-id="41TPetex2TH3xTJ4uEgHuf"></span> 学习 <span class="count" id="c-study" data-page-node-id="SfLXRLBHsZrvwqL0yhC0NR">0</span></div>
+    <div class="nav-item" data-view="life" data-page-node-id="nIg4xINTSywcE41FFCSBaj"><span class="dot" style="background:#138A5E" data-page-node-id="pxLuDqkmdd8QOmYW0VhWww"></span> 生活 <span class="count" id="c-life" data-page-node-id="gTdXrxD2nriONHFMj6DGfE">0</span></div>
+    <div class="side-btn" id="btnTpl" data-page-node-id="ywRA9jKJPdCIWWkOzrrr0T"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12a8 8 0 0 1 13.5-5.5L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.5 5.5L4 16M4 20v-4h4"/></svg> 例行任务</div>
+    <div class="side-btn" id="btnTheme" data-page-node-id="89NwoxtHzlVIU8Ac3QixfQ"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式</div>
     <div class="nav-label" data-page-node-id="Cwqrr6MaBzt6MW3Zy6kHhw">分析</div>
-    <div class="nav-item" data-view="stats" data-page-node-id="AFgds7qLx5yBj4freHauyK"><span data-page-node-id="V7w9YI9lgtivvrQVPtmwFu">📊</span> 统计分析</div>
+    <div class="nav-item" data-view="stats" data-page-node-id="AFgds7qLx5yBj4freHauyK"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg> 统计分析</div>
     <div class="spacer" data-page-node-id="WE1okqEIvb50hNSrmBhPh4"></div>
-    <div class="side-btn" id="btnExportFile" data-page-node-id="MjKAaHVkPDRNziS4c3RecO">📤 导出含数据文件</div>
-    <div class="side-btn" id="btnExportJson" data-page-node-id="SnjzVvsS1QVpF7jJmPXPgv">💾 备份(JSON)</div>
-    <div class="side-btn" id="btnExportCsv" data-page-node-id="cMjLEweFmaO9OYtBcgV5OZ">📋 导出CSV</div>
-    <div class="side-btn" id="btnImport" data-page-node-id="GO9gLrktLw9dIVsGNywZzk">📥 导入(JSON)</div>
+    <div class="side-btn" id="btnExportFile" data-page-node-id="MjKAaHVkPDRNziS4c3RecO"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14"/></svg> 导出含数据文件</div>
+    <div class="side-btn" id="btnExportJson" data-page-node-id="SnjzVvsS1QVpF7jJmPXPgv"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 4h11l3 3v13H5zM8 4v5h7M8 14h8v6H8z"/></svg> 备份(JSON)</div>
+    <div class="side-btn" id="btnExportCsv" data-page-node-id="cMjLEweFmaO9OYtBcgV5OZ"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M4 15h16M9 5v14M15 5v14"/></svg> 导出CSV</div>
+    <div class="side-btn" id="btnImport" data-page-node-id="GO9gLrktLw9dIVsGNywZzk"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 20V10m0 0 4 4m-4-4-4 4M5 5h14"/></svg> 导入(JSON)</div>
     <div class="store-status" id="storeStatus" data-page-node-id="4bkVFlAs7aLmd8EErzJR9r"></div>
-    <div class="side-btn" id="btnSync" data-page-node-id="qipihd5r3Jnng72sgse1hP">☁️ 云端同步</div>
-    <div class="side-btn" id="btnClear" data-page-node-id="Rfpsx21jksOKKiprGOEk3F">🗑️ 清空全部</div>
+    <div class="side-btn" id="btnSync" data-page-node-id="qipihd5r3Jnng72sgse1hP"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 18 18H7Z"/></svg> 云端同步</div>
+    <div class="side-btn" id="btnClear" data-page-node-id="Rfpsx21jksOKKiprGOEk3F"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg> 清空全部</div>
   </aside>
   <div class="overlay" id="overlay" data-page-node-id="FuR5IucCvkmvd9AZZqy1FO"></div>
 
   <main class="main" data-page-node-id="BwDZyRXzdQyRjGJeAOjzg2">
     <div class="topbar" data-page-node-id="GDKwsOC1MNLauqbf5wixP9">
-      <button class="icon-btn menu-btn" id="menuBtn" data-page-node-id="yk0rry2fw40szt1BLxcTF3">☰</button>
+      <button class="icon-btn menu-btn" id="menuBtn" data-page-node-id="yk0rry2fw40szt1BLxcTF3"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <div class="greet" data-page-node-id="9v9mRTc7vgwfsKVR7kAimx">
         <h1 id="greet" data-page-node-id="5mkDGqnn76uo3N2wJNJyAI">你好</h1>
         <p id="dateLine" data-page-node-id="aB6llRiDjPbBeBgZHLLM3B"></p>
@@ -740,21 +756,21 @@
       </div>
       <div class="row2" data-page-node-id="5OluApxSm3q3Dsxzp539ty">
         <select id="catInput" data-page-node-id="3OSdOwM3PufctgVBt30Yjn">
-          <option value="all" data-page-node-id="YjB6yPVG9l1cBl3qwepmoD">📋 全部</option>
-          <option value="temp" data-page-node-id="VCwcPo6LU0MMFUtZAnwRVc">⚡ 临时任务</option>
-          <option value="waishi" data-page-node-id="1L4sf5oHjmuY7mBfuM7H44">🏢 外事办</option>
-          <option value="coffee" data-page-node-id="X6DPzmm2HUXPFKhCHJsESi">☕ 咖啡店</option>
-          <option value="trade" data-page-node-id="4LlXROZnqCFEHtycd68RDL">📈 自营交易</option>
-          <option value="study" data-page-node-id="xCzgGovwwLf6YGvI4cbY6U">📚 学习</option>
-          <option value="life" data-page-node-id="HiqnW9T2zbW5e3oK2Ah52N">🏠 生活</option>
+          <option value="all" data-page-node-id="YjB6yPVG9l1cBl3qwepmoD">全部</option>
+          <option value="temp" data-page-node-id="VCwcPo6LU0MMFUtZAnwRVc">临时任务</option>
+          <option value="waishi" data-page-node-id="1L4sf5oHjmuY7mBfuM7H44">外事办</option>
+          <option value="coffee" data-page-node-id="X6DPzmm2HUXPFKhCHJsESi">咖啡店</option>
+          <option value="trade" data-page-node-id="4LlXROZnqCFEHtycd68RDL">自营交易</option>
+          <option value="study" data-page-node-id="xCzgGovwwLf6YGvI4cbY6U">学习</option>
+          <option value="life" data-page-node-id="HiqnW9T2zbW5e3oK2Ah52N">生活</option>
         </select>
         <button class="btn-add" id="addBtn" data-page-node-id="UrOQm36aasWkfaotUEye7X">添加任务</button>
       </div>
       <div class="row3" data-page-node-id="3KbOUueZNEkZuoPllcFhFa">
-        <label class="time-chk" data-page-node-id="n1CcNGOnaYACHbFP1DFjjj"><input type="checkbox" id="timeChk" data-page-node-id="8Y2R19zC46RcvM7PbH5NdW"> ⏰ 设置时间</label>
+        <label class="time-chk" data-page-node-id="n1CcNGOnaYACHbFP1DFjjj"><input type="checkbox" id="timeChk" data-page-node-id="8Y2R19zC46RcvM7PbH5NdW">  设置时间</label>
       </div>
       <div class="row4" id="timeRow" data-page-node-id="wCKfPRZXGAv8zaLPdDUmIa">
-        <span class="lbl" data-page-node-id="AHP6kTPUnsBaE1Rt8CXeMR">⏰ 时间</span>
+        <span class="lbl" data-page-node-id="AHP6kTPUnsBaE1Rt8CXeMR"> 时间</span>
         <div id="timeStartTrigger" data-page-node-id="VmTTg5g8KCwkEJ9HGFcqkl"></div>
         <input type="time" id="timeStart" class="hide-native-time" data-page-node-id="lL9CpZRU4urD8dp5hFIeGp">
       </div>
@@ -765,7 +781,7 @@
       <button class="dn-date" id="dayLabel" data-page-node-id="Stwt5SDLHy3lEFEe7E2W2e">今天</button>
       <button class="dn-btn" id="dayNext" title="后一天" data-page-node-id="mb1e4YN2tQdAHzvJvBnDJZ">›</button>
       <button class="dn-today" id="dayToday" data-page-node-id="XSXDeo1DawGDc1QmBw1CPY">回到今天</button>
-      <button class="dn-btn tl" id="tlToggle" title="切换时间线视图" data-page-node-id="FIk5z41doR9DcTN4jgTYry">📈 时间线</button>
+      <button class="dn-btn tl" id="tlToggle" title="切换时间线视图" data-page-node-id="FIk5z41doR9DcTN4jgTYry"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg> 时间线</button>
       <input type="date" id="dayPicker" data-page-node-id="JVNNDP2oQSykCXOa77IrTp">
     </div>
 
@@ -774,15 +790,15 @@
     <div id="statsArea" style="display:none" data-page-node-id="JGGVERB8VYm476QVJ0FNLa">
       <div class="stats-summary" id="statsSummary" data-page-node-id="trRXBNXGDz0cuEhjgZUB59"></div>
       <div class="stats-card" id="maxOvrDetailCard" style="display:none" data-page-node-id="cPLPRfDZYCuz92sa8nCgRn">
-        <div class="card-title" data-page-node-id="F4LEEc8xrQWQ4Ppq1IypiC">🔴 最长逾期任务详情</div>
+        <div class="card-title" data-page-node-id="F4LEEc8xrQWQ4Ppq1IypiC">最长逾期任务详情</div>
         <div id="maxOvrDetail" data-page-node-id="8gGkxrjmYCfJNqiAw0YBJQ"></div>
       </div>
       <div class="stats-card" id="ovrListCard" data-page-node-id="OQh7AMbcD4wH4CxFI3bQu8">
-        <div class="card-title" data-page-node-id="sYbN72yEBOF9rjgYY6Z0wB">🚨 当前逾期清单（按逾期天数排序）</div>
+        <div class="card-title" data-page-node-id="sYbN72yEBOF9rjgYY6Z0wB">当前逾期清单（按逾期天数排序）</div>
         <div id="ovrList" data-page-node-id="41aCCQPp3IkgHwBQihvENh"></div>
       </div>
       <div class="stats-card analysis" data-page-node-id="WFjDlsvBCdDnxetwWCAOyO">
-        <div class="card-title" data-page-node-id="wyCt9l4RVG4UTzijwPQiQC">📌 改进建议</div>
+        <div class="card-title" data-page-node-id="wyCt9l4RVG4UTzijwPQiQC">改进建议</div>
         <div id="statsAdvice" data-page-node-id="wlUHhHtUjIWeGABvFCODTa"></div>
       </div>
     </div>
@@ -790,11 +806,11 @@
 </div>
 
 <nav class="bottom-nav" id="bottomNav" data-page-node-id="FtEmH4JGSs7N1iS6vB5lzQ">
-  <div class="bn" data-view="temp" data-page-node-id="2fRXuGEb9VOB9JjeOmFkW3"><span class="ic" data-page-node-id="UEMgHre81RIAYQWQnD1w8b">⚡</span>临时<span class="count" id="b-temp" data-page-node-id="uIeADG7tjK7EwpmKT4soTF">0</span></div>
-  <div class="bn" data-view="work" data-page-node-id="h5HcT71kAOSGNHdl2qdFzR"><span class="ic" data-page-node-id="ALIXYbjIqwl62LsSXxDFy0">💼</span>工作<span class="count" id="b-work" data-page-node-id="PbJuDyEV6D4reXAimZhES6">0</span></div>
-  <div class="bn active" data-view="today" data-page-node-id="LiI1jA4uWmehFHFflfpxFP"><span class="ic" data-page-node-id="UcR5SnnwkvbTBxSEi6kgqK">📅</span><span id="bTodayNum" data-page-node-id="ec7XHrG6H9p37jqj2HZufu">31</span><span class="count" id="b-today" data-page-node-id="CbUUujkPqYEMA61fS9hBlV">0</span></div>
-  <div class="bn" data-view="study" data-page-node-id="MCtfyX0BaQcMN72fs1B8Wc"><span class="ic" data-page-node-id="86AZu3wMqddt55yA57fzQo">📚</span>学习<span class="count" id="b-study" data-page-node-id="cmw6c3IKq4LJtg0qytJQFr">0</span></div>
-  <div class="bn" data-view="life" data-page-node-id="G7IsuPdvwNf1XQLbapxHP6"><span class="ic" data-page-node-id="A5CxqUVqT8WBM9ElgIvUHv">🏠</span>生活<span class="count" id="b-life" data-page-node-id="ni7YzR5D7dNPcoC0jitbpJ">0</span></div>
+  <div class="bn" data-view="temp" data-page-node-id="2fRXuGEb9VOB9JjeOmFkW3"><svg class="ic" viewBox="0 0 24 24" fill="currentColor" width="21" height="21"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>临时<span class="count" id="b-temp" data-page-node-id="uIeADG7tjK7EwpmKT4soTF">0</span></div>
+  <div class="bn" data-view="work" data-page-node-id="h5HcT71kAOSGNHdl2qdFzR"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M9 7.5V5.5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12.5h18"/></svg>工作<span class="count" id="b-work" data-page-node-id="PbJuDyEV6D4reXAimZhES6">0</span></div>
+  <div class="bn active" data-view="today" data-page-node-id="LiI1jA4uWmehFHFflfpxFP"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg><span id="bTodayNum" data-page-node-id="ec7XHrG6H9p37jqj2HZufu">31</span><span class="count" id="b-today" data-page-node-id="CbUUujkPqYEMA61fS9hBlV">0</span></div>
+  <div class="bn" data-view="study" data-page-node-id="MCtfyX0BaQcMN72fs1B8Wc"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M4 5.5A2 2 0 0 1 6 3.5h6v16H6a2 2 0 0 0-2 2V5.5Z"/><path d="M20 5.5A2 2 0 0 0 18 3.5h-6v16h6a2 2 0 0 1 2 2V5.5Z"/></svg>学习<span class="count" id="b-study" data-page-node-id="cmw6c3IKq4LJtg0qytJQFr">0</span></div>
+  <div class="bn" data-view="life" data-page-node-id="G7IsuPdvwNf1XQLbapxHP6"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="m4 11 8-6 8 6M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/></svg>生活<span class="count" id="b-life" data-page-node-id="ni7YzR5D7dNPcoC0jitbpJ">0</span></div>
 </nav>
 
 <div id="toast" data-page-node-id="0XzoD5AshNwh8yVinL6gxS"></div>
@@ -802,10 +818,10 @@
 <!-- celebration modal -->
 <div class="modal-overlay" id="celebrateModal" data-page-node-id="WurIL4ogcgCEAriEf32Gcz">
   <div class="celebrate" data-page-node-id="8hqG3vn2yInbcVb0aqDbQq">
-    <div class="trophy" data-page-node-id="XAU7G2TSQ6YQTCDkfBiEO0">🏆</div>
+    <div class="trophy" data-page-node-id="XAU7G2TSQ6YQTCDkfBiEO0"><svg class="trophy-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="52" height="52"><path d="M8 4h8v4a4 4 0 0 1-8 0V4ZM8 6H5v2a3 3 0 0 0 3 3M16 6h3v2a3 3 0 0 1-3 3M9 14h6v3H9zM7 21h10"/></svg></div>
     <h2 data-page-node-id="FldTz3vZBQBdDbnjg94FqU">全部完成！</h2>
     <p data-page-node-id="noyaxYBw3DCEW4MsLHCRqM">全部完成，今天满分！</p>
-    <button class="btn-ok" id="celebrateOk" data-page-node-id="e7OoAJI43BDMUq2LwFhEAv">✨ 明天继续加油</button>
+    <button class="btn-ok" id="celebrateOk" data-page-node-id="e7OoAJI43BDMUq2LwFhEAv">明天继续加油</button>
   </div>
 </div>
 
@@ -820,18 +836,18 @@
     <div class="edit-field" data-page-node-id="84TEfBbes8V8llNs5lExf3">
       <label data-page-node-id="tpR2NRUMXuABzSENLUHvne">分类</label>
       <select id="editCat" data-page-node-id="d8MVLZwCv8nfC8fP7jEhI4">
-        <option value="temp" data-page-node-id="bFiSSeKfeXzz8xaSet3JPd">⚡ 临时任务</option>
-        <option value="work" data-page-node-id="Sc0tk0qmp6tkY1RiH2hebi">💼 工作</option>
-        <option value="study" data-page-node-id="8x5YxXVd9zTwNQlOnqE9bT">📚 学习</option>
-        <option value="life" data-page-node-id="WZTgbiZ5oMcQFmsT7HpM3f">🏠 生活</option>
+        <option value="temp" data-page-node-id="bFiSSeKfeXzz8xaSet3JPd">临时任务</option>
+        <option value="work" data-page-node-id="Sc0tk0qmp6tkY1RiH2hebi">工作</option>
+        <option value="study" data-page-node-id="8x5YxXVd9zTwNQlOnqE9bT">学习</option>
+        <option value="life" data-page-node-id="WZTgbiZ5oMcQFmsT7HpM3f">生活</option>
       </select>
     </div>
     <div class="edit-field" id="editSubRow" style="display:none" data-page-node-id="3noMuQmInJdNRZg3w8JCiP">
       <label data-page-node-id="9qxodHmyG7r2Dmo9kJ4NHQ">子类（工作下细分）</label>
       <select id="editSub" data-page-node-id="B9cHIUJyxlLu8TR4eR6DwD">
-        <option value="waishi" data-page-node-id="oTzXRBoItGFjO4H6rygTGG">🏢 外事办</option>
-        <option value="coffee" data-page-node-id="41tXY1Hx0Htrw7UuuHxFkP">☕ 咖啡店</option>
-        <option value="trade" data-page-node-id="u3l9L6zWXLqN0uvSyzrvTL">📈 自营交易</option>
+        <option value="waishi" data-page-node-id="oTzXRBoItGFjO4H6rygTGG">外事办</option>
+        <option value="coffee" data-page-node-id="41tXY1Hx0Htrw7UuuHxFkP">咖啡店</option>
+        <option value="trade" data-page-node-id="u3l9L6zWXLqN0uvSyzrvTL">自营交易</option>
       </select>
     </div>
     <div class="edit-field" data-page-node-id="e6PhVIa716SnPxyVTrREwL">
@@ -870,7 +886,7 @@
 <!-- cloud sync modal -->
 <div class="modal-overlay" id="syncModal" data-page-node-id="L6uR8CDTfUjxON4V9auZuB">
   <div class="edit-modal" data-page-node-id="zZevbhQ9DAR2sqgB515LcE">
-    <h3 data-page-node-id="4rCdbz5eiuBSNQmbSfcnEe">☁️ 云端同步（GitHub Gist）</h3>
+    <h3 data-page-node-id="4rCdbz5eiuBSNQmbSfcnEe"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 18 18H7Z"/></svg> 云端同步（GitHub Gist）</h3>
     <p class="sync-tip" data-page-node-id="Q6aoEhSe1ee27QZfIsJ45h">在 GitHub 生成一个带 <b data-page-node-id="Vma8iikt2uQTfPHxIMNQIB">gist</b> 权限的 Personal Access Token，粘贴到下方，即可让<b data-page-node-id="R4Ve7qqfYkK70PLBjJpnlR">手机端与网页端共享同一份数据</b>。Token 仅保存在本机浏览器，不会随文件导出或上传到别处。</p>
     <label class="fld" data-page-node-id="tgCgNkAQssIJKhiQLJDYif">Token（ghp_...）</label>
     <input type="password" id="syncToken" placeholder="粘贴 GitHub Token" autocomplete="off" data-page-node-id="CNNZ2ADGFPJVaAhiIU5muE">
@@ -889,18 +905,18 @@
 <!-- routine template modal -->
 <div class="modal-overlay" id="tplModal" data-page-node-id="aCZeHdaIIvgehYcoJn8WHt">
   <div class="edit-modal" data-page-node-id="KcuZpEXDo6Df4KiJhx32sh">
-    <h3 data-page-node-id="IDCAS5gGMgaZxsjV4MU4Nl">🔁 例行任务</h3>
+    <h3 data-page-node-id="IDCAS5gGMgaZxsjV4MU4Nl"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12a8 8 0 0 1 13.5-5.5L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.5 5.5L4 16M4 20v-4h4"/></svg> 例行任务</h3>
     <p class="sync-tip" data-page-node-id="P6tQJv5XxG4HpiCo1B1FH1">固定重复的工作（如咖啡店日常）设为例行任务后，<b data-page-node-id="rmLmcNqGcyrMAkwjqf3KdO">每天自动生成当天的任务</b>，一次设置永久生效，不用再手动输入。</p>
     <div class="tpl-add" data-page-node-id="t15lnWEWx4Ni8UsKDJjWAD">
       <input type="text" id="tplText" maxlength="200" placeholder="例：开店清洁 / 盘点物料 / 对账" data-page-node-id="AZC4ODdnvnO0ArpJRLW8nP">
       <div class="tpl-add-row" data-page-node-id="THjC6usMx8znxegu1c3IVe">
         <select id="tplCat" data-page-node-id="2FXIFv98btCh5C9su7HyQE">
-          <option value="coffee" selected data-page-node-id="IyGBKu2xNUl5k2tDswDafG">☕ 咖啡店</option>
-          <option value="waishi" data-page-node-id="0Fmii9MoxZqor1BWiGwBsa">🏢 外事办</option>
-          <option value="trade" data-page-node-id="GNOnXepY5uMwDaGjvmKRwn">📈 自营交易</option>
-          <option value="study" data-page-node-id="upngz00HiHKIUpDaRcrLqN">📚 学习</option>
-          <option value="life" data-page-node-id="BSpHciKfGKPrD3XL7mtpcD">🏠 生活</option>
-          <option value="temp" data-page-node-id="gOPRyTDov9xH6EV7hac89r">⚡ 临时任务</option>
+          <option value="coffee" selected data-page-node-id="IyGBKu2xNUl5k2tDswDafG">咖啡店</option>
+          <option value="waishi" data-page-node-id="0Fmii9MoxZqor1BWiGwBsa">外事办</option>
+          <option value="trade" data-page-node-id="GNOnXepY5uMwDaGjvmKRwn">自营交易</option>
+          <option value="study" data-page-node-id="upngz00HiHKIUpDaRcrLqN">学习</option>
+          <option value="life" data-page-node-id="BSpHciKfGKPrD3XL7mtpcD">生活</option>
+          <option value="temp" data-page-node-id="gOPRyTDov9xH6EV7hac89r">临时任务</option>
         </select>
         <button class="btn-add" id="tplAddBtn" data-page-node-id="tHviMI0mxfu9iP9lCEAtmr">添加</button>
       </div>
@@ -940,15 +956,15 @@
 
 <script>
 const CATS={
-  temp:{name:'临时任务',color:'#b08d4a',soft:'#faf6ed'},
-  work:{name:'工作',color:'#4a7a8c',soft:'#e4eef2'},
-  study:{name:'学习',color:'#7a5a9c',soft:'#eee8f4'},
-  life:{name:'生活',color:'#4a8c6a',soft:'#e4f0e8'}
+  temp:{name:'临时任务',color:'#B9801F',soft:'#FBF3E2'},
+  work:{name:'工作',color:'#2B54D8',soft:'#EAEFFC'},
+  study:{name:'学习',color:'#5B53C9',soft:'#ECEAF8'},
+  life:{name:'生活',color:'#138A5E',soft:'#E2F4EC'}
 };
 const SUBS={work:[
-  {key:'waishi',name:'外事办',color:'#5a7a9c',soft:'#e8eef4'},
-  {key:'coffee',name:'咖啡店',color:'#a07840',soft:'#f5ede4'},
-  {key:'trade',name:'自营交易',color:'#9c5a6a',soft:'#f4e8ec'}
+  {key:'waishi',name:'外事办',color:'#2B54D8',soft:'#EAEFFC'},
+  {key:'coffee',name:'咖啡店',color:'#9A6326',soft:'#F6ECDD'},
+  {key:'trade',name:'自营交易',color:'#B23B7A',soft:'#FBEAF2'}
 ]};
 const STORE_KEY='workbench_tasks_v1', TRASH_KEY='workbench_trash_v1', TPL_KEY='workbench_tpl_v1', TOMB_KEY='workbench_tomb_v1';
 let tasks=[], trash=[], templates=[], ideas=[], tombstones=[], editingTplId=null;
@@ -986,7 +1002,7 @@ try{goals=JSON.parse(lsGet('workbench_goals')||'[]')||[];if(!Array.isArray(goals
       unit:'天',
       total:93,
       deadline:'2026-11-10',
-      color:'#8b5cf6',
+      color:'var(--accent)',
       obstacle:'',
       cope:'',
       logs:[],
@@ -1219,7 +1235,7 @@ function renderStats(){
   // 当前逾期清单：合并相同内容，按逾期天数排序
   const ovrEl=document.getElementById('ovrList');
   if(ovr.length===0){
-    ovrEl.innerHTML='<div style="font-size:13px;color:var(--muted)">🎉 当前没有逾期任务，保持得很好！</div>';
+    ovrEl.innerHTML='<div style="font-size:13px;color:var(--muted)">✓ 当前没有逾期任务，保持得很好！</div>';
   }else{
     // 按任务文字分组合并
     const grp={};
@@ -1251,13 +1267,13 @@ function renderStats(){
   // 改进建议（基于具体任务内容）
   const li=[];
   if(ovr.length===0){
-    li.push('<li class="good">🎉 当前零逾期，执行力在线！保持每天清空逾期清单的节奏。</li>');
+    li.push('<li class="good">✓ 当前零逾期，执行力在线！保持每天清空逾期清单的节奏。</li>');
   }else{
     if(ovr.length>=5)li.push('<li class="bad">逾期共 <b>'+ovr.length+'</b> 条，明显超载。建议每天只留 3-5 条核心任务，其余顺延或删除。</li>');
     if(topTask)li.push('<li>「<span class="hl">'+escapeHtml(topTask.text||'')+'</span>」已逾期最久（'+daysOverdue(topTask)+' 天），是首要卡点。今天优先把它清掉，或重新规划截止时间。</li>');
     const chronic=ovr.filter(t=>daysOverdue(t)>=7);
     if(chronic.length){
-      li.push('<li class="bad">⚠️ 以下 <b>'+chronic.length+'</b> 条已逾期 7 天以上，可能已不相关或长期卡住：'+chronic.slice(0,5).map(t=>escapeHtml(t.text||'')).join('、')+(chronic.length>5?' 等':'')+'。建议要么今天就做，要么果断删除/重新规划。</li>');
+      li.push('<li class="bad">⚠ 以下 <b>'+chronic.length+'</b> 条已逾期 7 天以上，可能已不相关或长期卡住：'+chronic.slice(0,5).map(t=>escapeHtml(t.text||'')).join('、')+(chronic.length>5?' 等':'')+'。建议要么今天就做，要么果断删除/重新规划。</li>');
     }
     if(ovr.some(t=>t.overdueMark))li.push('<li>有任务被手动标记为逾期，说明一拖再拖。挑一个最小的今天先完成，用「小胜」打破拖延。</li>');
     li.push('<li>复盘习惯：每晚花 2 分钟看这张表，把「经常逾期」的任务要么提前做、要么从清单里拿掉。</li>');
@@ -1392,7 +1408,7 @@ async function pushSync(){
     if(/40[13]/.test(e&&e.message||'')){
       // Token 失效/权限不足：停止无意义重试，明确提示用户更新
       if(sync._retry){clearInterval(sync._retry);sync._retry=null;}
-      syncStatus('⚠️ '+(e.message||'同步失败')+'（点此更新）','err');
+      syncStatus('⚠ '+(e.message||'同步失败')+'（点此更新）','err');
       return;
     }
     const off=(typeof navigator!=='undefined'&&navigator.onLine===false);
@@ -1440,7 +1456,7 @@ async function pullSync(silent){
   }catch(e){
     if(/40[13]/.test(e&&e.message||'')){
       if(sync._retry){clearInterval(sync._retry);sync._retry=null;}
-      syncStatus('⚠️ '+(e.message||'拉取失败')+'（点此更新）','err');
+      syncStatus('⚠ '+(e.message||'拉取失败')+'（点此更新）','err');
       return;
     }
     if(!silent)syncStatus('拉取失败：'+(e&&e.message?e.message:e),'err');
@@ -1582,7 +1598,7 @@ function tplAction(act,id){
 /* 例行任务模板：行内编辑表单 */
 function tplEditRowHtml(tpl){
   const raw=(tpl.sub)?tpl.sub:tpl.category;
-  const labels={coffee:'☕ 咖啡店',waishi:'🏢 外事办',trade:'📈 自营交易',study:'📚 学习',life:'🏠 生活',temp:'⚡ 临时任务'};
+  const labels={coffee:'咖啡店',waishi:'外事办',trade:'自营交易',study:'学习',life:'生活',temp:'临时任务'};
   const opt=v=>'<option value="'+v+'"'+(raw===v?' selected':'')+'>'+labels[v]+'</option>';
   return '<div class="tpl-row editing" data-tpl-id="'+tpl.id+'">'+
     '<div class="tpl-edit">'+
@@ -1669,7 +1685,7 @@ function updateStoreStatus(){
     for(const k in localStorage){const v=localStorage[k]||'';total+=k.length+v.length;}
     usedKB=Math.round(total*2/1024); // UTF-16 每字符 2 字节
     const pct=Math.round(total*2/(5*1024*1024)*100); // 5MB 基准
-    if(pct>=80)warnHTML='<br><span class="store-warn">⚠️ 存储已用 '+pct+'%('+usedKB+'KB)，建议导出备份后清理</span>';
+    if(pct>=80)warnHTML='<br><span class="store-warn">⚠ 存储已用 '+pct+'%('+usedKB+'KB)，建议导出备份后清理</span>';
     else if(pct>=50)warnHTML='<br><span style="color:#f59e0b">存储已用 '+pct+'% ('+usedKB+'KB)</span>';
   }catch(e){}
   el.innerHTML='本地'+(lsOK?'✓':'✗')+' · 任务'+n(tasks)+' 目标'+n(goals)+warnHTML+'<br>'+cloud+' · '+location.origin;
@@ -1689,7 +1705,7 @@ function renderTasks(isTodayMode,focusDate){
     const msg=view==='today'
       ?(isTodayMode?'今天还没有任务，添加一条开始吧':'「'+dt+'」还没有任务')
       :(isTodayMode?'这个分类下还没有任务':'「'+dt+'」这个分类下还没有任务');
-    area.innerHTML=pre+'<div class="empty"><div class="big">🌱</div>'+msg+'</div>'+renderTrashHtml();
+    area.innerHTML=pre+'<div class="empty"><div class="big"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>'+msg+'</div>'+renderTrashHtml();
     if(view==='work')wireWorkTabs();
     wireTrash();
     return;
@@ -1701,12 +1717,12 @@ function renderTasks(isTodayMode,focusDate){
     const byTime=(a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||'');
     html+=items([...openList].sort(byTime));
   }else if(openList.length){
-    html=isTodayMode?items(openList):secTitle('📅 '+dt+' · '+openList.length)+items(openList);
+    html=isTodayMode?items(openList):secTitle(' '+dt+' · '+openList.length)+items(openList);
   }
   // ---- 已完成任务（折叠收纳）----
   if(doneList.length){
     html+='<div class="done-bar" id="doneBar">'+
-      '<span class="db-icon">✅</span>'+
+      '<span class="db-icon">✓</span>'+
       '<span class="db-text">已完成</span>'+
       '<span class="db-count">'+doneList.length+'</span>'+
       '<span class="db-arrow'+(showDone?' open':'')+'">'+(showDone?'▲':'▼')+'</span>'+
@@ -1716,7 +1732,7 @@ function renderTasks(isTodayMode,focusDate){
   // ---- 逾期任务（折叠收纳）----
   if(ovrList.length){
     html+='<div class="ovr-bar" id="ovrBar">'+
-      '<span class="db-icon">⏰</span>'+
+      '<span class="db-icon"></span>'+
       '<span class="db-text">已逾期</span>'+
       '<span class="db-count ovr-cnt">'+ovrList.length+'</span>'+
       '<span class="db-arrow'+(showOvr?' open':'')+'">'+(showOvr?'▲':'▼')+'</span>'+
@@ -1772,7 +1788,7 @@ function renderOverviewView(){
   const isOvr=t=>!!t.overdueMark||overdueOn(t);
   const relevant=t=>isOvr(t)||doneToday(t)||(openTask(t)&&(dueOn(t)||!t.due||isRepeatActive(t)));
   const all=tasks.filter(relevant);
-  if(!all.length){area.innerHTML='<div class="empty"><div class="big">🌱</div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
+  if(!all.length){area.innerHTML='<div class="empty"><div class="big"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
   const done=all.filter(doneToday).sort((a,b)=>(doneAtOf(b)||0)-(doneAtOf(a)||0));
   const overdue=all.filter(isOvr).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
   const pending=all.filter(t=>!doneToday(t)&&!isOvr(t)).sort((a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||''));
@@ -1788,18 +1804,18 @@ function renderOverviewView(){
   '</div>';
   html+='<div class="ovw-progress"><div class="bar" style="width:'+pct+'%"></div></div>';
   html+='<div class="ovw-prog-text">今日完成进度 '+pct+'% · 已完成 '+done.length+' / 当日共 '+totalToday+' 项'+(overdue.length?' · 逾期 '+overdue.length+' 项':'');
-  if(pending.length===0&&overdue.length===0&&done.length>0)html+=' · 🎉 已全部完成';
+  if(pending.length===0&&overdue.length===0&&done.length>0)html+=' · ✓ 已全部完成';
   html+='</div>';
   // 待完成：默认展示（置顶）
-  if(pending.length)html+='<div class="ovw-group"><div class="section-title">📋 待完成 · '+pending.length+'</div>'+items(pending)+'</div>';
-  else if(!overdue.length)html+='<div class="ovw-group"><div class="ovw-all-done">🎉 今日待办已全部完成，去加点新任务吧！</div></div>';
+  if(pending.length)html+='<div class="ovw-group"><div class="section-title"> 待完成 · '+pending.length+'</div>'+items(pending)+'</div>';
+  else if(!overdue.length)html+='<div class="ovw-group"><div class="ovw-all-done">✓ 今日待办已全部完成，去加点新任务吧！</div></div>';
   // 逾期：单独归类（红色，位于待完成下方）
-  if(overdue.length)html+='<div class="ovw-group ovr-group"><div class="section-title">🔴 逾期 · '+overdue.length+'</div>'+items(overdue)+'</div>';
+  if(overdue.length)html+='<div class="ovw-group ovr-group"><div class="section-title"> 逾期 · '+overdue.length+'</div>'+items(overdue)+'</div>';
   // 今日已完成：仅当天完成（默认折叠），点击展开
   if(done.length){
     html+='<div class="ovw-group">'+
       '<div class="ovw-collapsed-head" data-act="ovw-toggle-done">'+
-        '<span>✅ 今日已完成 · '+done.length+'</span>'+
+        '<span>✓ 今日已完成 · '+done.length+'</span>'+
         '<span class="chev">'+(ovwDoneOpen?'▾':'▸')+'</span>'+
       '</div>'+
       (ovwDoneOpen?'<div class="ovw-done-list">'+items(done)+'</div>':'')+
@@ -1819,7 +1835,7 @@ function renderTimeline(isTodayMode,focusDate){
   if(!timed.length&&!untimedOpen.length&&!untimedDone.length){
     const dt=fmtSel();
     const msg=isTodayMode?'今天还没有任务，添加一条开始吧':'「'+dt+'」还没有任务';
-    area.innerHTML=pre+'<div class="empty"><div class="big">🌱</div>'+msg+'</div>'+renderTrashHtml();
+    area.innerHTML=pre+'<div class="empty"><div class="big"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>'+msg+'</div>'+renderTrashHtml();
     if(view==='work')wireWorkTabs();
     wireTrash();
     return;
@@ -1836,16 +1852,16 @@ function renderTimeline(isTodayMode,focusDate){
         '<div class="task tl-card'+(isDoneToday(t)?' done':'')+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
           '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
           '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+
-            '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+(t.end?' <span class="ovw-time">截止 '+t.end+'</span>':'')+(doneAtOf(t)?' <span class="ovw-done">✅ '+fmtHM(doneAtOf(t))+'</span>':'')+'</div></div>'+
-          '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'⭐':'☆')+'</div>'+
+            '<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">↻ '+repLabel(t.repeat)+'</span>':'')+(t.end?' <span class="ovw-time">截止 '+t.end+'</span>':'')+(doneAtOf(t)?' <span class="ovw-done">✓ '+fmtHM(doneAtOf(t))+'</span>':'')+'</div></div>'+
+          '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'★':'☆')+'</div>'+
             '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
             '<div class="del" data-act="del" data-id="'+t.id+'">×</div></div>'+
         '</div></div>';
     }).join('')+'</div>';
   }
-  if(untimedOpen.length)html+='<div class="tl-untimed"><div class="section-title">🗒️ 未排时间 · '+untimedOpen.length+'</div>'+items(untimedOpen)+'</div>';
+  if(untimedOpen.length)html+='<div class="tl-untimed"><div class="section-title"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> 未排时间 · '+untimedOpen.length+'</div>'+items(untimedOpen)+'</div>';
   if(untimedDone.length){
-    html+='<div class="done-bar" id="doneBar"><span class="db-icon">✅</span><span class="db-text">已完成</span>'+
+    html+='<div class="done-bar" id="doneBar"><span class="db-icon">✓</span><span class="db-text">已完成</span>'+
       '<span class="db-count">'+untimedDone.length+'</span>'+
       '<span class="db-arrow'+(showDone?' open':'')+'">'+(showDone?'▲':'▼')+'</span></div>';
     html+='<div id="doneList" class="'+(showDone?'':'done-collapsed')+'">'+(showDone?items(untimedDone):'')+'</div>';
@@ -1882,15 +1898,15 @@ function items(arr){return '<div class="task-list">'+arr.map(t=>{
   if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
   const tmRange=(t.start||t.end)?' <span class="ovw-time">'+(t.start||'…')+(t.end?('–'+t.end):'')+'</span>':'';
   const da=doneAtOf(t);
-  const doneSpan=da?' <span class="ovw-done">✅ '+fmtHM(da)+'</span>':'';
+  const doneSpan=da?' <span class="ovw-done">✓ '+fmtHM(da)+'</span>':'';
   return '<div class="task '+(t.done?'done':'')+'" data-id="'+t.id+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
     '<div class="drag-handle" title="长按拖拽排序">⋮</div>'+
     '<div class="check" data-act="toggle" data-id="'+t.id+'">'+(isDoneToday(t)?'✓':'')+'</div>'+
-    '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+(t.note?'<div class="note-ind" data-act="edit" data-id="'+t.id+'"><span class="note-icon">📝</span>'+escapeHtml(t.note)+'</div>':'')+'<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">🔁 '+repLabel(t.repeat)+'</span>':'')+tmRange+doneSpan+'</div></div>'+
-    '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'⭐':'☆')+'</div>'+
+    '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div>'+(t.note?'<div class="note-ind" data-act="edit" data-id="'+t.id+'"><span class="note-icon">✎</span>'+escapeHtml(t.note)+'</div>':'')+'<div class="meta"><span class="chip">'+chipName+'</span>'+(t.repeat&&t.repeat!=='none'?'<span class="chip">↻ '+repLabel(t.repeat)+'</span>':'')+tmRange+doneSpan+'</div></div>'+
+    '<div class="acts"><div class="star'+(t.imp?' on':'')+'" data-act="star" data-id="'+t.id+'" title="标记重要">'+(t.imp?'★':'☆')+'</div>'+
     (t.overdueMark
       ?'<div class="ovr" data-act="restore-ovr" data-id="'+t.id+'" title="从逾期恢复">↩</div>'
-      :'<div class="ovr" data-act="overdue" data-id="'+t.id+'" title="移入逾期">⏰</div>')+
+      :'<div class="ovr" data-act="overdue" data-id="'+t.id+'" title="移入逾期"></div>')+
     '<div class="edit" data-act="edit" data-id="'+t.id+'" title="编辑">✎</div>'+
     '<div class="del" data-act="del" data-id="'+t.id+'">×</div></div></div>';
 }).join('')+'</div>';}
@@ -2096,7 +2112,7 @@ function render(){
   updateCounts();
   applyActive();
   const tlBtn=document.getElementById('tlToggle');
-  if(tlBtn){tlBtn.classList.toggle('active',tlMode);tlBtn.textContent=tlMode?'📋 列表':'📈 时间线';}
+  if(tlBtn){tlBtn.classList.toggle('active',tlMode);tlBtn.textContent=tlMode?'列表':'时间线';}
   const taskView=isTaskView(view);
   document.getElementById('ringCard').style.display=(view==='today')?'flex':'none';
   renderImpCard();
@@ -2178,14 +2194,14 @@ function addTask(){
   saveTasks();render();
 }
 function toggle(id){const t=tasks.find(x=>x.id===id);if(!t)return;const now=Date.now();if(t.repeat&&t.repeat!=='none'){t.checks=t.checks||{};const d=todayStr();if(t.checks[d]){delete t.checks[d];if(t.checksAt)delete t.checksAt[d];}else{t.checks[d]=true;t.checksAt=t.checksAt||{};t.checksAt[d]=now;}}else{if(t.done){t.done=false;delete t.completedAt;}else{t.done=true;t.completedAt=now;}}t.updated=now;saveTasks();render();checkAllDone();}
-function toggleImp(id){const t=tasks.find(x=>x.id===id);if(t){t.imp=!t.imp;t.updated=Date.now();saveTasks();render();showToast(t.imp?'⭐ 已标记为重要':'已取消重要标记');}}
+function toggleImp(id){const t=tasks.find(x=>x.id===id);if(t){t.imp=!t.imp;t.updated=Date.now();saveTasks();render();showToast(t.imp?'★ 已标记为重要':'已取消重要标记');}}
 /* 首页「重要任务」置顶卡（%圆环下方） */
 function renderImpCard(){
   const card=document.getElementById('impCard');if(!card)return;
   const imps=tasks.filter(t=>t.imp&&!isDoneToday(t));
   if(view!=='today'||!imps.length){card.style.display='none';card.innerHTML='';return;}
   card.style.display='block';
-  card.innerHTML='<div class="imp-title">⭐ 重要 · '+imps.length+'</div>'+
+  card.innerHTML='<div class="imp-title">★ 重要 · '+imps.length+'</div>'+
     imps.map(t=>{
       let c=CATS[t.category];let color=c?c.color:'#999',name=c?c.name:t.category;
       if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){name='工作·'+s.name;color=s.color;}}
@@ -2193,7 +2209,7 @@ function renderImpCard(){
         '<div class="check" data-act="toggle" data-id="'+t.id+'"></div>'+
         '<div class="imp-txt">'+escapeHtml(t.text)+'</div>'+
         '<span class="imp-chip" style="color:'+color+'">'+name+'</span>'+
-        '<div class="star on" data-act="star" data-id="'+t.id+'" title="取消重要">⭐</div></div>';
+        '<div class="star on" data-act="star" data-id="'+t.id+'" title="取消重要">★</div></div>';
     }).join('');
   if(!card.dataset.bound){
     card.addEventListener('click',e=>{
@@ -2271,20 +2287,20 @@ function renderTrashHtml(){
     const c=CATS[t.category]||{name:'其他',color:'#999',soft:'#eee'};
     let chipName=c.name,chipColor=c.color,chipSoft=c.soft;
     if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){chipName='工作·'+s.name;chipColor=s.color;}}
-    const due=t.due?'<span class="due">🗓 '+t.due+'</span>':'';
+    const due=t.due?'<span class="due"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> '+t.due+'</span>':'';
     return '<div class="task trash-item" data-id="'+t.id+'" style="--cat:'+chipColor+';--cat-soft:'+chipSoft+'">'+
       '<div class="body"><div class="txt">'+escapeHtml(t.text)+'</div><div class="meta"><span class="chip">'+chipName+'</span>'+due+'</div></div>'+
       '<div class="acts">'+
         '<div class="restore" data-t-act="restore" data-id="'+t.id+'">↩ 恢复</div>'+
-        '<div class="tdel" data-t-act="purge" data-id="'+t.id+'">🗑 彻底删除</div>'+
+        '<div class="tdel" data-t-act="purge" data-id="'+t.id+'">✕ 彻底删除</div>'+
       '</div></div>';
   }).join('');
   return '<div class="trash-bar" id="trashBar">'+
-      '<span class="tb-icon">🗑️</span><span class="tb-text">回收站</span>'+
+      '<span class="tb-icon">✕</span><span class="tb-text">回收站</span>'+
       '<span class="tb-count">'+trash.length+'</span>'+
       '<span class="tb-arrow'+(showTrash?' open':'')+'">'+(showTrash?'▲':'▼')+'</span></div>'+
     '<div id="trashList" class="'+(showTrash?'':'done-collapsed')+'">'+items+'</div>'+
-    '<div class="trash-clear" data-t-act="clearall">🧹 清空回收站</div>';
+    '<div class="trash-clear" data-t-act="clearall"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m1 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> 清空回收站</div>';
 }
 function wireTrash(){
   const bar=document.getElementById('trashBar');
@@ -2427,13 +2443,13 @@ function hideInstallHint(){const el=document.getElementById('installHint');if(el
 function applyTheme(){
   const t=lsGet('workbench_theme');
   if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
-  const btn=document.getElementById('btnTheme');if(btn)btn.textContent=(t==='dark')?'☀️ 浅色模式':'🌙 深色模式';
+  const btn=document.getElementById('btnTheme');if(btn)btn.textContent=(t==='dark')?'☀ 浅色模式':'<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式';
 }
 function toggleTheme(){
   const dark=!document.documentElement.getAttribute('data-theme');
   if(dark)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
   lsSet('workbench_theme',dark?'dark':'light');
-  const btn=document.getElementById('btnTheme');if(btn)btn.textContent=dark?'☀️ 浅色模式':'🌙 深色模式';
+  const btn=document.getElementById('btnTheme');if(btn)btn.textContent=dark?'☀ 浅色模式':'<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式';
 }
 function hideBoot(){
 
@@ -2596,7 +2612,7 @@ window.addEventListener('load',()=>setTimeout(hideBoot,1300));
 if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
 </script>
 <div id="installHint" class="install-hint" data-page-node-id="yiHflEEzURTF7GlMPhZ0od">
-  <div class="ih-icon" data-page-node-id="X9k36bnvp75gZJlN9r18mC">📲</div>
+  <div class="ih-icon" data-page-node-id="X9k36bnvp75gZJlN9r18mC"></div>
   <div class="ih-text" data-page-node-id="wA13TTP6fx1VB7FlCNsPGA">
     <strong data-page-node-id="bOPnkCfzdQt1MHNcr99k4C">添加到主屏幕</strong>
     <span data-page-node-id="4WzoYn71lLx1KpXuOwxPPR">获得 APP 般体验：离线可用、不被微信吞数据</span>
@@ -2606,7 +2622,7 @@ if(document.readyState!=='loading')init();else document.addEventListener('DOMCon
 </div>
 <div class="kbd-overlay" id="kbdOverlay" data-page-node-id="3lFPQOrB6BTDp1hV7sFckn">
   <div class="kbd-box" data-page-node-id="pBs10MbVzC7F6g53nqtjs6">
-    <h3 data-page-node-id="jHZag8Ce0GF0OKvucdjxNH">⌨️ 键盘快捷键</h3>
+    <h3 data-page-node-id="jHZag8Ce0GF0OKvucdjxNH">⌨ 键盘快捷键</h3>
     <div class="kbd-list" data-page-node-id="AnEzLdXwrUHAhhpajRNKQU">
       <div class="kbd-row" data-page-node-id="5b5bDC4KAmLuMlv4GagEJI"><span class="kbd-desc" data-page-node-id="UgFRwGosfdwgjwZEFxExCj">快速添加任务</span><span class="kbd-key" data-page-node-id="11Dwin89AnCUYpOZCizj3E">N</span></div>
       <div class="kbd-row" data-page-node-id="9sGhlIFnaAkpau69OvhCCV"><span class="kbd-desc" data-page-node-id="NDYVEIviPkjlRTxEl6mC57">回到今天</span><span class="kbd-key" data-page-node-id="Plmj8VES0uB6uv8vTK6DGV">T</span></div>
