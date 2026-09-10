@@ -1,9 +1,10 @@
-const CACHE = 'wb-pwa-v39';
+const CACHE = 'wb-pwa-v40';
 const ASSETS = ['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    // D1：单个资源 404 不再让整个 install 失败（旧版 addAll 会全盘中断离线能力）
+    caches.open(CACHE).then(c => Promise.all(ASSETS.map(u => c.add(u).catch(()=>null)))).then(() => self.skipWaiting())
   );
 });
 
@@ -11,9 +12,10 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
-      // 新版本装好后，强制已打开的页面重载到新代码（解决安卓 PWA 更新卡住）
+      // D2：不再强制 reload（会打断用户输入）。改为通知页面显示「有新版本」提示条，
+      // 由页面在无聚焦输入框、无打开弹层时才自动重载。
       .then(() => self.clients.matchAll({type:'window',includeUncontrolled:true})
-        .then(cls => cls.forEach(c => { try{ c.navigate(c.url); }catch(_){} })))
+        .then(cls => cls.forEach(c => { try{ c.postMessage({type:'SW_UPDATED',cache:CACHE}); }catch(_){} })))
   );
 });
 
