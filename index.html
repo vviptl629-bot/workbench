@@ -15,13 +15,36 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-512.png">
 <script>
-/* FOUC 防护：解析期同步设置 <html data-theme> 与 theme-color meta，
-   在 <style> 解析前完成，避免首屏主题闪烁。 */
+/* FOUC 防护 + 主体颜色共享：解析期同步 data-theme、theme-color 与 accent，
+   在 <style> 解析前完成，避免首屏主题/主色闪烁；accent 优先读本地设置，
+   其次读跨应用共享键 wb_accent（学习台写入），让两应用主色保持一致。 */
 (function(){
+  function h2r(h){h=(h||'').replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c;}).join('');var n=parseInt(h,16);return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};}
+  function mix(hex,tr,tg,tb,ratio){var c=h2r(hex);var r=Math.round(c.r+(tr-c.r)*ratio),g=Math.round(c.g+(tg-c.g)*ratio),b=Math.round(c.b+(tb-c.b)*ratio);return 'rgb('+r+','+g+','+b+')';}
+  function shade(hex,ratio){return ratio<0?mix(hex,0,0,0,Math.abs(ratio)):mix(hex,255,255,255,ratio);}
+  window.__setAccent=function(hex,persist){
+    try{
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      var root=document.documentElement.style;
+      root.setProperty('--accent',dark?shade(hex,0.42):hex);
+      root.setProperty('--accent-soft',dark?shade(hex,-0.74):shade(hex,0.86));
+      root.setProperty('--accent-strong',dark?shade(hex,0.60):shade(hex,-0.20));
+      root.setProperty('--accent-tint',dark?shade(hex,-0.78):shade(hex,0.88));
+      root.setProperty('--btn-primary',dark?shade(hex,0.10):hex);
+      root.setProperty('--btn-primary-hover',dark?shade(hex,0.18):shade(hex,-0.12));
+      root.setProperty('--chip-work-text',dark?shade(hex,0.55):hex);
+      root.setProperty('--chip-waishi-text',dark?shade(hex,0.55):hex);
+      /* 状态栏颜色与「添加任务」按钮同源：= 当前主题下的 --btn-primary */
+      var mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=dark?shade(hex,0.10):hex;
+      if(persist!==false){localStorage.setItem('workbench_accent',hex);localStorage.setItem('wb_accent',hex);}
+    }catch(e){}
+  };
   try{
     var t=localStorage.getItem('workbench_theme');
     if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');
-      var m=document.querySelector('meta[name="theme-color"]');if(m)m.content='#0E1220';}
+      var m=document.querySelector('meta[name="theme-color"]');if(m)m.content='#3D63E0';}
+    var a=localStorage.getItem('workbench_accent')||localStorage.getItem('wb_accent');
+    if(a)window.__setAccent(a,false);
   }catch(e){}
 })();
 </script>
@@ -169,7 +192,16 @@
 
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;padding:24px 28px 96px;display:flex;flex-direction:column;gap:20px}
-  .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  /* 顶部色带：与「添加任务」按钮同源（--btn-primary），吸顶 + 向左右和上方出血，
+     并覆盖状态栏安全区，使状态栏 → 顶栏 → 内容之间没有可见接缝。 */
+  .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    position:sticky;top:0;z-index:40;
+    background:var(--btn-primary);color:#fff;
+    margin:-24px -28px 0;padding:calc(24px + env(safe-area-inset-top)) 28px 18px}
+  .topbar .greet h1{color:#fff}
+  .topbar .greet p{color:rgba(255,255,255,.78);opacity:1}
+  .topbar .icon-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.30);color:#fff}
+  .topbar .icon-btn:hover{background:rgba(255,255,255,.24);border-color:#fff;color:#fff}
   /* 标题与日期时间同行水平排布，核心信息更大更重 */
   .greet{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
   .greet h1{font-size:24px;font-weight:800;letter-spacing:.2px;white-space:nowrap}
@@ -474,6 +506,7 @@
     .sidebar.open{transform:translateX(0)}
     .overlay.show{display:block}
     .main{padding:16px 18px 90px;gap:28px}
+    .topbar{margin:-16px -18px 0;padding:calc(16px + env(safe-area-inset-top)) 18px 14px;gap:12px}
     .menu-btn{display:flex}
     /* 手机端：环略收小、指标等宽分栏，避免标签挤压 */
     .ring{padding:14px 16px;gap:14px}
@@ -632,6 +665,118 @@
   .dn-btn.tl svg{width:16px;height:16px}
   .trophy svg{width:52px;height:52px}
   .brand .logo{font-size:0}
+  /* ---------- 主体颜色卡片 ---------- */
+  .accent-card{padding:6px 12px 10px;display:flex;flex-direction:column;gap:8px}
+  .accent-presets{display:flex;flex-wrap:wrap;gap:8px}
+  .accent-swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--border);transition:transform .12s,border-color .12s;box-shadow:0 1px 2px rgba(16,24,40,.10)}
+  .accent-swatch:hover{transform:scale(1.08)}
+  .accent-swatch.active{border-color:var(--text);transform:scale(1.12)}
+  .accent-custom{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .accent-custom input[type=color]{width:28px;height:28px;border:none;background:none;cursor:pointer;padding:0}
+
+  /* ============================================================
+     v44 · 视觉精修皮肤层（纯外观）
+     仅覆盖 颜色 / 材质 / 圆角 / 阴影 / 间距 / 字体渲染，
+     不改动任何 HTML 结构、功能与内容。整块删除即可完全还原。
+     ============================================================ */
+
+  /* 1) 基线变量：顶栏出血与主区留白共用同一组变量，保证永远对齐 */
+  :root{
+    --pad-x:28px; --pad-y:24px;
+    --r-card:18px; --r-ctl:13px; --r-pill:999px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --shadow:0 1px 2px rgba(21,35,64,.04),0 10px 24px -12px rgba(35,57,110,.16);
+    --shadow-lg:0 2px 6px rgba(21,35,64,.05),0 18px 42px -16px rgba(35,57,110,.22);
+    --btn-shadow:0 4px 12px -8px rgba(24,40,80,.38);
+    --bg:#F2F5FA;
+    --bg-grad:linear-gradient(180deg,#F1F5FB 0%,#F6F8FC 44%,#EDF1F8 100%);
+    --text:#1F2733; --muted:#66748A; --border:#E4EAF3; --card-2:#F2F5FA;
+    --accent-soft:#ECF1FB; --accent-tint:#ECF1FB; --accent-strong:#22386C;
+  }
+  :root[data-theme="dark"]{
+    --shadow:0 1px 2px rgba(0,0,0,.45),0 12px 28px -14px rgba(0,0,0,.60);
+    --shadow-lg:0 2px 8px rgba(0,0,0,.50),0 20px 46px -18px rgba(0,0,0,.70);
+    --btn-shadow:0 5px 14px -9px rgba(0,0,0,.60);
+    --bg:#0D1120;
+    --bg-grad:linear-gradient(180deg,#0D1120 0%,#121829 50%,#0B0F1C 100%);
+    --card:#171D30; --card-2:#1E2539; --text:#DCE3F0; --muted:#94A1B8; --border:#242C42;
+    --accent-soft:#1B2440;
+  }
+
+  /* 2) 顶栏：叠一层柔和光泽 + 底部投影，色带"有体积"不发闷；整体更紧凑 */
+  .main{padding:var(--pad-y) var(--pad-x) 96px;gap:20px}
+  .topbar{flex-wrap:nowrap;align-items:center;gap:12px;
+    margin:calc(var(--pad-y) * -1) calc(var(--pad-x) * -1) 0;
+    padding:calc(var(--pad-y) + env(safe-area-inset-top)) var(--pad-x) 18px;
+    background-color:var(--btn-primary);
+    background-image:linear-gradient(158deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,0) 62%);
+    box-shadow:0 10px 26px -16px rgba(17,30,62,.55)}
+  .greet{flex:1;min-width:0;gap:0}
+  .greet h1{font-size:21px;font-weight:800;letter-spacing:-.2px;line-height:1.25}
+  .greet p{font-size:12.5px;letter-spacing:.2px;margin-top:2px}
+
+  /* 3) 卡片材质统一：大圆角 + 轻浮起阴影 + 更淡的描边 */
+  .ring,.addbox,.imp-card,.daynav,.stats-card,.task,.trash-bar,.stats-summary .sbox{
+    border-radius:var(--r-card);box-shadow:var(--shadow);border-color:var(--border)}
+  .task:hover{box-shadow:var(--shadow-lg)}
+  .task .txt{letter-spacing:-.1px}
+  .ring{padding:18px 20px;gap:20px}
+
+  /* 4) 表单控件：从"灰底发闷"改为"浅底 + 淡描边"，聚焦有明确光环 */
+  .addbox{padding:15px 16px 14px;gap:11px}
+  .addbox input[type=text]{background:var(--card);border:1.5px solid var(--border);
+    border-radius:var(--r-ctl);padding:13px 16px}
+  .addbox input[type=text]::placeholder{color:var(--muted);opacity:.75}
+  .addbox input[type=text]:focus{border-color:var(--accent);background:var(--card);
+    box-shadow:0 0 0 4px var(--accent-soft)}
+  .addbox select,.addbox input[type=date]{background:var(--card);border:1.5px solid var(--border);
+    border-radius:var(--r-ctl)}
+
+  /* 5) 胶囊类控件统一全圆角 + 轻微立体感 */
+  .btn-add,.dn-today,.subtab,.chip,.ovr-bar .ovr-cnt{border-radius:var(--r-pill)}
+  .btn-add,.dn-today,.tp-btn-ok,.subtab.active{
+    background-image:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 100%);
+    box-shadow:var(--btn-shadow);
+    transition:transform .18s var(--ease),box-shadow .18s var(--ease),background-color .18s}
+  .btn-add{letter-spacing:.3px;font-weight:700;padding:12px 28px}
+  .dn-btn,.icon-btn,.side-btn{transition:transform .16s var(--ease),background .16s,border-color .16s,color .16s}
+  .dn-btn{background:var(--card);border-radius:var(--r-ctl)}
+  .dn-date{letter-spacing:-.2px}
+
+  /* 6) 指标数字：主色给"在做的事"，绿给"已完成"，红给"已逾期"，四栏一眼看懂 */
+  .ring .stat .num{font-size:22px;font-weight:800;letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+  #stOpen{color:var(--accent)}
+  .ring .stat .num.done{color:var(--success)}
+  .ring .stat .num.over{color:var(--error)}
+  .ring .stat .lbl{font-size:11.5px;letter-spacing:.1px}
+
+  /* 7) 空状态：图标加柔和"底托"，不再是飘着一条灰线 */
+  .empty{padding:38px 16px;font-size:13px;line-height:1.7}
+  .empty .big{position:relative;width:72px;height:72px;margin:0 auto 14px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:none;color:var(--accent)}
+  .empty .big::before{content:'';position:absolute;inset:0;border-radius:50%;
+    background:var(--accent);opacity:.12}
+  .empty .big svg{position:relative;width:32px;height:32px;stroke-width:1.6}
+  :root[data-theme="dark"] .empty .big::before{opacity:.20}
+
+  /* 8) 全局渲染细节 */
+  html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  .chip{letter-spacing:.1px;font-weight:700}
+
+  /* 9) 手机端：收紧纵向节奏，顶栏与问候语同排，消掉半屏空白 */
+  @media(max-width:760px){
+    :root{--pad-x:16px;--pad-y:14px}
+    .main{gap:14px;padding-bottom:88px}
+    .topbar{padding-bottom:14px;gap:11px}
+    .greet{flex-direction:column;align-items:flex-start;gap:0}
+    .greet h1{font-size:19px}
+    .greet p{font-size:12px;margin-top:1px}
+    .menu-btn{width:36px;height:36px}
+    .ring{padding:16px 14px;gap:14px}
+    .ring .stat .num{font-size:20px}
+    .addbox{padding:14px 14px 12px}
+  }
 </style>
 </head>
 <body>
@@ -652,9 +797,9 @@
     <div class="nav-item" data-view="overview">全日总览</div>
     <div class="nav-label">任务分类</div>
     <div class="nav-item" data-view="temp"><span class="dot" style="background:#9A5A12"></span> 临时任务 <span class="count" id="c-temp">0</span></div>
-    <div class="nav-item" data-view="work"><span class="dot" style="background:#2C4B8D"></span> 工作 <span class="count" id="c-work">0</span></div>
+    <div class="nav-item" data-view="work"><span class="dot" style="background:var(--accent)"></span> 工作 <span class="count" id="c-work">0</span></div>
     <div class="nav-sub">
-      <div class="nav-item sub" data-view="waishi"><span class="dot" style="background:#2C4B8D"></span> 外事办 <span class="count" id="c-waishi">0</span></div>
+      <div class="nav-item sub" data-view="waishi"><span class="dot" style="background:var(--accent)"></span> 外事办 <span class="count" id="c-waishi">0</span></div>
       <div class="nav-item sub" data-view="coffee"><span class="dot" style="background:#96681C"></span> 咖啡店 <span class="count" id="c-coffee">0</span></div>
       <div class="nav-item sub" data-view="trade"><span class="dot" style="background:#3F6E6A"></span> 自营交易 <span class="count" id="c-trade">0</span></div>
     </div>
@@ -662,6 +807,11 @@
     <div class="nav-item" data-view="life"><span class="dot" style="background:#1E7A5A"></span> 生活 <span class="count" id="c-life">0</span></div>
     <div class="side-btn" id="btnTpl"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12a8 8 0 0 1 13.5-5.5L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.5 5.5L4 16M4 20v-4h4"/></svg> 例行任务</div>
     <div class="side-btn" id="btnTheme"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式</div>
+    <div class="nav-label">主体颜色</div>
+    <div class="accent-card" id="accentCard">
+      <div class="accent-presets" id="accentPresets"></div>
+      <label class="accent-custom"><input type="color" id="accentCustom" value="#2C4B8D"><span>自定义</span></label>
+    </div>
     <div class="nav-label">分析</div>
     <div class="nav-item" data-view="stats"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg> 统计分析</div>
     <div class="spacer"></div>
@@ -2451,16 +2601,50 @@ function applyTheme(){
   const t=lsGet('workbench_theme');
   if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
   document.body.style.background=''; // 清理可能残留的内联背景，让 CSS 变量生效
-  const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=(t==='dark')?'#0E1220':'#2C4B8D';
   const btn=document.getElementById('btnTheme');if(btn)btn.innerHTML=(t==='dark')?ICON_SUN+' 浅色模式':ICON_MOON+' 深色模式';
+  if(typeof setAccent==='function')setAccent(currentAccent()); // 主题切换后按当前明/暗重算主色衍生色
+  syncThemeColor(); // 状态栏颜色跟随 --btn-primary（状态栏/顶部色带/添加任务按钮 三者同色）
+}
+/* ---------- 主体颜色（accent）可配置 + 跨应用共享 ---------- */
+var ACCENT_PRESETS=[
+  {name:'靛蓝',hex:'#2C4B8D'},
+  {name:'紫',hex:'#8B5CF6'},
+  {name:'青',hex:'#0E9F9A'},
+  {name:'蓝',hex:'#2563EB'},
+  {name:'玫红',hex:'#DB2777'},
+  {name:'琥珀',hex:'#D97706'}
+];
+/* 状态栏颜色 = 当前主题下的 --btn-primary，与顶部色带、添加任务按钮严格同色同源 */
+function syncThemeColor(){
+  var mt=document.querySelector('meta[name="theme-color"]');if(!mt)return;
+  var v=(getComputedStyle(document.documentElement).getPropertyValue('--btn-primary')||'').trim();
+  if(!v)v=document.documentElement.getAttribute('data-theme')==='dark'?'#3D63E0':'#2C4B8D';
+  mt.content=v;
+}
+function setAccent(hex,opts){opts=opts||{};if(window.__setAccent)window.__setAccent(hex,opts.persist!==false);}
+function currentAccent(){try{var v=localStorage.getItem('workbench_accent')||localStorage.getItem('wb_accent');if(v)return v;}catch(e){}return '#2C4B8D';}
+function buildAccentUI(){
+  var box=document.getElementById('accentPresets');if(!box)return;
+  var cur=currentAccent().toLowerCase();
+  box.innerHTML='';
+  ACCENT_PRESETS.forEach(function(p){
+    var s=document.createElement('div');
+    s.className='accent-swatch'+(p.hex.toLowerCase()===cur?' active':'');
+    s.style.background=p.hex;s.title=p.name;
+    s.onclick=function(){setAccent(p.hex);buildAccentUI();};
+    box.appendChild(s);
+  });
+  var ci=document.getElementById('accentCustom');
+  if(ci){ci.value=currentAccent();ci.oninput=function(){setAccent(ci.value);};ci.onchange=function(){setAccent(ci.value);buildAccentUI();};}
 }
 function toggleTheme(){
   const dark=!document.documentElement.getAttribute('data-theme');
   if(dark)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
   lsSet('workbench_theme',dark?'dark':'light');
   document.body.style.background=''; // 兜底：清理历史残留内联
-  const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=dark?'#0E1220':'#2C4B8D';
   const btn=document.getElementById('btnTheme');if(btn)btn.innerHTML=dark?ICON_SUN+' 浅色模式':ICON_MOON+' 深色模式';
+  if(typeof setAccent==='function')setAccent(currentAccent()); // 切换后重算主色衍生色
+  syncThemeColor(); // 状态栏颜色跟随 --btn-primary
 }
 /* D2：新版本提示条——点击刷新；仅当页面无聚焦输入框且无打开弹层时才延时自动重载 */
 function uiSafeToReload(){
@@ -2518,6 +2702,7 @@ function init(){
   setupInstallHint();
   load();
   applyTheme(); // 应用已保存的深色/浅色偏好
+  buildAccentUI(); // 渲染主体颜色选择器（预设 + 自定义）
   genRoutine(); // 打开即生成今天的例行任务
   // 跨天检测：页面一直开着跨过零点时也能自动生成
   let _lastDay=todayStr();
