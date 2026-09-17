@@ -15,7 +15,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icon-512.png">
 <script>
-/* FOUC 防护 + 主体颜色共享：解析期同步 data-theme、theme-color 与 accent，
+/* FOUC 防护 + 主题颜色共享：解析期同步 data-theme、theme-color 与 accent，
    在 <style> 解析前完成，避免首屏主题/主色闪烁；accent 优先读本地设置，
    其次读跨应用共享键 wb_accent（学习台写入），让两应用主色保持一致。 */
 (function(){
@@ -611,8 +611,9 @@
   .dn-btn.tl svg{width:16px;height:16px}
   .trophy svg{width:52px;height:52px}
   .brand .logo{font-size:0}
-  /* ---------- 主体颜色卡片 ---------- */
-  .accent-card{padding:6px 12px 10px;display:flex;flex-direction:column;gap:8px}
+  /* ---------- 主题颜色卡片（明/暗切换 + 主色） ---------- */
+  .accent-card{padding:6px 12px 10px;display:flex;flex-direction:column;gap:10px}
+  .accent-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
   .accent-presets{display:flex;flex-wrap:wrap;gap:8px}
   .accent-swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--border);transition:transform .12s,border-color .12s;box-shadow:0 1px 2px rgba(16,24,40,.10)}
   .accent-swatch:hover{transform:scale(1.08)}
@@ -739,48 +740,89 @@
   /* 自然高度、不参与伸缩：桌面端与手机端都交给侧栏自身滚动，避免内容被压缩后点不到 */
   .fold-body.open{display:flex;flex:0 0 auto}
 
-  /* 11) 侧栏「专注」模块：番茄钟 + 专注记录（极简直尺：细描边 + 单色强调，跟随主题变量） */
-  .fp{display:flex;flex-direction:column;gap:10px;padding:12px;margin-top:2px;
-    background:var(--card-2);border:1px solid var(--border);border-radius:14px}
-  .fp-top{display:flex;align-items:center;gap:10px}
-  .fp-ring{position:relative;width:58px;height:58px;flex-shrink:0}
-  .fp-ring svg{width:58px;height:58px;transform:rotate(-90deg);display:block}
-  .fp-ring circle{fill:none;stroke-width:6;stroke-linecap:round}
+  /* 11) 专注：侧栏入口 + 独立专注页（极简克制：细描边、单色强调，全部走主题变量） */
+  .nav-item .count.live{background:var(--accent);color:#fff;font-variant-numeric:tabular-nums}
+  :root[data-theme="dark"] .nav-item .count.live{color:#0E1220}
+
+  .fp-page{position:fixed;inset:0;z-index:70;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg-grad)}
+  .fp-page.show{display:block}
+  .fp-wrap{max-width:440px;margin:0 auto;min-height:100%;
+    padding:calc(18px + env(safe-area-inset-top)) 18px calc(30px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:20px}
+  .fp-head{display:flex;align-items:center;gap:10px}
+  .fp-title{font-size:20px;font-weight:700;letter-spacing:.3px}
+  .fp-head-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .fp-icbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+    color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .fp-icbtn:hover{color:var(--text);border-color:var(--text)}
+  .fp-icbtn.on{color:var(--accent);border-color:var(--accent)}
+  .fp-icbtn svg{width:17px;height:17px}
+  .fp-sec{display:flex;flex-direction:column;gap:10px}
+  .fp-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .fp-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .fp-chip{padding:12px 0;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);
+    font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s}
+  .fp-chip:hover{border-color:var(--text)}
+  .fp-chip.active{background:var(--btn-primary);border-color:transparent;color:#fff}
+  .fp-lock .fp-chip,.fp-lock .fp-custom,.fp-lock .fp-range{opacity:.45;pointer-events:none}
+  .fp-custom{display:flex;align-items:center;gap:8px}
+  .fp-step{width:38px;height:38px;flex-shrink:0;border-radius:11px;border:1px solid var(--border);background:var(--card);
+    color:var(--text);font-size:18px;line-height:1;cursor:pointer;font-family:inherit;transition:.15s}
+  .fp-step:hover{border-color:var(--accent);color:var(--accent)}
+  .fp-step:active{transform:scale(.95)}
+  .fp-input{flex:1;min-width:0;text-align:center;padding:9px 8px;border-radius:11px;border:1px solid var(--border);
+    background:var(--card);color:var(--text);font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
+  .fp-input:focus{outline:none;border-color:var(--accent)}
+  .fp-unit{font-size:12.5px;color:var(--muted)}
+  .fp-range{width:100%;height:20px;margin:0;-webkit-appearance:none;appearance:none;background:none;cursor:pointer}
+  .fp-range::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--border)}
+  .fp-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;
+    background:var(--accent);border:2px solid var(--card);box-shadow:var(--shadow)}
+  .fp-range::-moz-range-track{height:4px;border-radius:4px;background:var(--border)}
+  .fp-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--card)}
+  .fp-hint{font-size:11.5px;color:var(--muted);line-height:1.6}
+  .fp-timer{display:flex;flex-direction:column;align-items:center;gap:12px;padding:2px 0}
+  .fp-ring{position:relative;width:196px;height:196px}
+  .fp-ring svg{width:196px;height:196px;transform:rotate(-90deg);display:block}
+  .fp-ring circle{fill:none;stroke-width:4;stroke-linecap:round}
   .fp-ring .bg{stroke:var(--border)}
   .fp-ring .fg{stroke:var(--accent);transition:stroke-dashoffset .3s linear,stroke .25s}
   .fp-ring.brk .fg{stroke:var(--muted)}
-  .fp-ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-  .fp-time{font-size:16px;font-weight:700;letter-spacing:.4px;line-height:1.15;font-variant-numeric:tabular-nums}
-  .fp-phase{font-size:10px;color:var(--muted);letter-spacing:.06em}
-  .fp-side{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-  .fp-sum{font-size:12px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
-  .fp-round{font-size:11px;color:var(--muted)}
-  .fp-ctrl{display:flex;gap:8px}
-  .fp-btn{flex:1;padding:8px 0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
-    border:1px solid var(--border);background:var(--card);color:var(--text);transition:.15s;font-family:inherit}
-  .fp-btn:hover{border-color:var(--accent);color:var(--accent)}
-  .fp-btn:active{transform:scale(.97)}
-  .fp-btn.pri{background:var(--btn-primary);border-color:transparent;color:#fff}
-  .fp-btn.pri:hover{background:var(--btn-primary-hover);color:#fff}
-  .fp-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);padding-top:9px}
-  .fp-foot .fp-sum{font-size:11.5px;color:var(--muted);font-weight:500}
-  .fp-link{margin-left:auto;display:inline-flex;align-items:center;gap:3px;font-size:11.5px;color:var(--muted);
-    cursor:pointer;padding:2px 6px;border-radius:8px;user-select:none;transition:.15s}
-  .fp-link:hover{color:var(--accent);background:var(--card)}
-  .fp-link .caret{transition:transform .2s}
-  .fp-link.open .caret{transform:rotate(180deg)}
-  .fp-hist{display:none;flex-direction:column;max-height:196px;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .fp-hist.open{display:flex}
-  .fp-day{display:flex;align-items:baseline;gap:6px;font-size:10.5px;color:var(--muted);letter-spacing:.04em;
-    padding:9px 2px 3px;position:sticky;top:0;background:var(--card-2)}
+  .fp-ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+  .fp-time{font-size:46px;font-weight:700;letter-spacing:1px;line-height:1.05;font-variant-numeric:tabular-nums}
+  .fp-phase{font-size:12px;color:var(--muted);letter-spacing:.1em}
+  .fp-status{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.6}
+  .fp-status b{color:var(--text);font-weight:600}
+  .fp-actions{display:flex;gap:10px}
+  .fp-big{flex:1;padding:14px 0;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);
+    font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s}
+  .fp-big:hover{border-color:var(--text)}
+  .fp-big:active{transform:scale(.98)}
+  .fp-big.pri{background:var(--btn-primary);border-color:transparent;color:#fff}
+  .fp-big.pri:hover{background:var(--btn-primary-hover);color:#fff}
+  .fp-big:disabled{opacity:.4;pointer-events:none}
+  .fp-sumrow{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted);
+    border-top:1px solid var(--border);padding-top:14px}
+  .fp-sumrow b{color:var(--text);font-weight:600}
+  .fp-hist{display:flex;flex-direction:column}
+  .fp-day{display:flex;align-items:baseline;gap:6px;font-size:11px;color:var(--muted);letter-spacing:.04em;
+    padding:12px 2px 5px;position:sticky;top:0;background:var(--bg)}
   .fp-day:first-child{padding-top:2px}
   .fp-day .n{margin-left:auto;font-variant-numeric:tabular-nums}
-  .fp-item{display:flex;gap:8px;padding:5px 6px;border-radius:8px;font-size:12px;line-height:1.55;cursor:pointer;transition:.15s}
-  .fp-item:hover{background:var(--card)}
+  .fp-item{display:flex;gap:10px;padding:9px 11px;border-radius:12px;font-size:13px;line-height:1.55;cursor:pointer;
+    background:var(--card);border:1px solid var(--border);margin-bottom:6px;transition:.15s}
+  .fp-item:hover{border-color:var(--text)}
   .fp-item .t{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
   .fp-item .x{min-width:0;word-break:break-word}
   .fp-item.none .x{color:var(--text-disabled);font-style:italic}
-  .fp-empty{font-size:11.5px;color:var(--muted);padding:4px 2px 2px;line-height:1.7}
+  .fp-empty{font-size:12.5px;color:var(--muted);line-height:1.7;padding:2px}
+  /* 主题颜色：明/暗切换 + 主色（都在「主题颜色」折叠组内） */
+  .theme-seg{display:flex;gap:4px;padding:3px;border-radius:11px;background:var(--bg);border:1px solid var(--border)}
+  .theme-opt{flex:1;text-align:center;padding:7px 0;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--muted);
+    cursor:pointer;user-select:none;transition:.15s}
+  .theme-opt:hover{color:var(--text)}
+  .theme-opt.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+  /* 专注结束后填写产出 */
   .fp-note{background:var(--elev);border-radius:14px;padding:20px 20px 16px;width:92%;max-width:360px;
     box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--border)}
   .fp-note h3{font-size:16px;margin-bottom:5px}
@@ -790,8 +832,10 @@
     font-family:inherit;box-sizing:border-box}
   .fp-note textarea:focus{outline:none;border-color:var(--accent)}
   @media(max-width:760px){
-    .fp{padding:12px 12px}
-    .fp-hist{max-height:220px}
+    .fp-wrap{padding-left:16px;padding-right:16px;gap:18px}
+    .fp-ring,.fp-ring svg{width:172px;height:172px}
+    .fp-time{font-size:40px}
+    .fp-chip{padding:11px 0;font-size:13.5px}
   }
 </style>
 </head>
@@ -821,37 +865,20 @@
     </div>
     <div class="nav-item" data-view="study"><span class="dot" style="background:#5171AC"></span> 学习 <span class="count" id="c-study">0</span></div>
     <div class="nav-item" data-view="life"><span class="dot" style="background:#1E7A5A"></span> 生活 <span class="count" id="c-life">0</span></div>
-    <div class="fold-head" data-fold="focus">专注<span class="fold-right"><span class="fold-badge" id="foldFocusBadge"></span><svg class="fold-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="fold-body" data-fold="focus">
-      <div class="fp">
-        <div class="fp-top">
-          <div class="fp-ring" id="fpRing">
-            <svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="34"/><circle class="fg" id="fpRingFg" cx="40" cy="40" r="34"/></svg>
-            <div class="mid"><div class="fp-time" id="fpTime">25:00</div><div class="fp-phase" id="fpPhase">专注</div></div>
-          </div>
-          <div class="fp-side">
-            <div class="fp-sum" id="fpToday">今日 0 段 · 0 分钟</div>
-            <div class="fp-round" id="fpRound">第 1 轮</div>
-          </div>
-        </div>
-        <div class="fp-ctrl">
-          <div class="fp-btn pri" id="fpStart">开始</div>
-          <div class="fp-btn" id="fpReset">重置</div>
-        </div>
-        <div class="fp-foot">
-          <span class="fp-sum" id="fpWeek">本周 0 段 · 0 分钟</span>
-          <span class="fp-link" id="fpHist">记录<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="m6 9 6 6 6-6"/></svg></span>
-        </div>
-        <div class="fp-hist" id="fpHistBox"><div id="fpList"></div></div>
-      </div>
-    </div>
+    <div class="nav-label">工具</div>
+    <div class="nav-item" id="fpEntry"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg> 专注 <span class="count" id="c-focus">0</span></div>
     <div class="side-btn" id="btnTpl"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12a8 8 0 0 1 13.5-5.5L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.5 5.5L4 16M4 20v-4h4"/></svg> 例行任务</div>
-    <div class="side-btn" id="btnTheme"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg> 深色模式</div>
-    <div class="fold-head" data-fold="accent">主体颜色<span class="fold-right"><svg class="fold-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg></span></div>
+    <div class="fold-head" data-fold="accent">主题颜色<span class="fold-right"><svg class="fold-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg></span></div>
     <div class="fold-body" data-fold="accent">
       <div class="accent-card" id="accentCard">
-        <div class="accent-presets" id="accentPresets"></div>
-        <label class="accent-custom"><input type="color" id="accentCustom" value="#2C4B8D"><span>自定义</span></label>
+        <div class="theme-seg" id="themeSeg">
+          <div class="theme-opt" data-theme-opt="light">浅色</div>
+          <div class="theme-opt" data-theme-opt="dark">深色</div>
+        </div>
+        <div class="accent-row">
+          <div class="accent-presets" id="accentPresets"></div>
+          <label class="accent-custom"><input type="color" id="accentCustom" value="#2C4B8D"><span>自定义</span></label>
+        </div>
       </div>
     </div>
     <div class="fold-head" data-fold="tools" id="foldToolsHead">分析与数据<span class="fold-right"><span class="fold-badge" id="foldToolsBadge"></span><svg class="fold-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg></span></div>
@@ -1028,15 +1055,74 @@
   </div>
 </div>
 
+<!-- 专注：独立页面（点侧栏「专注」进入，不与主页面内容混排） -->
+<div class="fp-page" id="fpPage" role="dialog" aria-modal="true" aria-label="专注">
+  <div class="fp-wrap">
+    <div class="fp-head">
+      <div class="fp-title">专注</div>
+      <div class="fp-head-r">
+        <button class="fp-icbtn on" id="fpSoundBtn" title="提示音开关（点击试听）" aria-label="提示音开关">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        </button>
+        <button class="fp-icbtn" id="fpCloseBtn" title="返回" aria-label="返回">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="fp-sec" id="fpSetupSec">
+      <div class="fp-label">专注时长</div>
+      <div class="fp-chips" id="fpChips">
+        <button class="fp-chip" data-min="5">5′</button>
+        <button class="fp-chip" data-min="15">15′</button>
+        <button class="fp-chip" data-min="25">25′</button>
+        <button class="fp-chip" data-min="45">45′</button>
+        <button class="fp-chip" data-min="60">60′</button>
+      </div>
+      <div class="fp-custom" id="fpCustom">
+        <button class="fp-step" id="fpMinus" aria-label="减少 5 分钟">−</button>
+        <input class="fp-input" id="fpMinInput" type="number" min="1" max="180" step="1" inputmode="numeric" value="25" aria-label="自定义分钟数">
+        <span class="fp-unit">分钟</span>
+        <button class="fp-step" id="fpPlus" aria-label="增加 5 分钟">+</button>
+      </div>
+      <input class="fp-range" id="fpRange" type="range" min="5" max="180" step="5" value="25" aria-label="拖动调整时长">
+      <div class="fp-hint">默认 25 分钟 · 范围 1–180 分钟 · ± 与滑块步长 5 分钟（输入框可直接填任意整数）；开始后需先「结束」才能改</div>
+    </div>
+
+    <div class="fp-timer">
+      <div class="fp-ring" id="fpRing">
+        <svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="34"/><circle class="fg" id="fpRingFg" cx="40" cy="40" r="34"/></svg>
+        <div class="mid"><div class="fp-time" id="fpTime">25:00</div><div class="fp-phase" id="fpPhase">专注</div></div>
+      </div>
+      <div class="fp-status" id="fpStatus"></div>
+    </div>
+
+    <div class="fp-actions">
+      <button class="fp-big pri" id="fpStart">开始</button>
+      <button class="fp-big" id="fpStop" disabled>结束</button>
+    </div>
+
+    <div class="fp-sumrow">
+      <span id="fpToday">今日 <b>0</b> 段 · <b>0</b> 分钟</span>
+      <span id="fpWeek">本周 <b>0</b> 段 · <b>0</b> 分钟</span>
+    </div>
+
+    <div class="fp-sec">
+      <div class="fp-label">专注记录</div>
+      <div class="fp-hist" id="fpList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- focus note modal：一段专注结束后记录产出 -->
 <div class="modal-overlay" id="fpNoteModal">
   <div class="fp-note">
-    <h3>这 25 分钟做了什么？</h3>
+    <h3 id="fpNoteTitle">这 25 分钟做了什么？</h3>
     <div class="sub" id="fpNoteSub"></div>
     <textarea id="fpNoteText" maxlength="500" placeholder="一句话记录产出或卡点，方便日/周复盘回看"></textarea>
-    <div class="fp-ctrl" style="margin-top:12px">
-      <div class="fp-btn pri" id="fpNoteSave">保存</div>
-      <div class="fp-btn" id="fpNoteSkip">跳过</div>
+    <div class="fp-actions" style="margin-top:12px">
+      <button class="fp-big pri" id="fpNoteSave">保存</button>
+      <button class="fp-big" id="fpNoteSkip">跳过</button>
     </div>
   </div>
 </div>
@@ -1846,7 +1932,7 @@ function updateCounts(){
 }
 
 /* 侧栏折叠组：默认收起（FOLD_DEFAULT 可改），展开状态按组记忆在本机 */
-var FOLD_DEFAULT={tools:false,accent:false,focus:true};
+var FOLD_DEFAULT={tools:false,accent:false};
 function initSideFold(){
   const sb=document.getElementById('sidebar');
   document.querySelectorAll('.fold-head[data-fold]').forEach(head=>{
@@ -2677,16 +2763,15 @@ function showInstallHint(){
 function hideInstallHint(){const el=document.getElementById('installHint');if(el)el.style.display='none';}
 
 /* ---------- init ---------- */
-const ICON_SUN='<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';const ICON_MOON='<svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z"/></svg>';
 function applyTheme(){
   const t=lsGet('workbench_theme');
   if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
   document.body.style.background=''; // 清理可能残留的内联背景，让 CSS 变量生效
-  const btn=document.getElementById('btnTheme');if(btn)btn.innerHTML=(t==='dark')?ICON_SUN+' 浅色模式':ICON_MOON+' 深色模式';
+  markThemeSeg(); // 「主题颜色」里的 浅色/深色 选中态
   if(typeof setAccent==='function')setAccent(currentAccent()); // 主题切换后按当前明/暗重算主色衍生色
   syncThemeColor(); // 状态栏颜色跟随 --btn-primary（状态栏/顶部色带/添加任务按钮 三者同色）
 }
-/* ---------- 主体颜色（accent）可配置 + 跨应用共享 ---------- */
+/* 主题颜色（accent + 明暗）可配置 + 跨应用共享 */
 var ACCENT_PRESETS=[
   {name:'靛蓝',hex:'#2C4B8D'}   /* 只保留默认色；需要更多预设时在数组里追加即可 */
 ];
@@ -2713,14 +2798,30 @@ function buildAccentUI(){
   var ci=document.getElementById('accentCustom');
   if(ci){ci.value=currentAccent();ci.oninput=function(){setAccent(ci.value);};ci.onchange=function(){setAccent(ci.value);buildAccentUI();};}
 }
-function toggleTheme(){
-  const dark=!document.documentElement.getAttribute('data-theme');
+/* 「主题颜色」组内的 浅色/深色 切换：与快捷键 D 共用同一份偏好（workbench_theme） */
+function markThemeSeg(){
+  var dark=document.documentElement.getAttribute('data-theme')==='dark';
+  Array.prototype.forEach.call(document.querySelectorAll('#themeSeg .theme-opt'),function(o){
+    o.classList.toggle('active',(o.getAttribute('data-theme-opt')==='dark')===dark);
+  });
+}
+function setThemeMode(wantDark){
+  var dark=!!wantDark;
   if(dark)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
   lsSet('workbench_theme',dark?'dark':'light');
   document.body.style.background=''; // 兜底：清理历史残留内联
-  const btn=document.getElementById('btnTheme');if(btn)btn.innerHTML=dark?ICON_SUN+' 浅色模式':ICON_MOON+' 深色模式';
+  markThemeSeg();
   if(typeof setAccent==='function')setAccent(currentAccent()); // 切换后重算主色衍生色
   syncThemeColor(); // 状态栏颜色跟随 --btn-primary
+}
+function buildThemeSeg(){
+  Array.prototype.forEach.call(document.querySelectorAll('#themeSeg .theme-opt'),function(o){
+    o.onclick=function(){setThemeMode(o.getAttribute('data-theme-opt')==='dark');};
+  });
+  markThemeSeg();
+}
+function toggleTheme(){
+  setThemeMode(!document.documentElement.getAttribute('data-theme'));
 }
 /* D2：新版本提示条——点击刷新；仅当页面无聚焦输入框且无打开弹层时才延时自动重载 */
 function uiSafeToReload(){
@@ -2778,9 +2879,10 @@ function init(){
   setupInstallHint();
   load();
   applyTheme(); // 应用已保存的深色/浅色偏好
-  buildAccentUI(); // 渲染主体颜色选择器（预设 + 自定义）
-  initSideFold();  // 侧栏「分析与数据」折叠组
-  initFocusPanel(); // 侧栏「专注」模块：番茄钟 + 专注记录
+  buildAccentUI(); // 渲染主题颜色选择器（预设 + 自定义）
+  buildThemeSeg(); // 「主题颜色」里的 浅色/深色 切换
+  initSideFold();  // 侧栏折叠组（主题颜色 / 分析与数据）
+  initFocusPage(); // 专注：独立页面 + 番茄钟 + 专注记录
   genRoutine(); // 打开即生成今天的例行任务
   // 跨天检测：页面一直开着跨过零点时也能自动生成
   let _lastDay=todayStr();
@@ -2824,10 +2926,13 @@ function init(){
   };
   document.getElementById('editText').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
   document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit();});
-  document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{
+  document.querySelectorAll('.nav-item').forEach(n=>{
     const v=n.dataset.view;
-    if(v==='waishi'||v==='coffee'||v==='trade')setWorkSub(v);
-    else setView(v);
+    if(!v)return; // 「专注」等纯入口项不带 data-view，由各自模块绑定点击
+    n.onclick=()=>{
+      if(v==='waishi'||v==='coffee'||v==='trade')setWorkSub(v);
+      else setView(v);
+    };
   });
   document.querySelectorAll('.bn').forEach(n=>n.onclick=()=>setView(n.dataset.view));
   document.getElementById('btnExportFile').onclick=exportFile;
@@ -2837,7 +2942,6 @@ function init(){
   document.getElementById('btnClear').onclick=clearAll;
   document.getElementById('btnSync').onclick=openSync;
   document.getElementById('btnTpl').onclick=()=>{openTpl();closeSidebar();};
-  document.getElementById('btnTheme').onclick=toggleTheme;
   document.getElementById('tplClose').onclick=()=>document.getElementById('tplModal').classList.remove('show');
   document.getElementById('tplModal').addEventListener('click',e=>{if(e.target.id==='tplModal')e.currentTarget.classList.remove('show');});
   document.getElementById('tplAddBtn').onclick=addTpl;
@@ -2911,6 +3015,9 @@ function init(){
       if(e.key==='Escape'){ae.blur();}
       return;
     }
+    // 专注页打开时不吃全局快捷键，避免误触切换视图/主题
+    const _fpp=document.getElementById('fpPage');
+    if(_fpp&&_fpp.classList.contains('show'))return;
     if(e.key==='n'||e.key==='N'){e.preventDefault();const inp=document.getElementById('taskInput');if(inp){inp.focus();inp.scrollIntoView({behavior:'smooth',block:'center'});}}
     else if(e.key==='t'||e.key==='T'){e.preventDefault();selDate='';setView('today');}
     else if(e.key==='l'||e.key==='L'){e.preventDefault();tlMode=!tlMode;render();}
@@ -2926,32 +3033,89 @@ window.addEventListener('load',()=>setTimeout(hideBoot,1300));
 // 等 DOM 完全解析后再初始化（kbdOverlay 等元素在脚本之后，需确保已存在）
 if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
 
-/* ==================== 侧栏「专注」模块：番茄钟 + 专注记录 ====================
-   规则：25 分钟专注 → 自动进入 5 分钟休息 → 休息结束回到专注，等待手动开启下一轮。
-   计时基于绝对结束时间戳（endAt），标签被节流/休眠后回前台不会走偏；
-   运行状态写入 localStorage，刷新或重开页面可继续，关闭期间走完的那轮会补记。
-   记录字段：id / start(开始 时间戳) / durMs(时长) / text(用户填写的产出)。          */
-var FP_KEY='workbench_focus_v1', FP_STATE='workbench_focus_state_v1', FP_HIST='workbench_focus_hist';
-var FOCUS_MS=25*60000, BREAK_MS=5*60000, FP_MAX=300; // 本地最多保留的会话条数
-var focusList=[];
-var fp={phase:'focus',remain:FOCUS_MS,endAt:0,running:false,startedAt:0,round:1,_t:null};
+/* ==================== 专注：独立页面 + 番茄钟 + 专注记录 ====================
+   入口：侧栏「专注」→ 打开独立页面（fixed 覆盖整屏，不与主页面内容混排）。
+   时长：预设 5/15/25/45/60 分钟，默认 25；自定义 1–180 分钟，步长 5（± 按钮 / 滑块 / 直接输入）。
+   流程：专注倒计时 → 到点响铃 + 弹「这 N 分钟做了什么」→ 自动进入 5 分钟休息 → 休息结束响铃回到待机。
+   计时基于绝对结束时间戳 endAt，标签节流/休眠后回前台不走偏；运行状态与所选时长持久化，刷新可续。
+   记录字段：id / start(开始时间戳) / durMs(实际专注时长) / text(用户填写的产出)。 */
+var FP_KEY='workbench_focus_v1', FP_STATE='workbench_focus_state_v1',
+    FP_DURKEY='workbench_focus_dur', FP_SNDKEY='workbench_focus_sound';
+var FP_DEF_MIN=25, FP_MIN_MIN=1, FP_MIN_MAX=180, FP_MIN_STEP=5;
+var BREAK_MS=5*60000, FP_MAX=300;
+var focusList=[], fpDurMin=FP_DEF_MIN, fpSound=true;
+var fp={phase:'focus',total:FP_DEF_MIN*60000,remain:FP_DEF_MIN*60000,endAt:0,running:false,startedAt:0,_t:null};
 try{focusList=JSON.parse(lsGet(FP_KEY)||'[]');if(!Array.isArray(focusList))focusList=[];}catch(e){focusList=[];}
-try{var _fpS=JSON.parse(lsGet(FP_STATE)||'{}');
-  if(_fpS&&typeof _fpS==='object'&&_fpS.remain){
-    fp.phase=_fpS.phase==='break'?'break':'focus';
-    fp.remain=Math.max(0,+_fpS.remain||0);fp.round=+_fpS.round||1;
-    fp.running=!!_fpS.running;fp.endAt=+_fpS.endAt||0;fp.startedAt=+_fpS.startedAt||0;
+try{var _fd=parseInt(lsGet(FP_DURKEY)||'',10);if(_fd>=FP_MIN_MIN&&_fd<=FP_MIN_MAX)fpDurMin=_fd;}catch(e){}
+fp.total=fpDurMin*60000;fp.remain=fp.total;
+try{if(lsGet(FP_SNDKEY)==='0')fpSound=false;}catch(e){}
+try{var _fs=JSON.parse(lsGet(FP_STATE)||'{}');
+  if(_fs&&typeof _fs==='object'&&_fs.remain){
+    fp.phase=_fs.phase==='break'?'break':'focus';
+    var _ft=parseInt(_fs.total,10);
+    if(_ft>=FP_MIN_MIN*60000&&_ft<=FP_MIN_MAX*60000){fp.total=_ft;fpDurMin=Math.round(_ft/60000);}
+    fp.remain=Math.max(0,+_fs.remain||0);
+    fp.running=!!_fs.running;fp.endAt=+_fs.endAt||0;fp.startedAt=+_fs.startedAt||0;
   }}catch(e){}
 function saveFocus(){lsSet(FP_KEY,JSON.stringify(focusList));schedulePush();}
-function saveFpState(){lsSet(FP_STATE,JSON.stringify({phase:fp.phase,remain:fp.remain,endAt:fp.endAt,running:fp.running,startedAt:fp.startedAt,round:fp.round}));}
-function fpTotal(){return fp.phase==='break'?BREAK_MS:FOCUS_MS;}
+function saveFpState(){lsSet(FP_STATE,JSON.stringify({phase:fp.phase,total:fp.total,remain:fp.remain,endAt:fp.endAt,running:fp.running,startedAt:fp.startedAt}));}
+function fpTotal(){return fp.phase==='break'?BREAK_MS:fp.total;}
+function fpIdle(){return !fp.running&&fp.phase==='focus'&&fp.remain===fp.total&&!fp.startedAt;}
 function fpSec2(ms){var s=Math.max(0,Math.ceil((ms||0)/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function fpMin(ms){var m=Math.round((ms||0)/60000);return m<1?1:m;}
 function fpDayKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fpClock(ts){var d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
-function fpWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime();} // 周一 00:00
+function fpWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime();}
 function fpStat(from){var a=focusList.filter(function(r){return (r.start||0)>=from;});
   return {n:a.length,m:Math.round(a.reduce(function(s,r){return s+(r.durMs||0);},0)/60000)};}
-/* 渲染：圆环进度 / 倒计时 / 阶段 / 按钮文案 / 汇总 / 记录列表；折叠后状态走折叠徽章 */
+
+/* ---------- 提示音：Web Audio 合成，无外部音频文件，离线可用 ---------- */
+var _fpAC=null;
+function fpAudio(){try{if(!_fpAC)_fpAC=new (window.AudioContext||window.webkitAudioContext)();
+  if(_fpAC.state==='suspended')_fpAC.resume();return _fpAC;}catch(e){return null;}}
+function fpBeep(n){
+  if(!fpSound)return;
+  var ac=fpAudio();if(!ac)return;
+  n=n||3;
+  try{
+    for(var i=0;i<n;i++){
+      var t0=ac.currentTime+i*0.34, o=ac.createOscillator(), g=ac.createGain();
+      o.type='sine';o.frequency.setValueAtTime(i===n-1?1046:784,t0);
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.exponentialRampToValueAtTime(0.3,t0+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+0.28);
+      o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+0.3);
+    }
+  }catch(e){}
+}
+function fpSoundUI(){var b=document.getElementById('fpSoundBtn');if(b)b.classList.toggle('on',fpSound);}
+
+/* ---------- 时长选择：预设 / ± 微调 / 滑块 / 直接输入 ---------- */
+function fpSetDuration(min,syncInput){
+  min=Math.round(+min||0);
+  if(!(min>=FP_MIN_MIN))return false; // 非法输入（空/0/非数字）：交调用方回填原值
+  min=Math.min(FP_MIN_MAX,min);
+  fpDurMin=min;lsSet(FP_DURKEY,String(min));
+  if(fpIdle()){fp.total=min*60000;fp.remain=fp.total;saveFpState();}
+  if(syncInput!==true){
+    var inp=document.getElementById('fpMinInput'),rg=document.getElementById('fpRange');
+    if(inp)inp.value=min;if(rg)rg.value=min;
+  }
+  fpRender();
+  return true;
+}
+function fpSyncDurUI(){
+  if(document.activeElement!==document.getElementById('fpMinInput')){
+    var inp=document.getElementById('fpMinInput');if(inp&&+inp.value!==fpDurMin)inp.value=fpDurMin;
+  }
+  var rg=document.getElementById('fpRange');if(rg&&+rg.value!==fpDurMin)rg.value=fpDurMin;
+  var box=document.getElementById('fpChips');
+  if(box)Array.prototype.forEach.call(box.querySelectorAll('.fp-chip'),function(c){
+    c.classList.toggle('active',+c.getAttribute('data-min')===fpDurMin);
+  });
+}
+
+/* ---------- 渲染：进度环 / 倒计时 / 阶段 / 状态 / 按钮 / 汇总 / 记录 ---------- */
 function fpRender(){
   var tot=fpTotal(), r=Math.max(0,fp.remain), C=2*Math.PI*34;
   var ring=document.getElementById('fpRing'), fg=document.getElementById('fpRingFg');
@@ -2959,32 +3123,42 @@ function fpRender(){
   if(ring)ring.classList.toggle('brk',fp.phase==='break');
   var t=document.getElementById('fpTime');if(t)t.textContent=fpSec2(r);
   var p=document.getElementById('fpPhase');if(p)p.textContent=fp.phase==='break'?'休息':'专注';
-  var b=document.getElementById('fpStart');if(b)b.textContent=fp.running?'暂停':(r<tot?'继续':'开始');
-  var rd=document.getElementById('fpRound');if(rd)rd.textContent='第 '+fp.round+' 轮';
+  var st=document.getElementById('fpStatus');
+  if(st){
+    if(fp.phase==='break')st.innerHTML=fp.running?'休息中 · 剩余 <b>'+fpSec2(r)+'</b>':'休息已暂停 · 剩余 <b>'+fpSec2(r)+'</b>';
+    else if(fp.running)st.innerHTML='专注中 · 已专注 <b>'+fpSec2(tot-r)+'</b> / '+Math.round(tot/60000)+' 分钟';
+    else if(!fpIdle())st.innerHTML='已暂停 · 剩余 <b>'+fpSec2(r)+'</b>';
+    else st.innerHTML='待机 · 本轮 <b>'+fpDurMin+'</b> 分钟，休息 5 分钟';
+  }
+  var b=document.getElementById('fpStart');
+  if(b)b.textContent=fp.running?'暂停':(fp.phase==='break'?'暂停休息':(fpIdle()?'开始':'继续'));
+  var sb=document.getElementById('fpStop');if(sb)sb.disabled=fpIdle();
+  var sec=document.getElementById('fpSetupSec');if(sec)sec.classList.toggle('fp-lock',!fpIdle());
+  fpSyncDurUI();
   var today=focusList.filter(function(x){return fpDayKey(x.start||0)===fpDayKey(Date.now());});
-  var td=document.getElementById('fpToday');
-  if(td)td.textContent='今日 '+today.length+' 段 · '+Math.round(today.reduce(function(s,x){return s+(x.durMs||0);},0)/60000)+' 分钟';
+  var tm=Math.round(today.reduce(function(s,x){return s+(x.durMs||0);},0)/60000);
+  var td=document.getElementById('fpToday');if(td)td.innerHTML='今日 <b>'+today.length+'</b> 段 · <b>'+tm+'</b> 分钟';
   var wk=fpStat(fpWeekStart());
-  var we=document.getElementById('fpWeek');if(we)we.textContent='本周 '+wk.n+' 段 · '+wk.m+' 分钟';
-  var bd=document.getElementById('foldFocusBadge');
-  if(bd)bd.textContent=fp.running?((fp.phase==='break'?'休息 ':'专注 ')+fpSec2(r)):('今日 '+today.length+' 段');
+  var we=document.getElementById('fpWeek');if(we)we.innerHTML='本周 <b>'+wk.n+'</b> 段 · <b>'+wk.m+'</b> 分钟';
+  var cb=document.getElementById('c-focus');
+  if(cb){var live=fp.running||!fpIdle();cb.textContent=live?fpSec2(r):String(tm);cb.classList.toggle('live',live);}
   fpHistRender();
 }
-/* 记录列表：按自然日倒序分组，日标题带当日合计，便于按日/周复盘；点击任一条可补写文字 */
+/* 记录列表：按自然日倒序分组，日标题带当日合计，便于按日/周复盘；点任一条可补写文字 */
 function fpHistRender(){
   var box=document.getElementById('fpList');if(!box)return;
   var list=focusList.slice().sort(function(a,b){return (b.start||0)-(a.start||0);});
-  if(!list.length){box.innerHTML='<div class="fp-empty">还没有专注记录。完成一段 25 分钟专注后，会自动生成一条。</div>';return;}
+  if(!list.length){box.innerHTML='<div class="fp-empty">还没有专注记录。完成一段专注后会自动生成一条，点它可补写内容。</div>';return;}
   var html='',cur='';
   list.slice(0,FP_MAX).forEach(function(r){
     var k=fpDayKey(r.start||0);
     if(k!==cur){
       cur=k;var d=new Date(r.start),same=focusList.filter(function(x){return fpDayKey(x.start||0)===k;});
-      html+='<div class="fp-day"><span>'+(d.getMonth()+1)+'月'+d.getDate()+'日</span><span class="wk">周'+'日一二三四五六'.charAt(d.getDay())+'</span>'+
+      html+='<div class="fp-day"><span>'+(d.getMonth()+1)+'月'+d.getDate()+'日</span><span>周'+'日一二三四五六'.charAt(d.getDay())+'</span>'+
         '<span class="n">'+same.length+' 段 · '+Math.round(same.reduce(function(s,x){return s+(x.durMs||0);},0)/60000)+' 分钟</span></div>';
     }
     var txt=(r.text||'').trim();
-    html+='<div class="fp-item'+(txt?'':' none')+'" data-fid="'+r.id+'"><span class="t">'+fpClock(r.start)+' · '+Math.round((r.durMs||0)/60000)+'分</span>'+
+    html+='<div class="fp-item'+(txt?'':' none')+'" data-fid="'+r.id+'"><span class="t">'+fpClock(r.start)+' · '+fpMin(r.durMs)+'分</span>'+
       '<span class="x">'+(txt?escapeHtml(txt):'未记录')+'</span></div>';
   });
   box.innerHTML=html;
@@ -2992,19 +3166,29 @@ function fpHistRender(){
     el.onclick=function(){fpOpenNote(el.getAttribute('data-fid'));};
   });
 }
+
+/* ---------- 计时控制 ---------- */
 function fpToggle(){
-  if(fp.running){fp.remain=Math.max(0,fp.endAt-Date.now());fp.running=false;clearInterval(fp._t);fp._t=null;}
-  else{
+  if(fp.running){
+    fp.remain=Math.max(0,fp.endAt-Date.now());fp.running=false;clearInterval(fp._t);fp._t=null;
+  }else{
+    if(fpIdle()){fp.total=fpDurMin*60000;fp.remain=fp.total;}
     if(!fp.startedAt)fp.startedAt=Date.now();
+    fpAudio(); // 在用户手势里解锁音频上下文，保证后续自动响铃能被播放
     fp.endAt=Date.now()+fp.remain;fp.running=true;
     clearInterval(fp._t);fp._t=setInterval(fpTick,250);
   }
   saveFpState();fpRender();
 }
-function fpReset(){
-  clearInterval(fp._t);fp._t=null;fp.running=false;
-  fp.phase='focus';fp.remain=FOCUS_MS;fp.endAt=0;fp.startedAt=0;
+/* 结束：本轮作废回待机；已专注 ≥1 分钟则记一条并请用户补写产出 */
+function fpEnd(){
+  if(fpIdle())return;
+  clearInterval(fp._t);fp._t=null;
+  var wasFocus=fp.phase==='focus';
+  var elapsed=wasFocus?Math.max(0,fp.total-fp.remain):0;
+  fp.running=false;fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
   saveFpState();fpRender();
+  if(wasFocus&&elapsed>=60000){fpAddRecord(Date.now()-elapsed,elapsed);fpOpenNote();}
 }
 function fpTick(){
   if(!fp.running)return;
@@ -3012,17 +3196,18 @@ function fpTick(){
   if(fp.remain<=0){fpComplete();return;}
   fpRender();
 }
-/* 阶段结束：专注 → 生成记录 + 自动进入休息并弹出填写；休息结束 → 回到专注，等待手动开启下一轮 */
+/* 阶段结束：专注 → 响铃 + 生成记录 + 弹填写 + 自动进入休息；休息结束 → 响铃 + 回到待机 */
 function fpComplete(){
   clearInterval(fp._t);fp._t=null;fp.running=false;
   if(fp.phase==='focus'){
-    var st=fp.startedAt||(Date.now()-FOCUS_MS);
-    fpAddRecord(st,FOCUS_MS);
+    fpAddRecord(fp.startedAt||(Date.now()-fp.total),fp.total);
+    fpBeep(3);
     fp.phase='break';fp.remain=BREAK_MS;fp.endAt=Date.now()+BREAK_MS;fp.startedAt=Date.now();
-    fp.running=true;fp._t=setInterval(fpTick,250);fp.round++;
+    fp.running=true;fp._t=setInterval(fpTick,250);
     saveFpState();fpRender();fpOpenNote();
   }else{
-    fp.phase='focus';fp.remain=FOCUS_MS;fp.endAt=0;fp.startedAt=0;
+    fpBeep(2);
+    fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     saveFpState();fpRender();
   }
 }
@@ -3032,15 +3217,17 @@ function fpAddRecord(start,dur){
   if(focusList.length>FP_MAX*2)focusList=focusList.slice(-FP_MAX*2);
   saveFocus();return rec;
 }
-/* 填写弹窗：新完成的一轮自动打开；历史里点任一条可补写/修改（始终保存，避免输入丢失） */
+
+/* ---------- 产出填写弹窗（新完成的一轮自动打开；点历史任一条可补写，始终保存避免输入丢失） ---------- */
 var _fpEditId=null;
 function fpOpenNote(id){
   var rec=id?focusList.filter(function(x){return x.id===id;})[0]:focusList[focusList.length-1];
   if(!rec)return;
   _fpEditId=rec.id;
   var ta=document.getElementById('fpNoteText');if(ta)ta.value=rec.text||'';
+  var ti=document.getElementById('fpNoteTitle');if(ti)ti.textContent='这 '+fpMin(rec.durMs)+' 分钟做了什么？';
   var sub=document.getElementById('fpNoteSub');
-  if(sub)sub.textContent=fpClock(rec.start)+' 开始 · 专注 '+Math.round((rec.durMs||0)/60000)+' 分钟';
+  if(sub)sub.textContent=fpClock(rec.start)+' 开始 · 专注 '+fpMin(rec.durMs)+' 分钟';
   document.getElementById('fpNoteModal').classList.add('show');
   setTimeout(function(){if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},80);
 }
@@ -3054,14 +3241,48 @@ function fpSaveNote(){
   var rec=focusList.filter(function(x){return x.id===_fpEditId;})[0];
   if(rec){rec.text=v;rec.updated=Date.now();saveFocus();fpRender();}
 }
-function initFocusPanel(){
+
+/* ---------- 独立页面开关 ---------- */
+function fpOpenPage(){
+  var pg=document.getElementById('fpPage');if(!pg)return;
+  pg.classList.add('show');pg.scrollTop=0;
+  document.body.style.overflow='hidden'; // 专注页自己滚，防止背后列表跟着动
+  var e=document.getElementById('fpEntry');if(e)e.classList.add('active');
+  fpRender();
+}
+function fpClosePage(){
+  var pg=document.getElementById('fpPage');if(!pg)return;
+  pg.classList.remove('show');
+  document.body.style.overflow='';
+  var e=document.getElementById('fpEntry');if(e)e.classList.remove('active');
+  closeSidebar();
+}
+
+/* ---------- 初始化 ---------- */
+function initFocusPage(){
+  document.getElementById('fpEntry').onclick=function(){fpOpenPage();closeSidebar();};
+  document.getElementById('fpCloseBtn').onclick=fpClosePage;
   document.getElementById('fpStart').onclick=fpToggle;
-  document.getElementById('fpReset').onclick=fpReset;
-  var trg=document.getElementById('fpHist'),box=document.getElementById('fpHistBox');
-  if(trg&&box){
-    trg.onclick=function(){var open=box.classList.toggle('open');trg.classList.toggle('open',open);lsSet(FP_HIST,open?'1':'0');};
-    if(lsGet(FP_HIST)==='1'){box.classList.add('open');trg.classList.add('open');}
+  document.getElementById('fpStop').onclick=fpEnd;
+  document.getElementById('fpSoundBtn').onclick=function(){
+    fpSound=!fpSound;lsSet(FP_SNDKEY,fpSound?'1':'0');fpSoundUI();
+    if(fpSound)fpBeep(1); // 打开时试听一声
+  };
+  fpSoundUI();
+  var chips=document.getElementById('fpChips');
+  if(chips)Array.prototype.forEach.call(chips.querySelectorAll('.fp-chip'),function(c){
+    c.onclick=function(){fpSetDuration(+c.getAttribute('data-min'));};
+  });
+  var inp=document.getElementById('fpMinInput');
+  if(inp){
+    var commit=function(){if(!fpSetDuration(inp.value))inp.value=fpDurMin;};
+    inp.onchange=commit;inp.onblur=commit;
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();inp.blur();}});
   }
+  var rg=document.getElementById('fpRange');
+  if(rg)rg.oninput=function(){fpSetDuration(rg.value);};
+  document.getElementById('fpMinus').onclick=function(){fpSetDuration(fpDurMin-FP_MIN_STEP);};
+  document.getElementById('fpPlus').onclick=function(){fpSetDuration(fpDurMin+FP_MIN_STEP);};
   document.getElementById('fpNoteSave').onclick=function(){fpSaveNote();fpCloseNote(false);};
   document.getElementById('fpNoteSkip').onclick=function(){fpCloseNote(false);};
   document.getElementById('fpNoteModal').addEventListener('click',function(e){if(e.target.id==='fpNoteModal')fpCloseNote(true);});
@@ -3069,14 +3290,21 @@ function initFocusPanel(){
     if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();fpSaveNote();fpCloseNote(false);}
     if(e.key==='Escape'){e.preventDefault();fpCloseNote(true);}
   });
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape')return;
+    var note=document.getElementById('fpNoteModal');
+    if(note&&note.classList.contains('show'))return;
+    if(document.getElementById('fpPage').classList.contains('show'))fpClosePage();
+  });
   /* 恢复上次运行状态：仍在计时则续走；页面关闭期间已走完的那轮补记一条并请用户补写 */
   if(fp.running){
     var left=fp.endAt-Date.now();
     if(left>0){fp.remain=left;clearInterval(fp._t);fp._t=setInterval(fpTick,250);fpRender();return;}
     fp.running=false;
-    if(fp.phase==='focus'){fpAddRecord(fp.startedAt||(Date.now()-FOCUS_MS),FOCUS_MS);fp.round++;}
-    fp.phase='break';fp.remain=BREAK_MS;fp.endAt=0;fp.startedAt=0;
-    saveFpState();fpRender();fpOpenNote();
+    if(fp.phase==='focus')fpAddRecord(fp.startedAt||(Date.now()-fp.total),fp.total);
+    fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
+    saveFpState();fpRender();
+    fpOpenNote();
     return;
   }
   fpRender();
