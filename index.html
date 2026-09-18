@@ -3080,30 +3080,47 @@ function init(){
 
   document.getElementById('addBtn').onclick=addTask;
   document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
-  // 手机端软键盘压缩可视高度：添加框被上方「重要」置顶卡顶到屏幕下方时会被键盘挡住，聚焦后自动滚到键盘上方
-  let kbEl=null,kbBox=null;
+  // 手机端软键盘：添加框（尤其上方「重要」卡片把它顶下去时）会被键盘挡住。
+  // 聚焦后把输入框滚动到键盘上方；多次校正以对抗浏览器原生聚焦滚动的滞后/回弹；
+  // 同时给文档补一段"键盘高度"底部留白，保证页面不够长时也能滚得动。
+  let kbEl=null,kbBox=null,_kbTimers=[];
+  function kbClearTimers(){_kbTimers.forEach(t=>clearTimeout(t));_kbTimers=[];}
   function kbKeepVisible(){
     if(!kbEl||document.activeElement!==kbEl)return;
     const box=(kbBox&&kbBox.isConnected)?kbBox:kbEl;
     const vv=window.visualViewport;
-    const vh=vv?vv.height:window.innerHeight, vt=vv?vv.offsetTop:0, m=12;
+    const vh=vv?vv.height:window.innerHeight;
+    const vt=(vv&&typeof vv.offsetTop==='number')?vv.offsetTop:0;
+    const m=16;
     const r=box.getBoundingClientRect();
     let dy=0;
-    if(r.bottom-vt>vh-m)dy=(r.bottom-vt)-(vh-m);
-    if(r.top-vt-dy<m)dy=r.top-vt-m;
+    if(r.bottom-vt>vh-m)dy=(r.bottom-vt)-(vh-m);   // 底部被键盘压住 → 上移
+    if(r.top-vt-dy<m)dy=(r.top-vt)-m;              // 上移后顶部也不能被状态栏吃掉
     if(Math.abs(dy)>1)window.scrollBy(0,Math.round(dy));
+  }
+  function kbPad(){ // 键盘撑开期给文档补底部留白，保证可滚动到输入框之上
+    const vv=window.visualViewport;
+    if(!vv||!kbEl)return;
+    const kbH=Math.max(0,(window.innerHeight||0)-(vv.height||0)-(vv.offsetTop||0));
+    document.documentElement.style.paddingBottom=(kbH>0?kbH+24:0)+'px';
+  }
+  function kbSchedule(){
+    kbClearTimers();kbPad();
+    [60,200,350,550,800].forEach(d=>_kbTimers.push(setTimeout(()=>{kbPad();kbKeepVisible();},d)));
   }
   const addBoxKb=document.getElementById('taskAddBox');
   if(addBoxKb){
     addBoxKb.addEventListener('focusin',e=>{
       const el=e.target;
       if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))return;
-      kbEl=el;kbBox=addBoxKb;
-      setTimeout(kbKeepVisible,300);
+      kbEl=el;kbBox=addBoxKb;kbSchedule();
     });
-    addBoxKb.addEventListener('focusout',()=>{kbEl=null;});
+    addBoxKb.addEventListener('focusout',()=>{kbEl=null;kbClearTimers();document.documentElement.style.paddingBottom='';});
   }
-  if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>setTimeout(kbKeepVisible,60));
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',()=>{if(kbEl){kbPad();kbKeepVisible();}});
+    window.visualViewport.addEventListener('scroll',()=>{if(kbEl)kbKeepVisible();}); // 浏览器原生滚动后再次校正
+  }
   document.getElementById('dayPrev').onclick=()=>shiftDay(-1);
   document.getElementById('dayNext').onclick=()=>shiftDay(1);
   document.getElementById('dayToday').onclick=()=>{
