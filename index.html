@@ -831,7 +831,6 @@
   .fp-item:hover{border-color:var(--text)}
   .fp-item .t{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
   .fp-item .x{min-width:0;word-break:break-word}
-  .fp-item.none .x{color:var(--text-disabled);font-style:italic}
   /* 主题颜色：明/暗切换 + 主色（都在「主题颜色」折叠组内） */
   .theme-seg{display:flex;gap:4px;padding:3px;border-radius:11px;background:var(--bg);border:1px solid var(--border)}
   .theme-opt{flex:1;text-align:center;padding:7px 0;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--muted);
@@ -947,8 +946,9 @@
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand"><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg> 我的工作台</div>
-    <div class="nav-item" id="fpEntry"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg> 专注 <span class="count" id="c-focus">0</span></div>
+    
     <div class="nav-label">视图</div>
+    <div class="nav-item" id="fpEntry"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg> 专注 <span class="count" id="c-focus">0</span></div>
     <div class="nav-item active" data-view="today"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg> 今日待办 <span class="count" id="c-today">0</span></div>
     <div class="nav-item" data-view="overview">全日总览</div>
     <div class="nav-label">任务分类</div>
@@ -3080,6 +3080,30 @@ function init(){
 
   document.getElementById('addBtn').onclick=addTask;
   document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+  // 手机端软键盘压缩可视高度：添加框被上方「重要」置顶卡顶到屏幕下方时会被键盘挡住，聚焦后自动滚到键盘上方
+  let kbEl=null,kbBox=null;
+  function kbKeepVisible(){
+    if(!kbEl||document.activeElement!==kbEl)return;
+    const box=(kbBox&&kbBox.isConnected)?kbBox:kbEl;
+    const vv=window.visualViewport;
+    const vh=vv?vv.height:window.innerHeight, vt=vv?vv.offsetTop:0, m=12;
+    const r=box.getBoundingClientRect();
+    let dy=0;
+    if(r.bottom-vt>vh-m)dy=(r.bottom-vt)-(vh-m);
+    if(r.top-vt-dy<m)dy=r.top-vt-m;
+    if(Math.abs(dy)>1)window.scrollBy(0,Math.round(dy));
+  }
+  const addBoxKb=document.getElementById('taskAddBox');
+  if(addBoxKb){
+    addBoxKb.addEventListener('focusin',e=>{
+      const el=e.target;
+      if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))return;
+      kbEl=el;kbBox=addBoxKb;
+      setTimeout(kbKeepVisible,300);
+    });
+    addBoxKb.addEventListener('focusout',()=>{kbEl=null;});
+  }
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>setTimeout(kbKeepVisible,60));
   document.getElementById('dayPrev').onclick=()=>shiftDay(-1);
   document.getElementById('dayNext').onclick=()=>shiftDay(1);
   document.getElementById('dayToday').onclick=()=>{
@@ -3246,7 +3270,7 @@ try{var _fd=parseInt(lsGet(FP_DURKEY)||'',10);if(_fd>=FP_MIN_MIN&&_fd<=FP_MIN_MA
 fp.total=fpDurMin*60000;fp.remain=fp.total;
 try{if(lsGet(FP_SNDKEY)==='0')fpSound=false;}catch(e){}
 try{var _fs=JSON.parse(lsGet(FP_STATE)||'{}');
-  if(_fs&&typeof _fs==='object'&&_fs.remain){
+  if(_fs&&typeof _fs==='object'&&(_fs.running||+_fs.remain>0)){
     fp.phase=_fs.phase==='break'?'break':'focus';
     var _ft=parseInt(_fs.total,10);
     if(_ft>=FP_MIN_MIN*60000&&_ft<=FP_MIN_MAX*60000){fp.total=_ft;fpDurMin=Math.round(_ft/60000);}
@@ -3294,10 +3318,17 @@ function fpBeep(short){
     }
   }catch(e){}
 }
-function fpAlert(title,sub){
+var _fpAlertCb=null;
+function fpAlert(title,sub,cb){
   var t=document.getElementById('fpAlertTitle');if(t)t.textContent=title;
   var s=document.getElementById('fpAlertSub');if(s)s.textContent=sub||'';
+  _fpAlertCb=(typeof cb==='function')?cb:null;
   var m=document.getElementById('fpAlertModal');if(m)m.classList.add('show');
+}
+function fpAlertClose(){
+  var m=document.getElementById('fpAlertModal');if(m)m.classList.remove('show');
+  var cb=_fpAlertCb;_fpAlertCb=null;
+  if(cb){try{cb();}catch(e){}}
 }
 function fpSoundUI(){var b=document.getElementById('fpSoundBtn');if(b)b.classList.toggle('on',fpSound);}
 
@@ -3361,8 +3392,9 @@ function fpRender(){
 function fpHistRender(){
   var box=document.getElementById('fpList');if(!box)return;
   var sec=document.getElementById('fpHistSec');
-  var list=focusList.slice().sort(function(a,b){return (b.start||0)-(a.start||0);});
-  if(!list.length){if(sec)sec.style.display='none';box.innerHTML='';return;} // 无记录不显示内容
+  // 只保留写了文字的记录：没写内容的那几轮不进列表，列表/按日分组口径一致
+  var list=focusList.filter(function(r){return !!(''+(r&&r.text||'')).trim();}).sort(function(a,b){return (b.start||0)-(a.start||0);});
+  if(!list.length){if(sec)sec.style.display='none';box.innerHTML='';return;} // 无文字记录则不显示内容
   if(sec)sec.style.display='';
   var byK={},keys=[];
   list.slice(0,FP_MAX).forEach(function(r){
@@ -3382,9 +3414,9 @@ function fpHistRender(){
       '<span class="caret">▾</span></div>';
     html+='<div class="fp-daybody"'+(open?'':' style="display:none"')+'>'+
       rs.map(function(r){
-        var txt=(r.text||'').trim();
-        return '<div class="fp-item'+(txt?'':' none')+'" data-fid="'+r.id+'"><span class="t">'+fpClock(r.start)+' · '+fpMin(r.durMs)+'分</span>'+
-          '<span class="x">'+(txt?escapeHtml(txt):'未记录')+'</span></div>';
+        var txt=(''+(r&&r.text||'')).trim();
+        return '<div class="fp-item" data-fid="'+r.id+'"><span class="t">'+fpClock(r.start)+' · '+fpMin(r.durMs)+'分</span>'+
+          '<span class="x">'+escapeHtml(txt)+'</span></div>';
       }).join('')+'</div>';
   });
   box.innerHTML=html;
@@ -3451,7 +3483,9 @@ function fpComplete(){
     fpBeep();
     fp.phase='break';fp.remain=BREAK_MS;fp.endAt=Date.now()+BREAK_MS;fp.startedAt=Date.now();
     fp.running=true;fp._t=setInterval(fpTick,250);
-    saveFpState();fpRender();fpOpenNote();
+    saveFpState();fpRender();
+    // 到点先给一个明确的「时间到」弹窗，点「知道了」再进入产出填写
+    fpAlert('时间到','本轮专注 '+fpMin(fp.total)+' 分钟已完成，休息 5 分钟。写一句这轮做了什么吧。',function(){fpOpenNote();});
   }else{
     fpBeep();
     fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
@@ -3534,8 +3568,8 @@ function initFocusPage(){
   document.getElementById('fpPlus').onclick=function(){fpSetDuration(fpDurMin+FP_MIN_STEP);};
   document.getElementById('fpNoteSave').onclick=function(){fpSaveNote();fpCloseNote(false);};
   document.getElementById('fpNoteSkip').onclick=function(){fpCloseNote(false);};
-  document.getElementById('fpAlertOk').onclick=function(){document.getElementById('fpAlertModal').classList.remove('show');};
-  document.getElementById('fpAlertModal').addEventListener('click',function(e){if(e.target.id==='fpAlertModal')e.currentTarget.classList.remove('show');});
+  document.getElementById('fpAlertOk').onclick=fpAlertClose;
+  document.getElementById('fpAlertModal').addEventListener('click',function(e){if(e.target.id==='fpAlertModal')fpAlertClose();});
   // 手机端切后台/锁屏时定时器可能被冻结：回到前台立刻补算，保证到点一定弹窗
   document.addEventListener('visibilitychange',function(){if(!document.hidden)fpResync();});
   window.addEventListener('focus',fpResync);
@@ -3557,11 +3591,13 @@ function initFocusPage(){
   if(fp.running){
     var left=fp.endAt-Date.now();
     if(left>0){fp.remain=left;clearInterval(fp._t);fp._t=setInterval(fpTick,250);fpRender();return;}
+    var wasPhase=fp.phase, st=fp.startedAt||(Date.now()-(fp.total||0)), tt=fp.total||0;
     fp.running=false;
-    if(fp.phase==='focus')fpAddRecord(fp.startedAt||(Date.now()-fp.total),fp.total);
     fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
+    if(wasPhase==='focus')fpAddRecord(st,tt);
     saveFpState();fpRender();
-    fpOpenNote();
+    if(wasPhase==='focus')fpAlert('时间到','离开的这段时间里本轮专注已结束。写一句做了什么吧。',function(){fpOpenNote();});
+    else fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
     return;
   }
   fpRender();
