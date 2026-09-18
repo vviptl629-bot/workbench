@@ -3117,6 +3117,22 @@ function init(){
     if(_kbFit){try{_kbFit.style.maxHeight='';_kbFit.style.overflowY='';_kbFit.scrollTop=0;_kbFit.classList.remove('kb-fit');}catch(_){}}
     _kbFit=null;_kbActs=null;
   }
+  // 读取当前 translateY 像素值（我们只会写 translateY(-Npx) 这一种形式）
+  function kbShift(el){
+    const m=((el&&el.style.transform)||'').match(/translateY\((-?[\d.]+)px\)/);
+    return m?parseFloat(m[1]):0;
+  }
+  // 幂等抬升：值没变就一个字节都不碰 DOM。
+  // ⚠️ 千万别写成「先清 transform 再重设」：校正会跑 7 次（80/200/350/550/800/1200/1700ms），
+  //    那样每一次都会"先弹回原位置再抬起来"，屏幕就是肉眼可见地来回晃；而晃的过程中
+  //    mousedown 与 mouseup 落在不同元素上 → click 丢失 → 用户只能"长按等它稳住"才能编辑。
+  function kbSetLift(el,up){
+    if(!el)return;
+    const want=up>1?('translateY(-'+Math.round(up)+'px)'):'';
+    if(el.style.transform===want)return;
+    el.style.transform=want;
+    if(want)el.classList.add('kb-lift');else el.classList.remove('kb-lift');
+  }
   // 键盘是否还弹着（供"点遮罩是否关闭弹窗"判断：正在打字时别把输入全丢了）
   // ⚠️ 只判 kbEl，不能要求 activeElement===kbEl：点遮罩的 mousedown 会让输入框立刻失焦，
   //    等 click 事件到达时 activeElement 已经是 body，那样判定永远为假、保护形同虚设。
@@ -3245,18 +3261,19 @@ function init(){
     // 弹窗场景：真正要抬的是内层卡片（遮罩是全屏的，抬它没有意义）
     const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card'):null;
     const liftEl=card||whole;
-    if(card){card.style.transform='';card.classList.remove('kb-lift');}
-    kbResetKb(whole);
-    kbFitReset();
-    // 关键顺序：先把底部留白写好，再算可视底 —— 否则留白会被当成"BODY 可滚"而误导滚动路径
-    document.documentElement.style.paddingBottom='';
+    // ⚠️ 这里绝不能无条件复位再重算：每次校正都会把卡片"变回原高度、居中、滚回顶部"再重新限高抬起，
+    //    7 次调度就是 7 次抖动（用户报的"屏幕晃动"），且抖动期间点击会丢（"要长按才能编辑"）。
+    //    只在「换了卡片」时才彻底还原；其余一律增量、幂等。
+    if(_kbFit&&_kbFit!==card)kbFitReset();
     const M=kbMetrics();
     if(M.kb>0)kbBarUp();else kbBarDown();
-    if(M.kb<=0){document.documentElement.style.paddingBottom='';return;} // 键盘没弹出：什么都不做
-    // ① 先试最自然的：容器滚动 / 整块本来就在可视区内
+    if(M.kb<=0){kbFitReset();document.documentElement.style.paddingBottom='';return;} // 键盘没弹出：什么都不做
+    // ① 先试最自然的：容器滚动 / 整块本来就在可视区内。
+    //    已经能看见就直接返回 —— 但**不要在这里清底部留白**：后续校正会走到这条分支，
+    //    一清一设会让页面高度反复变化（也是"晃动"的来源之一）。留白只在键盘收起时（上面 / kbRelease）清。
     const sc0=kbScroller(kbEl)||kbScroller(whole);
-    if(sc0){ if(kbScrollToShow(whole)){document.documentElement.style.paddingBottom='';return;} }
-    else if(whole.getBoundingClientRect().bottom<=M.vis-12){document.documentElement.style.paddingBottom='';return;}
+    if(sc0){ if(kbScrollToShow(whole))return; }
+    else if(whole.getBoundingClientRect().bottom<=M.vis-12)return;
     if(card){
       // ② 弹窗：卡片比键盘上方的可视区还高 → 直接抬会把标题顶出屏幕。
       //    正确做法：把卡片「压进」可视区（限高 + 内部可滚），再把卡片顶边对齐可视区顶边，
@@ -3266,11 +3283,14 @@ function init(){
       //       所以限高时必须同时把按钮条 sticky 吸底，并在算可视底时把它扣掉。
       const V0=kbVisibleRect(M,whole);
       const avail=Math.max(200,Math.round((V0.bottom||M.vis)-24));
-      card.style.maxHeight=avail+'px';card.style.overflowY='auto';card.classList.add('kb-fit');_kbFit=card;
+      if(_kbFit!==card||card.style.maxHeight!==avail+'px'){
+        card.style.maxHeight=avail+'px';card.style.overflowY='auto';card.classList.add('kb-fit');_kbFit=card;
+      }
       _kbActs=card.querySelector('.edit-actions,.tpl-edit-actions');
+      // 用「当前 rect - 当前位移」反推自然位置，不必先清 transform（清了就会闪一下）
       const cr=card.getBoundingClientRect();
-      const up=Math.round(cr.top-(V0.top+12));
-      if(up>1){card.style.transform='translateY(-'+up+'px)';card.classList.add('kb-lift');}
+      const up=Math.round((cr.top-kbShift(card))-(V0.top+12));
+      kbSetLift(card,up);
       kbScrollToShow(whole);
       document.documentElement.style.paddingBottom=(M.kb+24)+'px';
       return;
@@ -3279,13 +3299,14 @@ function init(){
     //    优先保证「聚焦的输入框」露出来；若整块也能在不把顶边推出屏幕的前提下进来，就一并抬进来
     //    （只抬输入框会漏掉它下面的分类下拉 / 添加按钮）。
     const V=kbVisibleRect(M,whole);
-    const fr=kbEl.getBoundingClientRect(), lr=whole.getBoundingClientRect();
+    const fr=kbEl.getBoundingClientRect(), lr=whole.getBoundingClientRect(), sf=kbShift(whole);
+    // fr 已含位移（输入框本身没有 transform），lr 要减掉位移才是"自然位置"
     const fieldOver=Math.round(fr.bottom-(V.bottom-12));
-    const wholeOver=Math.round(lr.bottom-(V.bottom-12));
-    const maxUp=Math.max(0,Math.round(lr.top-(V.top+12)));
+    const wholeOver=Math.round((lr.bottom-sf)-(V.bottom-12));
+    const maxUp=Math.max(0,Math.round((lr.top-sf)-(V.top+12)));
     let use=Math.max(0,fieldOver);
     if(wholeOver>use&&wholeOver<=maxUp)use=wholeOver;
-    if(use>1){whole.style.transform='translateY(-'+use+'px)';whole.classList.add('kb-lift');}
+    kbSetLift(whole,use);
     document.documentElement.style.paddingBottom=(M.kb+24)+'px';
   }
   function kbSchedule(){
