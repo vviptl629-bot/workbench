@@ -255,6 +255,9 @@
   .addbox .row3{display:flex;align-items:center;gap:16px;padding-left:2px;flex-wrap:wrap}
   .addbox .imp-chk .imp-star{color:#E0A030;font-size:14px;line-height:1}
   .addbox .imp-chk:has(input:checked){color:#E0A030}
+  /* 软键盘避让兜底：页面滚不动时（iOS 独立 PWA / 已滚到底）直接用 transform 把整块添加框抬到键盘上方。
+     position:relative + z-index 只影响绘制层级，不改变布局流，失焦即移除。 */
+  .addbox.kb-lift{position:relative;z-index:35;box-shadow:0 18px 44px -14px rgba(17,30,62,.5)}
   /* day navigator */
   .daynav{display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);position:relative}
   .dn-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card-2);font-size:20px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;transition:.15s}
@@ -3080,33 +3083,55 @@ function init(){
 
   document.getElementById('addBtn').onclick=addTask;
   document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
-  // 手机端软键盘：添加框（尤其上方「重要」卡片把它顶下去时）会被键盘挡住。
-  // 聚焦后把输入框滚动到键盘上方；多次校正以对抗浏览器原生聚焦滚动的滞后/回弹；
-  // 同时给文档补一段"键盘高度"底部留白，保证页面不够长时也能滚得动。
-  let kbEl=null,kbBox=null,_kbTimers=[];
+  // 手机端软键盘避让（iOS 独立 PWA 上「聚焦自动滚动」常常整体不生效，故三层兜底）：
+  //   ① 用 visualViewport 与 window.innerHeight 两个信号算「键盘高度 / 可视区底部」；
+  //      两个信号都不可信（内嵌浏览器不报告）时，按键盘占屏 50% 保守估计；
+  //   ② 先按可视区底部滚动页面，把整块添加框顶到键盘上方（正常浏览器走这条，页面会自然上移）；
+  //   ③ 若滚动无效（独立 PWA / 页面已滚到底）→ 直接用 transform 把整块框浮到键盘上方，
+  //      完全不依赖页面滚动能力；失焦立即还原。
+  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0;
   function kbClearTimers(){_kbTimers.forEach(t=>clearTimeout(t));_kbTimers=[];}
+  function kbTouch(){ // 只在「触屏 + 手机尺寸」下启用保守估计，避免桌面端误抬起
+    const touch=('ontouchstart' in window)||((navigator.maxTouchPoints||0)>0);
+    const small=Math.min(window.innerWidth||9999,window.innerHeight||9999)<=820;
+    return touch&&small;
+  }
+  function kbMetrics(){
+    const vv=window.visualViewport;
+    const h0=_kbH0||window.innerHeight||0;
+    const nowH=window.innerHeight||h0;
+    const vvH=(vv&&typeof vv.height==='number')?vv.height:nowH;
+    const off=(vv&&typeof vv.offsetTop==='number')?vv.offsetTop:0;
+    let vis=Math.min(h0,Math.max(vvH+off,nowH));   // 两个信号取「更保守（更小）」的那个
+    let guessed=false;
+    if(h0-vis<60&&kbTouch()){vis=Math.round(h0*0.5);guessed=true;} // 都不可信 → 保守估计键盘占 50%
+    return {h0:h0,vis:vis,kb:Math.max(0,h0-vis),guessed:guessed};
+  }
+  function kbResetKb(){
+    const box=(kbBox&&kbBox.isConnected)?kbBox:document.getElementById('taskAddBox');
+    if(!box)return;
+    box.style.transform='';box.classList.remove('kb-lift');
+  }
   function kbKeepVisible(){
     if(!kbEl||document.activeElement!==kbEl)return;
     const box=(kbBox&&kbBox.isConnected)?kbBox:kbEl;
-    const vv=window.visualViewport;
-    const vh=vv?vv.height:window.innerHeight;
-    const vt=(vv&&typeof vv.offsetTop==='number')?vv.offsetTop:0;
-    const m=16;
-    const r=box.getBoundingClientRect();
-    let dy=0;
-    if(r.bottom-vt>vh-m)dy=(r.bottom-vt)-(vh-m);   // 底部被键盘压住 → 上移
-    if(r.top-vt-dy<m)dy=(r.top-vt)-m;              // 上移后顶部也不能被状态栏吃掉
-    if(Math.abs(dy)>1)window.scrollBy(0,Math.round(dy));
-  }
-  function kbPad(){ // 键盘撑开期给文档补底部留白，保证可滚动到输入框之上
-    const vv=window.visualViewport;
-    if(!vv||!kbEl)return;
-    const kbH=Math.max(0,(window.innerHeight||0)-(vv.height||0)-(vv.offsetTop||0));
-    document.documentElement.style.paddingBottom=(kbH>0?kbH+24:0)+'px';
+    if(!box)return;
+    const m=12,M=kbMetrics();
+    kbResetKb();                                   // 每次按「自然位置」重算，避免位移累积漂移
+    const r0=box.getBoundingClientRect();
+    let dy=r0.bottom-(M.vis-m);
+    if(r0.top-dy<m)dy=r0.top-m;                    // 但别把框顶到状态栏里
+    if(Math.abs(dy)>1){try{window.scrollBy(0,Math.round(dy));}catch(_){}}
+    const r1=box.getBoundingClientRect();          // 滚动无效时用 transform 兜底
+    const need=r1.bottom-(M.vis-m);
+    if(need>1){box.style.transform='translateY(-'+Math.round(need)+'px)';box.classList.add('kb-lift');}
+    document.documentElement.style.paddingBottom=(M.kb>0?(M.kb+24):0)+'px'; // 键盘期补底部留白
   }
   function kbSchedule(){
-    kbClearTimers();kbPad();
-    [60,200,350,550,800].forEach(d=>_kbTimers.push(setTimeout(()=>{kbPad();kbKeepVisible();},d)));
+    kbClearTimers();
+    _kbH0=window.innerHeight||0;                   // 记录键盘弹出前的视口高度作为基准
+    kbKeepVisible();
+    [80,200,350,550,800,1200,1700].forEach(d=>_kbTimers.push(setTimeout(kbKeepVisible,d)));
   }
   const addBoxKb=document.getElementById('taskAddBox');
   if(addBoxKb){
@@ -3115,12 +3140,22 @@ function init(){
       if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))return;
       kbEl=el;kbBox=addBoxKb;kbSchedule();
     });
-    addBoxKb.addEventListener('focusout',()=>{kbEl=null;kbClearTimers();document.documentElement.style.paddingBottom='';});
+    addBoxKb.addEventListener('focusout',()=>{
+      kbEl=null;kbClearTimers();kbResetKb();
+      document.documentElement.style.paddingBottom='';
+    });
   }
   if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',()=>{if(kbEl){kbPad();kbKeepVisible();}});
-    window.visualViewport.addEventListener('scroll',()=>{if(kbEl)kbKeepVisible();}); // 浏览器原生滚动后再次校正
+    window.visualViewport.addEventListener('resize',()=>{if(kbEl)kbKeepVisible();});
+    window.visualViewport.addEventListener('scroll',()=>{if(kbEl)kbKeepVisible();}); // 原生滚动后再次校正
   }
+  if(window.ResizeObserver){ // 开着键盘连加任务时「重要」卡片会长高、整页布局下移，需按新位置重新校正
+    try{
+      const _kbRo=new ResizeObserver(()=>{if(kbEl)kbKeepVisible();});
+      ['ringCard','impCard','taskAddBox','listArea'].forEach(id=>{const el=document.getElementById(id);if(el)_kbRo.observe(el);});
+    }catch(_){}
+  }
+  window.addEventListener('orientationchange',()=>{if(kbEl){_kbH0=window.innerHeight||0;kbKeepVisible();}});
   document.getElementById('dayPrev').onclick=()=>shiftDay(-1);
   document.getElementById('dayNext').onclick=()=>shiftDay(1);
   document.getElementById('dayToday').onclick=()=>{
