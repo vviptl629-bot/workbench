@@ -260,6 +260,11 @@
   .addbox.kb-lift{position:relative;z-index:35;box-shadow:0 18px 44px -14px rgba(17,30,62,.5)}
   /* 编辑弹窗同理：弹窗内滚不动（备注在底部）时把弹窗整体抬起，确保文本域与「保存」按钮都在键盘上方 */
   .edit-modal.kb-lift{position:relative;z-index:85;box-shadow:0 22px 60px -12px rgba(17,30,62,.55)}
+  /* 键盘期弹窗被限高（kb-fit）：此时「保存/取消」若不吸底就会被裁到卡片外面 ——
+     用户看到的按钮位置其实已经是遮罩，点上去 = 点遮罩 = 弹窗直接关闭、刚输入的内容全丢。
+     吸底后按钮永远贴在卡片底部，看得见也点得到。 */
+  .edit-modal.kb-fit .edit-actions,.edit-modal.kb-fit .tpl-edit-actions{
+    position:sticky;bottom:0;z-index:4;background:var(--elev);padding-top:10px;}
   /* day navigator */
   .daynav{display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);position:relative}
   .dn-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card-2);font-size:20px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;transition:.15s}
@@ -3105,13 +3110,17 @@ function init(){
   //   ③ 先按可视区底部滚动页面 / 弹窗内部；滚动无效（独立 PWA）→ 用 transform 把整块浮起来；
   //   ④ 弹窗（#editModal 等）自带滚动时，把可滚动祖先也一起滚动，而不是只算页面坐标。
   // 通用入口：kbAttach(容器, [受布局变化影响的兄弟节点])；页面与弹窗共用同一套。
-  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbBarUp=false,_kbFit=null;
+  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbBarUp=false,_kbFit=null,_kbActs=null;
   function kbClearTimers(){_kbTimers.forEach(t=>clearTimeout(t));_kbTimers=[];}
   // 弹窗卡片在键盘期被我们「限高 + 内部可滚」过，键盘收起 / 关闭弹窗时必须还原
   function kbFitReset(){
-    if(_kbFit){try{_kbFit.style.maxHeight='';_kbFit.style.overflowY='';_kbFit.scrollTop=0;}catch(_){}}
-    _kbFit=null;
+    if(_kbFit){try{_kbFit.style.maxHeight='';_kbFit.style.overflowY='';_kbFit.scrollTop=0;_kbFit.classList.remove('kb-fit');}catch(_){}}
+    _kbFit=null;_kbActs=null;
   }
+  // 键盘是否还弹着（供"点遮罩是否关闭弹窗"判断：正在打字时别把输入全丢了）
+  // ⚠️ 只判 kbEl，不能要求 activeElement===kbEl：点遮罩的 mousedown 会让输入框立刻失焦，
+  //    等 click 事件到达时 activeElement 已经是 body，那样判定永远为假、保护形同虚设。
+  function kbTyping(){return !!kbEl;}
   function kbTouch(){ // 只在「触屏 + 手机尺寸」下启用保守估计，避免桌面端误抬起
     const touch=('ontouchstart' in window)||((navigator.maxTouchPoints||0)>0);
     const small=Math.min(window.innerWidth||9999,window.innerHeight||9999)<=820;
@@ -3193,6 +3202,13 @@ function init(){
         }
       }catch(_){}
     }
+    // 吸底按钮条（限高弹窗里的「保存/取消」）占掉的那一条不算可用可视区
+    if(_kbActs&&_kbActs.isConnected){
+      try{
+        const ar=_kbActs.getBoundingClientRect();
+        if(ar.height>0&&ar.top<bottom)bottom=Math.min(bottom,Math.round(ar.top));
+      }catch(_){}
+    }
     return {top:top,bottom:bottom,left:left,right:right};
   }
   // 容器内滚动优先（弹窗自带 overflow-y:auto）；页面场景则滚页面。
@@ -3244,10 +3260,14 @@ function init(){
     if(card){
       // ② 弹窗：卡片比键盘上方的可视区还高 → 直接抬会把标题顶出屏幕。
       //    正确做法：把卡片「压进」可视区（限高 + 内部可滚），再把卡片顶边对齐可视区顶边，
-      //    最后在卡片内部把聚焦字段滚进来。这样标题永远在，且「保存」永远能滚到。
+      //    最后在卡片内部把聚焦字段滚进来。
+      //    ⚠️ 限高会把「保存/取消」裁到卡片外 —— 那块区域实际上已经是遮罩，
+      //       点"保存"= 点遮罩 = 弹窗关闭、输入全丢（用户报的"一点击就回主页"）。
+      //       所以限高时必须同时把按钮条 sticky 吸底，并在算可视底时把它扣掉。
       const V0=kbVisibleRect(M,whole);
-      const avail=Math.max(180,Math.round(V0.bottom-V0.top-24));
-      card.style.maxHeight=avail+'px';card.style.overflowY='auto';_kbFit=card;
+      const avail=Math.max(200,Math.round((V0.bottom||M.vis)-24));
+      card.style.maxHeight=avail+'px';card.style.overflowY='auto';card.classList.add('kb-fit');_kbFit=card;
+      _kbActs=card.querySelector('.edit-actions,.tpl-edit-actions');
       const cr=card.getBoundingClientRect();
       const up=Math.round(cr.top-(V0.top+12));
       if(up>1){card.style.transform='translateY(-'+up+'px)';card.classList.add('kb-lift');}
@@ -3349,7 +3369,15 @@ function init(){
     },d));
   });
   if(editModalEl)kbAttach(editModalEl,[]); // 复用主页那套键盘避让（含 vv 不可信 / 滚动失效兜底）
-  document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit();});
+  document.getElementById('editModal').addEventListener('click',e=>{
+    if(e.target.id!=='editModal')return;
+    // 键盘还弹着时点到遮罩空白：多半是误触或想收键盘，直接关弹窗会把刚打的字全丢掉
+    if(typeof kbTyping==='function'&&kbTyping()){
+      try{kbEl.blur();}catch(_){}
+      return;
+    }
+    closeEdit();
+  });
   document.querySelectorAll('.nav-item').forEach(n=>{
     const v=n.dataset.view;
     if(!v)return; // 「专注」等纯入口项不带 data-view，由各自模块绑定点击
