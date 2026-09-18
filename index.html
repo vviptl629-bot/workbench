@@ -258,6 +258,8 @@
   /* 软键盘避让兜底：页面滚不动时（iOS 独立 PWA / 已滚到底）直接用 transform 把整块添加框抬到键盘上方。
      position:relative + z-index 只影响绘制层级，不改变布局流，失焦即移除。 */
   .addbox.kb-lift{position:relative;z-index:35;box-shadow:0 18px 44px -14px rgba(17,30,62,.5)}
+  /* 编辑弹窗同理：弹窗内滚不动（备注在底部）时把弹窗整体抬起，确保文本域与「保存」按钮都在键盘上方 */
+  .edit-modal.kb-lift{position:relative;z-index:85;box-shadow:0 22px 60px -12px rgba(17,30,62,.55)}
   /* day navigator */
   .daynav{display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);position:relative}
   .dn-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card-2);font-size:20px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;transition:.15s}
@@ -2772,10 +2774,23 @@ function openEdit(id){
   bindTimeTrigger('editStartTrigger','editStart');
   bindTimeTrigger('editEndTrigger','editEnd');
   document.getElementById('editNote').value=t.note||'';
-  document.getElementById('editModal').classList.add('show');
-  setTimeout(()=>document.getElementById('editText').focus(),50);
+  // 每次打开都彻底重置键盘避让残留（上一场景可能留下了位移 / 底部固定栏抬起 / 底部留白）
+  if(typeof kbRelease==='function')kbRelease();
+  const _em=document.getElementById('editModal');
+  _em.classList.remove('kb-lift');_em.style.transform='';
+  const _emb=_em.querySelector('.edit-modal');
+  if(_emb){_emb.classList.remove('kb-lift');_emb.style.transform='';}
+  _em.scrollTop=0;
+  _em.classList.add('show');
+  // 不再自动聚焦「内容」输入框：手机上会立刻把键盘弹出来，把整个弹窗顶出可视区。
+  // 用户点哪个字段才为哪个字段避让（焦点落在没有输入法的字段上时也不会弹键盘）。
 }
-function closeEdit(){editId=null;document.getElementById('editModal').classList.remove('show');}
+function closeEdit(){
+  editId=null;
+  const em=document.getElementById('editModal');
+  em.classList.remove('show','kb-lift');em.style.transform='';
+  if(typeof kbRelease==='function')kbRelease();
+}
 function saveEdit(){
   const t=tasks.find(x=>x.id===editId);if(!t){closeEdit();return;}
   const txt=document.getElementById('editText').value.trim();
@@ -3083,14 +3098,20 @@ function init(){
 
   document.getElementById('addBtn').onclick=addTask;
   document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
-  // 手机端软键盘避让（iOS 独立 PWA 上「聚焦自动滚动」常常整体不生效，故三层兜底）：
+  // 手机端软键盘避让（iOS 独立 PWA 上「聚焦自动滚动」常常整体不生效，故四层兜底）：
   //   ① 用 visualViewport 与 window.innerHeight 两个信号算「键盘高度 / 可视区底部」；
   //      两个信号都不可信（内嵌浏览器不报告）时，按键盘占屏 50% 保守估计；
-  //   ② 先按可视区底部滚动页面，把整块添加框顶到键盘上方（正常浏览器走这条，页面会自然上移）；
-  //   ③ 若滚动无效（独立 PWA / 页面已滚到底）→ 直接用 transform 把整块框浮到键盘上方，
-  //      完全不依赖页面滚动能力；失焦立即还原。
-  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0;
+  //   ② 键盘期把底部固定栏（底部导航）临时抬起，避免它占着最下面一条压住输入框；
+  //   ③ 先按可视区底部滚动页面 / 弹窗内部；滚动无效（独立 PWA）→ 用 transform 把整块浮起来；
+  //   ④ 弹窗（#editModal 等）自带滚动时，把可滚动祖先也一起滚动，而不是只算页面坐标。
+  // 通用入口：kbAttach(容器, [受布局变化影响的兄弟节点])；页面与弹窗共用同一套。
+  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbBarUp=false,_kbFit=null;
   function kbClearTimers(){_kbTimers.forEach(t=>clearTimeout(t));_kbTimers=[];}
+  // 弹窗卡片在键盘期被我们「限高 + 内部可滚」过，键盘收起 / 关闭弹窗时必须还原
+  function kbFitReset(){
+    if(_kbFit){try{_kbFit.style.maxHeight='';_kbFit.style.overflowY='';_kbFit.scrollTop=0;}catch(_){}}
+    _kbFit=null;
+  }
   function kbTouch(){ // 只在「触屏 + 手机尺寸」下启用保守估计，避免桌面端误抬起
     const touch=('ontouchstart' in window)||((navigator.maxTouchPoints||0)>0);
     const small=Math.min(window.innerWidth||9999,window.innerHeight||9999)<=820;
@@ -3107,25 +3128,145 @@ function init(){
     if(h0-vis<60&&kbTouch()){vis=Math.round(h0*0.5);guessed=true;} // 都不可信 → 保守估计键盘占 50%
     return {h0:h0,vis:vis,kb:Math.max(0,h0-vis),guessed:guessed};
   }
-  function kbResetKb(){
-    const box=(kbBox&&kbBox.isConnected)?kbBox:document.getElementById('taskAddBox');
+  function kbBarUp(){ // 键盘期把底部固定导航收纳掉，避免它占着最下面一条压住输入框
+    if(_kbBarUp)return;
+    try{
+      document.documentElement.style.setProperty('--kb-h',Math.round(kbMetrics().kb)+'px');
+      document.querySelectorAll('.bottom-nav').forEach(b=>{b.style.transition='transform .18s ease';b.style.transform='translateY(calc(-1 * var(--kb-h, 0px)))';});
+      _kbBarUp=true;
+    }catch(_){}
+  }
+  function kbBarDown(){
+    if(_kbBarUp){
+      try{
+        document.querySelectorAll('.bottom-nav').forEach(b=>{b.style.transition='transform .18s ease';b.style.transform='';});
+        document.documentElement.style.removeProperty('--kb-h');
+      }catch(_){}
+      _kbBarUp=false;
+    }
+  }
+  function kbResetKb(box){
     if(!box)return;
     box.style.transform='';box.classList.remove('kb-lift');
   }
+  // 从元素往上找最近的「真正可滚动」祖先。
+  // ⚠️ 必须忽略由"键盘期底部留白"造成的假可滚：给 documentElement 补 paddingBottom 后，
+  //    BODY 的 scrollHeight 会凭空变大而 clientHeight 变小，看起来"可滚"，但滚它只是滚我们自己造的空白。
+  function kbScroller(from){
+    let n=from&&from.parentElement;
+    while(n&&n!==document.body&&n!==document.documentElement){
+      try{
+        const s=getComputedStyle(n);
+        if(/(auto|scroll|overlay)/.test(s.overflowY)&&n.scrollHeight>n.clientHeight+1)return n;
+      }catch(_){}
+      n=n.parentElement;
+    }
+    return null;
+  }
+  function kbVisibleRect(M,box){ // 真正可用的可视区域 = 可视视口 ∩ 滚动容器 ∩ 底部固定栏（取原始位置）
+    let top=0,bottom=M.vis,left=0,right=(window.innerWidth||0);
+    const sc=kbScroller(box);
+    if(sc){
+      const sr=sc.getBoundingClientRect();
+      top=Math.max(top,sr.top);bottom=Math.min(bottom,sr.bottom);
+      left=Math.max(left,sr.left);right=Math.min(right,sr.right);
+    }
+    if(top>=bottom-40){ // 容器比可视区还矮等极端情况 → 退回可视视口
+      top=0;bottom=M.vis;
+      if(sc){const sr=sc.getBoundingClientRect();top=Math.max(top,sr.top);}
+    }
+    const bn=document.querySelector('.bottom-nav');
+    if(bn){
+      try{
+        const bs=getComputedStyle(bn);
+        if(bs.display!=='none'&&bs.visibility!=='hidden'&&bs.position==='fixed'){
+          const br=bn.getBoundingClientRect();
+          // 用导航「本来」的位置：把自身 translateY 加回去，否则抬起后会立即可视底变小、来回抖动
+          let tf=0;const mt=bs.transform;
+          if(mt&&mt!=='none'){
+            const mm=mt.match(/matrix\(([^)]+)\)/);
+            if(mm){const a=mm[1].split(',').map(Number);tf=a[5]||0;}
+            else{const my=mt.match(/translateY\((-?[\d.]+)px\)/);if(my)tf=parseFloat(my[1]);}
+          }
+          const naturalTop=br.top-tf;
+          if(br.height>0&&naturalTop<bottom)bottom=Math.min(bottom,naturalTop);
+        }
+      }catch(_){}
+    }
+    return {top:top,bottom:bottom,left:left,right:right};
+  }
+  // 容器内滚动优先（弹窗自带 overflow-y:auto）；页面场景则滚页面。
+  // 返回 true 表示"已经能看见"，false 表示滚不动，需要调用方用 transform 兜底。
+  function kbScrollToShow(whole){
+    const m=12;
+    for(let i=0;i<2;i++){
+      const M=kbMetrics();
+      const V=kbVisibleRect(M,whole);
+      const r=kbEl.getBoundingClientRect();
+      const over=r.bottom-(V.bottom-m);
+      if(over<=1)return true;
+      let moved=false;
+      const sc=kbScroller(kbEl)||kbScroller(whole);
+      if(sc){
+        const before=sc.scrollTop;
+        try{sc.scrollTop=before+Math.round(over);}catch(_){}
+        if(Math.abs(sc.scrollTop-before)>1)moved=true;
+      }
+      if(!moved&&whole===kbEl){
+        const y0=window.scrollY;
+        try{window.scrollBy(0,Math.round(over));}catch(_){}
+        if(Math.abs(window.scrollY-y0)>0.5)moved=true;   // 必须核对"真的动了"才算 moved
+      }
+      if(!moved)return false;
+    }
+    const M2=kbMetrics(),V2=kbVisibleRect(M2,whole);
+    return kbEl.getBoundingClientRect().bottom<=V2.bottom-m;
+  }
   function kbKeepVisible(){
     if(!kbEl||document.activeElement!==kbEl)return;
-    const box=(kbBox&&kbBox.isConnected)?kbBox:kbEl;
-    if(!box)return;
-    const m=12,M=kbMetrics();
-    kbResetKb();                                   // 每次按「自然位置」重算，避免位移累积漂移
-    const r0=box.getBoundingClientRect();
-    let dy=r0.bottom-(M.vis-m);
-    if(r0.top-dy<m)dy=r0.top-m;                    // 但别把框顶到状态栏里
-    if(Math.abs(dy)>1){try{window.scrollBy(0,Math.round(dy));}catch(_){}}
-    const r1=box.getBoundingClientRect();          // 滚动无效时用 transform 兜底
-    const need=r1.bottom-(M.vis-m);
-    if(need>1){box.style.transform='translateY(-'+Math.round(need)+'px)';box.classList.add('kb-lift');}
-    document.documentElement.style.paddingBottom=(M.kb>0?(M.kb+24):0)+'px'; // 键盘期补底部留白
+    const whole=(kbBox&&kbBox.isConnected)?kbBox:kbEl;   // 容器（页面=添加框；弹窗=遮罩）
+    if(!whole)return;
+    // 弹窗场景：真正要抬的是内层卡片（遮罩是全屏的，抬它没有意义）
+    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card'):null;
+    const liftEl=card||whole;
+    if(card){card.style.transform='';card.classList.remove('kb-lift');}
+    kbResetKb(whole);
+    kbFitReset();
+    // 关键顺序：先把底部留白写好，再算可视底 —— 否则留白会被当成"BODY 可滚"而误导滚动路径
+    document.documentElement.style.paddingBottom='';
+    const M=kbMetrics();
+    if(M.kb>0)kbBarUp();else kbBarDown();
+    if(M.kb<=0){document.documentElement.style.paddingBottom='';return;} // 键盘没弹出：什么都不做
+    // ① 先试最自然的：容器滚动 / 整块本来就在可视区内
+    const sc0=kbScroller(kbEl)||kbScroller(whole);
+    if(sc0){ if(kbScrollToShow(whole)){document.documentElement.style.paddingBottom='';return;} }
+    else if(whole.getBoundingClientRect().bottom<=M.vis-12){document.documentElement.style.paddingBottom='';return;}
+    if(card){
+      // ② 弹窗：卡片比键盘上方的可视区还高 → 直接抬会把标题顶出屏幕。
+      //    正确做法：把卡片「压进」可视区（限高 + 内部可滚），再把卡片顶边对齐可视区顶边，
+      //    最后在卡片内部把聚焦字段滚进来。这样标题永远在，且「保存」永远能滚到。
+      const V0=kbVisibleRect(M,whole);
+      const avail=Math.max(180,Math.round(V0.bottom-V0.top-24));
+      card.style.maxHeight=avail+'px';card.style.overflowY='auto';_kbFit=card;
+      const cr=card.getBoundingClientRect();
+      const up=Math.round(cr.top-(V0.top+12));
+      if(up>1){card.style.transform='translateY(-'+up+'px)';card.classList.add('kb-lift');}
+      kbScrollToShow(whole);
+      document.documentElement.style.paddingBottom=(M.kb+24)+'px';
+      return;
+    }
+    // ③ 页面场景滚不动（iOS 独立 PWA）→ transform 抬起整块添加框
+    //    优先保证「聚焦的输入框」露出来；若整块也能在不把顶边推出屏幕的前提下进来，就一并抬进来
+    //    （只抬输入框会漏掉它下面的分类下拉 / 添加按钮）。
+    const V=kbVisibleRect(M,whole);
+    const fr=kbEl.getBoundingClientRect(), lr=whole.getBoundingClientRect();
+    const fieldOver=Math.round(fr.bottom-(V.bottom-12));
+    const wholeOver=Math.round(lr.bottom-(V.bottom-12));
+    const maxUp=Math.max(0,Math.round(lr.top-(V.top+12)));
+    let use=Math.max(0,fieldOver);
+    if(wholeOver>use&&wholeOver<=maxUp)use=wholeOver;
+    if(use>1){whole.style.transform='translateY(-'+use+'px)';whole.classList.add('kb-lift');}
+    document.documentElement.style.paddingBottom=(M.kb+24)+'px';
   }
   function kbSchedule(){
     kbClearTimers();
@@ -3133,27 +3274,36 @@ function init(){
     kbKeepVisible();
     [80,200,350,550,800,1200,1700].forEach(d=>_kbTimers.push(setTimeout(kbKeepVisible,d)));
   }
-  const addBoxKb=document.getElementById('taskAddBox');
-  if(addBoxKb){
-    addBoxKb.addEventListener('focusin',e=>{
-      const el=e.target;
-      if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'))return;
-      kbEl=el;kbBox=addBoxKb;kbSchedule();
+  function kbRelease(){
+    kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
+    ['taskAddBox','editModal'].forEach(id=>{
+      const el=document.getElementById(id);
+      kbResetKb(el);
+      try{const p=el&&el.querySelector('.edit-modal');if(p)kbResetKb(p);}catch(_){}
     });
-    addBoxKb.addEventListener('focusout',()=>{
-      kbEl=null;kbClearTimers();kbResetKb();
-      document.documentElement.style.paddingBottom='';
-    });
+    document.documentElement.style.paddingBottom='';
+    kbBarDown();
+    try{window.scrollTo(0,0);}catch(_){}   // 清掉避让过程中对页面滚动位置的改动，避免影响下一次打开弹窗
   }
+  function kbAttach(box,watchIds){
+    if(!box)return;
+    box.addEventListener('focusin',e=>{
+      const el=e.target;
+      if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'))return;
+      kbEl=el;kbBox=box;kbSchedule();
+    });
+    box.addEventListener('focusout',()=>{setTimeout(()=>{if(!document.activeElement||!box.contains(document.activeElement)){if(kbBox===box)kbRelease();}},120);});
+    if(window.ResizeObserver){
+      try{
+        const ro=new ResizeObserver(()=>{if(kbEl)kbKeepVisible();});
+        (watchIds||[]).forEach(id=>{const el=document.getElementById(id);if(el)ro.observe(el);});
+      }catch(_){}
+    }
+  }
+  kbAttach(document.getElementById('taskAddBox'),['ringCard','impCard','taskAddBox','listArea']);
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',()=>{if(kbEl)kbKeepVisible();});
     window.visualViewport.addEventListener('scroll',()=>{if(kbEl)kbKeepVisible();}); // 原生滚动后再次校正
-  }
-  if(window.ResizeObserver){ // 开着键盘连加任务时「重要」卡片会长高、整页布局下移，需按新位置重新校正
-    try{
-      const _kbRo=new ResizeObserver(()=>{if(kbEl)kbKeepVisible();});
-      ['ringCard','impCard','taskAddBox','listArea'].forEach(id=>{const el=document.getElementById(id);if(el)_kbRo.observe(el);});
-    }catch(_){}
   }
   window.addEventListener('orientationchange',()=>{if(kbEl){_kbH0=window.innerHeight||0;kbKeepVisible();}});
   document.getElementById('dayPrev').onclick=()=>shiftDay(-1);
@@ -3186,13 +3336,19 @@ function init(){
     tpSyncTrigger(document.getElementById('editEndTrigger'),'');
   };
   document.getElementById('editText').addEventListener('keydown',e=>{if(e.key==='Enter')saveEdit();});
-  // 手机端软键盘会压缩可视高度：聚焦任一字段后把它滚到可见区中部，避免「备注」等底部字段被键盘挡住
+  // 手机端软键盘会压缩可视高度：聚焦任一字段后把它滚到可见区中部，避免「备注」等底部字段被键盘挡住。
+  // 这里只负责「弹窗内滚动定位」；抬起/兜底统一交给上面的 kbAttach / kbKeepVisible（容器 = 弹窗本体）。
   const editModalEl=document.getElementById('editModal');
   if(editModalEl)editModalEl.addEventListener('focusin',e=>{
     const el=e.target;
     if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'))return;
-    setTimeout(()=>{try{el.scrollIntoView({block:'center',behavior:'smooth'});}catch(err){try{el.scrollIntoView(false);}catch(e2){}}},260);
+    // 键盘动画会改变可视区，间隔重试几次定位；block:'center' 保证弹窗「标题与上半部分」不会被推出屏幕
+    [60,260,520,900,1400].forEach(d=>setTimeout(()=>{
+      if(document.activeElement!==el)return;
+      try{el.scrollIntoView({block:'center',behavior:'smooth'});}catch(err){try{el.scrollIntoView(false);}catch(e2){}}
+    },d));
   });
+  if(editModalEl)kbAttach(editModalEl,[]); // 复用主页那套键盘避让（含 vv 不可信 / 滚动失效兜底）
   document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit();});
   document.querySelectorAll('.nav-item').forEach(n=>{
     const v=n.dataset.view;
