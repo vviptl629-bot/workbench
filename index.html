@@ -3110,7 +3110,7 @@ function init(){
   //   ③ 先按可视区底部滚动页面 / 弹窗内部；滚动无效（独立 PWA）→ 用 transform 把整块浮起来；
   //   ④ 弹窗（#editModal 等）自带滚动时，把可滚动祖先也一起滚动，而不是只算页面坐标。
   // 通用入口：kbAttach(容器, [受布局变化影响的兄弟节点])；页面与弹窗共用同一套。
-  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbBarUp=false,_kbFit=null,_kbActs=null;
+  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbFit=null,_kbActs=null;
   function kbClearTimers(){_kbTimers.forEach(t=>clearTimeout(t));_kbTimers=[];}
   // 弹窗卡片在键盘期被我们「限高 + 内部可滚」过，键盘收起 / 关闭弹窗时必须还原
   function kbFitReset(){
@@ -3157,36 +3157,15 @@ function init(){
     if(h0-vis<60&&kbTouch()){vis=Math.round(h0*0.5);guessed=true;} // 都不可信 → 保守估计键盘占 50%
     return {h0:h0,vis:vis,kb:Math.max(0,h0-vis),guessed:guessed};
   }
-  // 键盘期把底部固定导航「藏起来」（**不是搬走**）。
-  // ⚠️ 千万别再用 translateY 把它抬到键盘上方（v57 就是这么写的，用户截图里它跑到了屏幕正中间压住任务列表）。
-  //    两种真机环境都会翻车，且方向相反：
-  //    ① 键盘是「覆盖式」、完全不改变视口（微信 / 小米浏览器常见）→ 它本来就被键盘盖住，什么都不用做；
-  //       而 kbMetrics 在 vv 与 innerHeight 都无反应时会保守估成「键盘占 50% 屏高」（851 → 426px），
-  //       于是一抬就把导航从屏幕底部(795)搬到 369 —— 正好落在屏幕中间。
-  //    ② 浏览器自己会把 position:fixed 元素顶到键盘上方（iOS Safari 的原生行为）→ 我们再抬一次 = 双重上移，
-  //       同样落到屏幕中间。
-  //    结论：这个位置无论怎么算都不可控，唯一稳的做法是键盘期直接藏掉（visibility 而非 display，
-  //    保留盒子几何，kbVisibleRect 仍能读到它的自然位置）。
-  function kbBarUp(){
-    if(_kbBarUp)return;
-    try{
-      document.querySelectorAll('.bottom-nav').forEach(b=>{
-        b.style.transform='';   // 顺手清掉历史版本可能留下的位移
-        b.style.visibility='hidden';b.style.pointerEvents='none';
-      });
-      _kbBarUp=true;
-    }catch(_){}
-  }
-  function kbBarDown(){
-    if(_kbBarUp){
-      try{
-        document.querySelectorAll('.bottom-nav').forEach(b=>{
-          b.style.visibility='';b.style.pointerEvents='';b.style.transform='';
-        });
-      }catch(_){}
-      _kbBarUp=false;
-    }
-  }
+  // 键盘期底部固定导航：**什么都不做，让它固定在最下方**（v59）。
+  //    ① 键盘「覆盖式」、不改变视口（微信 / 小米浏览器常见）→ fixed 元素仍在布局视口底部，
+  //       被键盘盖住 —— 不动它，视觉上就是"沉在键盘后面"，最自然。
+  //    ② iOS Safari 会自己把 fixed 元素顶到键盘上方 → 不动它，就是紧贴键盘上方，也正是"固定在下方"。
+  // ⚠️ 这里试过两种主动干预，都翻车，别再改回去：
+  //    · v57 用 translateY 抬 kb 高 → 覆盖式环境下 kb 被保守估成 426px，导航从 795 被搬到 369 = 屏幕正中间。
+  //    · v58 改成 visibility 隐藏 → 用户不买账："固定在最下方不是更好吗"。
+  //    根子上的原因是：这个元素在键盘期的自然位置有 3 种可能且不可探测，任何"替它算位置"的写法必错。
+  //    它会不会压住输入内容？不会 —— kbVisibleRect() 已经把它的真实位置算进了可视底。
   function kbResetKb(box){
     if(!box)return;
     box.style.transform='';box.classList.remove('kb-lift');
@@ -3222,16 +3201,10 @@ function init(){
       try{
         const bs=getComputedStyle(bn);
         if(bs.display!=='none'&&bs.visibility!=='hidden'&&bs.position==='fixed'){
+          // iOS Safari 会自己把 fixed 元素顶到键盘上方 —— 那时它的顶边就是真实的可视底，
+          // 内容必须停在它上面，否则会被它压住。（所以我们才不去动它，见上方 kbResetKb 前的说明）
           const br=bn.getBoundingClientRect();
-          // 用导航「本来」的位置：把自身 translateY 加回去，否则抬起后会立即可视底变小、来回抖动
-          let tf=0;const mt=bs.transform;
-          if(mt&&mt!=='none'){
-            const mm=mt.match(/matrix\(([^)]+)\)/);
-            if(mm){const a=mm[1].split(',').map(Number);tf=a[5]||0;}
-            else{const my=mt.match(/translateY\((-?[\d.]+)px\)/);if(my)tf=parseFloat(my[1]);}
-          }
-          const naturalTop=br.top-tf;
-          if(br.height>0&&naturalTop<bottom)bottom=Math.min(bottom,naturalTop);
+          if(br.height>0&&br.top<bottom)bottom=Math.min(bottom,Math.round(br.top));
         }
       }catch(_){}
     }
@@ -3283,7 +3256,6 @@ function init(){
     //    只在「换了卡片」时才彻底还原；其余一律增量、幂等。
     if(_kbFit&&_kbFit!==card)kbFitReset();
     const M=kbMetrics();
-    if(M.kb>0)kbBarUp();else kbBarDown();
     if(M.kb<=0){kbFitReset();document.documentElement.style.paddingBottom='';return;} // 键盘没弹出：什么都不做
     // ① 先试最自然的：容器滚动 / 整块本来就在可视区内。
     //    已经能看见就直接返回 —— 但**不要在这里清底部留白**：后续校正会走到这条分支，
@@ -3340,7 +3312,6 @@ function init(){
       try{const p=el&&el.querySelector('.edit-modal');if(p)kbResetKb(p);}catch(_){}
     });
     document.documentElement.style.paddingBottom='';
-    kbBarDown();
     try{window.scrollTo(0,0);}catch(_){}   // 清掉避让过程中对页面滚动位置的改动，避免影响下一次打开弹窗
   }
   function kbAttach(box,watchIds){
