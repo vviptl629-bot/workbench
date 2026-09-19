@@ -3137,10 +3137,14 @@ function init(){
   // ⚠️ 只判 kbEl，不能要求 activeElement===kbEl：点遮罩的 mousedown 会让输入框立刻失焦，
   //    等 click 事件到达时 activeElement 已经是 body，那样判定永远为假、保护形同虚设。
   function kbTyping(){return !!kbEl;}
-  function kbTouch(){ // 只在「触屏 + 手机尺寸」下启用保守估计，避免桌面端误抬起
+  // 只在「触屏 + 窄屏」下启用保守估计，避免桌面端误抬起。
+  // ⚠️ 判据只看**宽度**。旧写法用 min(宽,高)≤820，于是 1280×800 的桌面窗口因为「高 800 ≤ 820」被判成手机，
+  //    一聚焦输入框就凭空补 424px 底部留白（桌面端平白多出一屏空白）。
+  //    另外 Chrome 桌面版的 `'ontouchstart' in window` 恒为 true（经典检测陷阱），所以宽度是唯一可靠的闸门。
+  function kbTouch(){
     const touch=('ontouchstart' in window)||((navigator.maxTouchPoints||0)>0);
-    const small=Math.min(window.innerWidth||9999,window.innerHeight||9999)<=820;
-    return touch&&small;
+    const narrow=(window.innerWidth||9999)<=820;
+    return touch&&narrow;
   }
   function kbMetrics(){
     const vv=window.visualViewport;
@@ -3153,19 +3157,32 @@ function init(){
     if(h0-vis<60&&kbTouch()){vis=Math.round(h0*0.5);guessed=true;} // 都不可信 → 保守估计键盘占 50%
     return {h0:h0,vis:vis,kb:Math.max(0,h0-vis),guessed:guessed};
   }
-  function kbBarUp(){ // 键盘期把底部固定导航收纳掉，避免它占着最下面一条压住输入框
+  // 键盘期把底部固定导航「藏起来」（**不是搬走**）。
+  // ⚠️ 千万别再用 translateY 把它抬到键盘上方（v57 就是这么写的，用户截图里它跑到了屏幕正中间压住任务列表）。
+  //    两种真机环境都会翻车，且方向相反：
+  //    ① 键盘是「覆盖式」、完全不改变视口（微信 / 小米浏览器常见）→ 它本来就被键盘盖住，什么都不用做；
+  //       而 kbMetrics 在 vv 与 innerHeight 都无反应时会保守估成「键盘占 50% 屏高」（851 → 426px），
+  //       于是一抬就把导航从屏幕底部(795)搬到 369 —— 正好落在屏幕中间。
+  //    ② 浏览器自己会把 position:fixed 元素顶到键盘上方（iOS Safari 的原生行为）→ 我们再抬一次 = 双重上移，
+  //       同样落到屏幕中间。
+  //    结论：这个位置无论怎么算都不可控，唯一稳的做法是键盘期直接藏掉（visibility 而非 display，
+  //    保留盒子几何，kbVisibleRect 仍能读到它的自然位置）。
+  function kbBarUp(){
     if(_kbBarUp)return;
     try{
-      document.documentElement.style.setProperty('--kb-h',Math.round(kbMetrics().kb)+'px');
-      document.querySelectorAll('.bottom-nav').forEach(b=>{b.style.transition='transform .18s ease';b.style.transform='translateY(calc(-1 * var(--kb-h, 0px)))';});
+      document.querySelectorAll('.bottom-nav').forEach(b=>{
+        b.style.transform='';   // 顺手清掉历史版本可能留下的位移
+        b.style.visibility='hidden';b.style.pointerEvents='none';
+      });
       _kbBarUp=true;
     }catch(_){}
   }
   function kbBarDown(){
     if(_kbBarUp){
       try{
-        document.querySelectorAll('.bottom-nav').forEach(b=>{b.style.transition='transform .18s ease';b.style.transform='';});
-        document.documentElement.style.removeProperty('--kb-h');
+        document.querySelectorAll('.bottom-nav').forEach(b=>{
+          b.style.visibility='';b.style.pointerEvents='';b.style.transform='';
+        });
       }catch(_){}
       _kbBarUp=false;
     }
