@@ -784,10 +784,7 @@
   .fp-icbtn svg{width:17px;height:17px}
   .fp-sec{display:flex;flex-direction:column;gap:10px}
   .fp-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-  .fp-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-  .fp-chips.sec{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:8px 10px;border:1px dashed var(--border);border-radius:10px}
-  .fp-chips.sec .fp-chip{min-width:56px}
-  .fp-sec-tag{font-size:11px;color:var(--muted);align-self:center;margin-left:2px}
+  .fp-chips{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
   .fp-chip{padding:12px 0;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);
     font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s}
   .fp-chip:hover{border-color:var(--text)}
@@ -1188,17 +1185,12 @@
     <div class="fp-sec" id="fpSetupSec">
       <div class="fp-label">专注时长</div>
       <div class="fp-chips" id="fpChips">
-        <button class="fp-chip" data-min="5">5′</button>
-        <button class="fp-chip" data-min="15">15′</button>
-        <button class="fp-chip" data-min="25">25′</button>
-        <button class="fp-chip" data-min="45">45′</button>
-        <button class="fp-chip" data-min="60">60′</button>
-      </div>
-      <div class="fp-chips sec" id="fpSecChips">
-        <button class="fp-chip" data-sec="10">10″</button>
-        <button class="fp-chip" data-sec="30">30″</button>
-        <button class="fp-chip" data-sec="60">60″</button>
-        <span class="fp-sec-tag">秒 · 测试用</span>
+        <button class="fp-chip" data-sec="10">10秒</button>
+        <button class="fp-chip" data-sec="30">30秒</button>
+        <button class="fp-chip" data-min="5">5分钟</button>
+        <button class="fp-chip" data-min="25">25分钟</button>
+        <button class="fp-chip" data-min="45">45分钟</button>
+        <button class="fp-chip" data-min="60">60分钟</button>
       </div>
       <div class="fp-custom" id="fpCustom">
         <button class="fp-step" id="fpMinus" aria-label="减少 5 分钟">−</button>
@@ -1207,7 +1199,7 @@
         <button class="fp-step" id="fpPlus" aria-label="增加 5 分钟">+</button>
       </div>
       <input class="fp-range" id="fpRange" type="range" min="5" max="180" step="5" value="25" aria-label="拖动调整时长">
-      <div class="fp-hint">默认 25 分钟 · 范围 1–180 分钟 · ± 与滑块步长 5 分钟（输入框可直接填任意整数）；下方「秒」档用于快速测试倒计时与响铃；开始后需先「结束」才能改</div>
+      <div class="fp-hint">默认 25 分钟 · 范围 1–180 分钟 · ± 与滑块步长 5 分钟（输入框可直接填任意整数）；前两个「秒」档用于快速测试倒计时与响铃；开始后需先「结束」才能改</div>
     </div>
 
     <div class="fp-timer">
@@ -3830,11 +3822,9 @@ function fpSyncDurUI(){
   var rg=document.getElementById('fpRange');if(rg&&+rg.value!==fpDurMin)rg.value=fpDurMin;
   var box=document.getElementById('fpChips');
   if(box)Array.prototype.forEach.call(box.querySelectorAll('.fp-chip'),function(c){
-    c.classList.toggle('active',fpDurSec===0&&+c.getAttribute('data-min')===fpDurMin);
-  });
-  var sbox=document.getElementById('fpSecChips');
-  if(sbox)Array.prototype.forEach.call(sbox.querySelectorAll('.fp-chip'),function(c){
-    c.classList.toggle('active',fpDurSec>0&&+c.getAttribute('data-sec')===fpDurSec);
+    var _s=c.getAttribute('data-sec'),_m=c.getAttribute('data-min');
+    if(_s!=null)c.classList.toggle('active',fpDurSec>0&&+_s===fpDurSec);
+    else if(_m!=null)c.classList.toggle('active',fpDurSec===0&&+_m===fpDurMin);
   });
 }
 
@@ -4043,11 +4033,9 @@ function initFocusPage(){
   fpSoundUI();
   var chips=document.getElementById('fpChips');
   if(chips)Array.prototype.forEach.call(chips.querySelectorAll('.fp-chip'),function(c){
-    c.onclick=function(){fpSetDuration(+c.getAttribute('data-min'));};
-  });
-  var secChips=document.getElementById('fpSecChips');
-  if(secChips)Array.prototype.forEach.call(secChips.querySelectorAll('.fp-chip'),function(c){
-    c.onclick=function(){fpSetDurSec(+c.getAttribute('data-sec'));};
+    var _s=c.getAttribute('data-sec'),_m=c.getAttribute('data-min');
+    if(_s!=null)c.onclick=function(){fpSetDurSec(+_s);};
+    else if(_m!=null)c.onclick=function(){fpSetDuration(+_m);};
   });
   var inp=document.getElementById('fpMinInput');
   if(inp){
