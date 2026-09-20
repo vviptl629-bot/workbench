@@ -935,6 +935,10 @@
     .sp-inp.w76{flex:0 0 70px}
   }
   .fp-note textarea:focus{outline:none;border-color:var(--accent)}
+  /* 专注产出弹窗的软键盘避让（与 .edit-modal 同一套机制，见 kbKeepVisible 的 card 分支）
+     —— 装得下只做最小抬升；装不下才限高 + 卡内可滚 + 按钮条吸底。 */
+  .fp-note.kb-lift{position:relative;z-index:85;box-shadow:0 22px 60px -12px rgba(17,30,62,.55)}
+  .fp-note.kb-fit .fp-actions{position:sticky;bottom:0;background:var(--elev);z-index:4;padding-top:10px}
   @media(max-width:760px){
     .fp-wrap{padding-left:16px;padding-right:16px;gap:18px}
     .fp-ring,.fp-ring svg{width:172px;height:172px}
@@ -3249,7 +3253,7 @@ function init(){
     const whole=(kbBox&&kbBox.isConnected)?kbBox:kbEl;   // 容器（页面=添加框；弹窗=遮罩）
     if(!whole)return;
     // 弹窗场景：真正要抬的是内层卡片（遮罩是全屏的，抬它没有意义）
-    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card'):null;
+    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card,.fp-note'):null;
     const liftEl=card||whole;
     // ⚠️ 这里绝不能无条件复位再重算：每次校正都会把卡片"变回原高度、居中、滚回顶部"再重新限高抬起，
     //    7 次调度就是 7 次抖动（用户报的"屏幕晃动"），且抖动期间点击会丢（"要长按才能编辑"）。
@@ -3270,16 +3274,35 @@ function init(){
       //    ⚠️ 限高会把「保存/取消」裁到卡片外 —— 那块区域实际上已经是遮罩，
       //       点"保存"= 点遮罩 = 弹窗关闭、输入全丢（用户报的"一点击就回主页"）。
       //       所以限高时必须同时把按钮条 sticky 吸底，并在算可视底时把它扣掉。
+      const natTopOf=function(){return Math.round(card.getBoundingClientRect().top-kbShift(card));};
       const V0=kbVisibleRect(M,whole);
-      const avail=Math.max(200,Math.round((V0.bottom||M.vis)-24));
-      if(_kbFit!==card||card.style.maxHeight!==avail+'px'){
-        card.style.maxHeight=avail+'px';card.style.overflowY='auto';card.classList.add('kb-fit');_kbFit=card;
-      }
-      _kbActs=card.querySelector('.edit-actions,.tpl-edit-actions');
+      const top0=Math.round(V0.top+12), bot0=Math.round((V0.bottom||M.vis)-12);
       // 用「当前 rect - 当前位移」反推自然位置，不必先清 transform（清了就会闪一下）
-      const cr=card.getBoundingClientRect();
-      const up=Math.round((cr.top-kbShift(card))-(V0.top+12));
-      kbSetLift(card,up);
+      let natTop=natTopOf();
+      let natH=card.offsetHeight||Math.round(card.getBoundingClientRect().height);
+      if(natH>bot0-top0){
+        // 卡片比"键盘上方的可视区"还高（编辑任务弹窗这种）：限高 + 卡内可滚 + 按钮吸底，
+        // 再把顶边对齐可视区顶边 —— 标题永远在，聚焦字段永远在键盘之上。
+        const avail=Math.max(200,Math.round((V0.bottom||M.vis)-24));
+        if(_kbFit!==card||card.style.maxHeight!==avail+'px'){
+          card.style.maxHeight=avail+'px';card.style.overflowY='auto';card.classList.add('kb-fit');_kbFit=card;
+        }
+        _kbActs=card.querySelector('.edit-actions,.tpl-edit-actions,.fp-actions');
+        // ⚠️ 限高会改变卡片高度 → flex 居中位置随之变化，必须用**限高后**的 rect 重算自然顶边。
+        //    沿用限高前量到的值会差一个"重排偏移"（实测 31px：卡片贴不到可视区顶边，按钮又压到键盘线上）。
+        kbSetLift(card,natTopOf()-top0);
+      }else{
+        // 卡片装得下（专注产出弹窗这种小卡）：只做**最小抬升**把按钮让出键盘，
+        // 别把它顶到屏幕最上面 —— 那样视觉上像"弹窗飞了"，且没必要。
+        if(_kbFit)kbFitReset();
+        _kbActs=null;
+        natTop=natTopOf();natH=card.offsetHeight||Math.round(card.getBoundingClientRect().height);
+        let up=Math.round((natTop+natH)-bot0);
+        if(up<0)up=0;
+        const maxUp=Math.max(0,natTop-top0);
+        if(up>maxUp)up=maxUp;
+        kbSetLift(card,up);
+      }
       kbScrollToShow(whole);
       document.documentElement.style.paddingBottom=(M.kb+24)+'px';
       return;
@@ -3306,10 +3329,10 @@ function init(){
   }
   function kbRelease(){
     kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
-    ['taskAddBox','editModal'].forEach(id=>{
-      const el=document.getElementById(id);
+    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['fpNoteModal','.fp-note']].forEach(pair=>{
+      const el=document.getElementById(pair[0]);
       kbResetKb(el);
-      try{const p=el&&el.querySelector('.edit-modal');if(p)kbResetKb(p);}catch(_){}
+      try{const p=el&&el.querySelector(pair[1]);if(p)kbResetKb(p);}catch(_){}
     });
     document.documentElement.style.paddingBottom='';
     try{window.scrollTo(0,0);}catch(_){}   // 清掉避让过程中对页面滚动位置的改动，避免影响下一次打开弹窗
@@ -3330,6 +3353,17 @@ function init(){
     }
   }
   kbAttach(document.getElementById('taskAddBox'),['ringCard','impCard','taskAddBox','listArea']);
+  kbAttach(document.getElementById('fpNoteModal'),[]); // 专注产出弹窗：同一套避让，别再抄一份
+  // 专注弹窗专用的"清残留"入口。注意**不能**顺手把 kbRelease 挂到 window 上：
+  // openEdit/closeEdit 里那句 `if(typeof kbRelease==='function')kbRelease()` 一直够不到局部函数所以是空转，
+  // 一旦挂上去就会连 window.scrollTo(0,0) 一起生效 —— 每次编辑任务都把列表滚回顶部。只清这一个弹窗更安全。
+  window.fpKbRelease=function(){
+    kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
+    const el=document.getElementById('fpNoteModal');
+    kbResetKb(el);
+    try{const c=el&&el.querySelector('.fp-note');if(c)kbResetKb(c);}catch(_){}
+    document.documentElement.style.paddingBottom='';
+  };
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',()=>{if(kbEl)kbKeepVisible();});
     window.visualViewport.addEventListener('scroll',()=>{if(kbEl)kbKeepVisible();}); // 原生滚动后再次校正
@@ -3534,34 +3568,170 @@ function fpWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate(
 function fpStat(from){var a=focusList.filter(function(r){return (r.start||0)>=from;});
   return {n:a.length,m:Math.round(a.reduce(function(s,r){return s+(r.durMs||0);},0)/60000)};}
 
-/* ---------- 提示音：Web Audio 合成，无外部音频文件，离线可用 ---------- */
-var _fpAC=null;
-function fpAudio(){try{if(!_fpAC)_fpAC=new (window.AudioContext||window.webkitAudioContext)();
-  if(_fpAC.state==='suspended')_fpAC.resume();return _fpAC;}catch(e){return null;}}
-var FP_RING_MS=5000; // 到点响铃总时长：5 秒
-function fpBeep(short){
-  if(!fpSound)return;
-  var ac=fpAudio();if(!ac)return;
+/* ---------- 到点响铃：优先播 happy-stroll.mp3（Web Audio 预解码，随 SW 离线缓存）----------
+   「有时候响、有时候没声音」的三个根因，逐条修掉：
+   ① 自动播放策略：铃声由定时器触发，没有任何用户手势 —— 上下文若从未被手势创建/唤醒，浏览器直接静音。
+      → 首次点击页面任意处就 fpPrimeAudio()：建上下文 + 播一帧静音 buffer 解锁（iOS 必做）。
+   ② 上下文挂着 'suspended'：旧写法按 currentTime 排 10 个振荡器，而 suspended 时 currentTime 是冻结的，
+      resume 之后它们同时炸响或被丢弃 → 听感就是"响一下没了 / 干脆没声"。
+      → 现在先等 resume() 落地，确认 state==='running' 才排声音，且**先播 mp3、播不了才合成**。
+   ③ 后台/锁屏期间定时器被冻结：到点补算发生在 fpResync / 重启恢复分支里，而旧代码**那两个分支根本不响铃**。
+      → 两处都补上 fpRingPlay()。
+   手机静音：网页没法像系统闹钟那样强行出声，但把能做的都做了 ——
+     · navigator.audioSession.type='playback'（iOS 16.4+）：按"媒体播放"归类，iOS 静音开关不再压掉；
+     · 全程振动（安卓静音下依然有效，节奏铺满整个响铃时长，iOS 无此 API 静默跳过）；
+     · 铃声走 Web Audio 而不是 <audio>，且**提前解码成 AudioBuffer**，到点只做一次 start()。
+   兜底顺序：AudioBuffer 播 mp3 → 合成双音（784/1046Hz 交替）→ <audio> 元素 → 只剩振动。 */
+var _fpAC=null,_fpBuf=null,_fpLoad=null,_fpRingSrc=null,_fpElem=null,_fpRingWant=false,_fpUnlockArmed=false,_fpWantAt=0;
+var FP_RING_SRC='./happy-stroll.mp3';
+var FP_RING_MS=9000;    // 到点响铃总时长：9 秒（用户 2026-09-20 要求 8~10 秒）
+var FP_PREVIEW_MS=3000; // 「试听」播放时长
+var FP_RING_GAIN=1;     // 实测 mp3 峰值 0.86 / RMS 0.147，属正常母带响度，不再加增益
+function fpAudio(){
+  try{if(!_fpAC)_fpAC=new (window.AudioContext||window.webkitAudioContext)();return _fpAC;}catch(e){return null;}
+}
+/* iOS 16.4+ 音频会话：声明为「媒体播放」，这是网页唯一有可能绕开静音开关的手段。不支持则跳过。 */
+function fpAudioSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}}
+/* 在用户手势里唤醒上下文 + 播一帧静音 buffer（经典 unlock）。返回上下文。 */
+function fpPrimeAudio(){
+  fpAudioSession();
+  var ac=fpAudio();if(!ac)return null;
+  try{var b=ac.createBuffer(1,1,ac.sampleRate||22050),s=ac.createBufferSource();
+    s.buffer=b;s.connect(ac.destination);s.start(0);}catch(e){}
+  try{if(ac.state==='suspended')ac.resume();}catch(e){}
+  return ac;
+}
+/* 预解码 mp3 → AudioBuffer（失败允许下次重试）。 */
+function fpLoadRing(cb){
+  if(_fpBuf){if(cb)cb(true);return;}
+  if(_fpLoad){_fpLoad.then(function(b){if(cb)cb(b);});return;}
+  var ac=fpAudio();
+  if(!ac||typeof fetch!=='function'){if(cb)cb(false);return;}
+  var p;
   try{
-    if(short){ // 单声（试听）
-      var s0=ac.currentTime, o0=ac.createOscillator(), g0=ac.createGain();
-      o0.type='sine';o0.frequency.setValueAtTime(880,s0);
-      g0.gain.setValueAtTime(0.0001,s0);g0.gain.exponentialRampToValueAtTime(0.25,s0+0.02);
-      g0.gain.exponentialRampToValueAtTime(0.0001,s0+0.3);
-      o0.connect(g0);g0.connect(ac.destination);o0.start(s0);o0.stop(s0+0.32);
-      return;
+    p=fetch(FP_RING_SRC,{cache:'force-cache'})
+      .then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer();})
+      .then(function(ab){return new Promise(function(res,rej){
+        var ok=function(buf){res(buf);};
+        try{var r2=ac.decodeAudioData(ab,ok,rej);if(r2&&r2.then)r2.then(ok,rej);}catch(e){rej(e);}
+      });})
+      .then(function(buf){_fpBuf=buf;_fpLoad=null;return true;})
+      .catch(function(){_fpLoad=null;return false;});
+  }catch(e){if(cb)cb(false);return;}
+  _fpLoad=p;
+  p.then(function(b){if(cb)cb(b);});
+}
+/* 合成音兜底：mp3 还没解码好 / 解码失败 / 首次离线 时顶上（不能因为没缓冲就吞掉这一声铃） */
+function fpSynth(ac,ms,vol,oneShot){
+  try{
+    var t0=ac.currentTime+0.03;
+    if(oneShot){
+      var o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.setValueAtTime(880,t0);
+      g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+Math.min(0.3,ms/1000));
+      o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+0.34);return;
     }
-    // 连续响 5 秒：每 0.5 秒一声，784/1046Hz 交替
-    var tick=0.5, n=Math.round(FP_RING_MS/1000/tick);
+    var tick=0.5,n=Math.max(1,Math.round((ms/1000)/tick));
     for(var i=0;i<n;i++){
-      var t0=ac.currentTime+i*tick, o=ac.createOscillator(), g=ac.createGain();
-      o.type='sine';o.frequency.setValueAtTime(i%2?1046:784,t0);
-      g.gain.setValueAtTime(0.0001,t0);
-      g.gain.exponentialRampToValueAtTime(0.3,t0+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,t0+0.32);
-      o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+0.34);
+      var ts=t0+i*tick,o2=ac.createOscillator(),g2=ac.createGain();
+      o2.type='sine';o2.frequency.setValueAtTime(i%2?1046:784,ts);
+      g2.gain.setValueAtTime(0.0001,ts);
+      g2.gain.exponentialRampToValueAtTime(vol,ts+0.02);
+      g2.gain.exponentialRampToValueAtTime(0.0001,ts+0.32);
+      o2.connect(g2);g2.connect(ac.destination);o2.start(ts);o2.stop(ts+0.34);
     }
   }catch(e){}
+}
+/* <audio> 元素兜底（没有 Web Audio 的环境） */
+function fpElemRing(ms){
+  try{
+    if(!_fpElem){_fpElem=new Audio(FP_RING_SRC);_fpElem.loop=true;_fpElem.preload='auto';}
+    _fpElem.currentTime=0;_fpElem.volume=1;
+    var pr=_fpElem.play();if(pr&&pr.catch)pr.catch(function(){});
+    clearTimeout(_fpElem._t);
+    _fpElem._t=setTimeout(function(){try{_fpElem.pause();}catch(e){}},ms);
+    return true;
+  }catch(e){return false;}
+}
+/* 播 mp3：循环铺满时长，末尾 0.8s 淡出（避免硬切）。返回是否真的排上了声音。 */
+function fpPlayBuf(ac,ms){
+  if(!_fpBuf)return false;
+  try{
+    var src=ac.createBufferSource();src.buffer=_fpBuf;src.loop=true;
+    var g=ac.createGain();g.gain.value=FP_RING_GAIN;
+    src.connect(g);g.connect(ac.destination);
+    var t0=ac.currentTime+0.05,dur=Math.max(0.3,ms/1000);
+    src.start(t0);src.stop(t0+dur+0.05);
+    g.gain.setValueAtTime(FP_RING_GAIN,t0);
+    g.gain.setValueAtTime(FP_RING_GAIN,t0+Math.max(0.1,dur-0.8));
+    g.gain.linearRampToValueAtTime(0.0001,t0+dur);
+    _fpRingSrc=src;return true;
+  }catch(e){return false;}
+}
+/* 振动：安卓（含静音）有效，iOS Safari 无此 API → 静默跳过。节奏铺满整个响铃时长。 */
+function fpVibrate(){
+  try{
+    if(!navigator.vibrate)return;
+    var on=450,off=180,t=0,p=[];
+    while(t<FP_RING_MS){p.push(on);t+=on;if(t>=FP_RING_MS)break;p.push(off);t+=off;}
+    navigator.vibrate(p);
+  }catch(e){}
+}
+function fpRingStop(){
+  try{if(_fpRingSrc){_fpRingSrc.stop();_fpRingSrc.disconnect();}}catch(e){}
+  _fpRingSrc=null;
+  try{if(_fpElem)_fpElem.pause();}catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+}
+/* 万一声音被策略拦下：留一个"下一拍补响"，用户第一次点屏幕就把这声铃补上（30 秒内有效） */
+function fpArmUnlock(){
+  _fpRingWant=true;
+  if(_fpUnlockArmed)return;_fpUnlockArmed=true;
+  var go=function(){
+    document.removeEventListener('pointerdown',go,true);_fpUnlockArmed=false;
+    if(!_fpRingWant||Date.now()-_fpWantAt>30000){_fpRingWant=false;return;}
+    fpRingPlay();
+  };
+  document.addEventListener('pointerdown',go,true);
+}
+function fpRingPlay(){
+  if(!fpSound)return;
+  fpAudioSession();     // 到点这一刻再声明一次"这是媒体播放"（iOS 静音开关唯一可能的绕法）
+  fpRingStop();         // 先清上一次的（缓冲源/audio 元素/振动），避免两条音源叠着播
+  _fpWantAt=Date.now();_fpRingWant=true;
+  fpVibrate();          // 静音下最可靠的一条通道：先起振，它不依赖任何手势
+  fpLoadRing();         // 顺手预热，下次到点无需等解码
+  var ac=fpAudio();
+  if(!ac){fpElemRing(FP_RING_MS);return;}
+  var settled=false;
+  var ok=function(){
+    if(settled)return;settled=true;
+    _fpRingWant=false;
+    if(fpPlayBuf(ac,FP_RING_MS))return;
+    fpSynth(ac,FP_RING_MS,0.3,false);   // 没缓冲好也要响，别静默
+  };
+  var alt=function(){
+    if(settled)return;settled=true;
+    fpElemRing(FP_RING_MS);fpArmUnlock();
+  };
+  try{
+    var pr=ac.resume();
+    if(pr&&pr.then)pr.then(ok,alt);else ok();
+  }catch(e){ok();}
+  // ⚠️ 没有任何用户手势时 resume() 会**一直挂着等手势**（不是 reject）→ 光靠 then 永远等不到兜底。
+  //    450ms 还没落地就换 <audio> 顶上，并挂"下一拍补响"：用户点一下屏幕立刻补一声完整的铃。
+  setTimeout(alt,450);
+}
+/* 「试听」：在用户手势里播 3 秒，同时完成解锁与预解码 */
+function fpPreview(){
+  if(!fpSound)return;
+  if(_fpRingSrc)fpRingStop();
+  var ac=fpPrimeAudio();
+  fpLoadRing(function(){
+    if(!ac)fpElemRing(FP_PREVIEW_MS);
+    else if(!fpPlayBuf(ac,FP_PREVIEW_MS))fpSynth(ac,FP_PREVIEW_MS,0.25,false);
+  });
 }
 var _fpAlertCb=null;
 function fpAlert(title,sub,cb){
@@ -3571,6 +3741,7 @@ function fpAlert(title,sub,cb){
   var m=document.getElementById('fpAlertModal');if(m)m.classList.add('show');
 }
 function fpAlertClose(){
+  fpRingStop(); // 用户已经知道了，不必再响满 9 秒
   var m=document.getElementById('fpAlertModal');if(m)m.classList.remove('show');
   var cb=_fpAlertCb;_fpAlertCb=null;
   if(cb){try{cb();}catch(e){}}
@@ -3683,10 +3854,11 @@ function fpHistRender(){
 function fpToggle(){
   if(fp.running){
     fp.remain=Math.max(0,fp.endAt-Date.now());fp.running=false;clearInterval(fp._t);fp._t=null;
+    fpRingStop(); // 手动取消：铃声/振动立即停
   }else{
     if(fpIdle()){fp.total=fpDurMin*60000;fp.remain=fp.total;}
     if(!fp.startedAt)fp.startedAt=Date.now();
-    fpAudio(); // 在用户手势里解锁音频上下文，保证后续自动响铃能被播放
+    fpPrimeAudio();fpLoadRing(); // 用户手势里解锁音频 + 预解码铃声，保证到点自动响铃发得出声
     fp.endAt=Date.now()+fp.remain;fp.running=true;
     clearInterval(fp._t);fp._t=setInterval(fpTick,250);
   }
@@ -3725,14 +3897,14 @@ function fpComplete(){
   clearInterval(fp._t);fp._t=null;fp.running=false;
   if(fp.phase==='focus'){
     fpAddRecord(fp.startedAt||(Date.now()-fp.total),fp.total);
-    fpBeep();
+    fpRingPlay();
     fp.phase='break';fp.remain=BREAK_MS;fp.endAt=Date.now()+BREAK_MS;fp.startedAt=Date.now();
     fp.running=true;fp._t=setInterval(fpTick,250);
     saveFpState();fpRender();
     // 到点先给一个明确的「时间到」弹窗，点「知道了」再进入产出填写
     fpAlert('时间到','本轮专注 '+fpMin(fp.total)+' 分钟已完成，休息 5 分钟。写一句这轮做了什么吧。',function(){fpOpenNote();});
   }else{
-    fpBeep();
+    fpRingPlay();
     fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     saveFpState();fpRender();
     fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
@@ -3755,12 +3927,14 @@ function fpOpenNote(id){
   var ti=document.getElementById('fpNoteTitle');if(ti)ti.textContent='这 '+fpMin(rec.durMs)+' 分钟做了什么？';
   var sub=document.getElementById('fpNoteSub');
   if(sub)sub.textContent=fpClock(rec.start)+' 开始 · 专注 '+fpMin(rec.durMs)+' 分钟';
+  if(window.fpKbRelease)window.fpKbRelease(); // 清掉上一场景残留的位移/限高/底部留白
   document.getElementById('fpNoteModal').classList.add('show');
   setTimeout(function(){if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},80);
 }
 function fpCloseNote(keepTyped){
   if(keepTyped){var ta=document.getElementById('fpNoteText');if(ta&&ta.value.trim())fpSaveNote();}
   var m=document.getElementById('fpNoteModal');if(m)m.classList.remove('show');
+  if(window.fpKbRelease)window.fpKbRelease();
   _fpEditId=null;
 }
 function fpSaveNote(){
@@ -3773,6 +3947,7 @@ function fpSaveNote(){
 function fpOpenPage(){
   var pg=document.getElementById('fpPage');if(!pg)return;
   _fpHsDirty=true;
+  fpPrimeAudio();fpLoadRing(); // 进专注页就是一次用户手势：解锁音频 + 预解码铃声
   pg.classList.add('show');pg.scrollTop=0;
   document.body.style.overflow='hidden'; // 专注页自己滚，防止背后列表跟着动
   var e=document.getElementById('fpEntry');if(e)e.classList.add('active');
@@ -3788,13 +3963,15 @@ function fpClosePage(){
 
 /* ---------- 初始化 ---------- */
 function initFocusPage(){
+  // 自动播放策略要求"至少发生过一次用户手势"，而铃声是定时器触发的 → 第一次点屏幕就把票据拿到
+  document.addEventListener('pointerdown',function(){fpPrimeAudio();fpLoadRing();},{capture:true,once:true});
   document.getElementById('fpEntry').onclick=function(){fpOpenPage();closeSidebar();};
   document.getElementById('fpCloseBtn').onclick=fpClosePage;
   document.getElementById('fpStart').onclick=fpToggle;
   document.getElementById('fpStop').onclick=fpEnd;
   document.getElementById('fpSoundBtn').onclick=function(){
     fpSound=!fpSound;lsSet(FP_SNDKEY,fpSound?'1':'0');fpSoundUI();
-    if(fpSound)fpBeep(true); // 打开时试听一声
+    if(fpSound)fpPreview(); // 打开时试听 3 秒（同时完成解锁与预解码）
   };
   fpSoundUI();
   var chips=document.getElementById('fpChips');
@@ -3841,6 +4018,7 @@ function initFocusPage(){
     fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     if(wasPhase==='focus')fpAddRecord(st,tt);
     saveFpState();fpRender();
+    fpRingPlay(); // 补算也要响：旧代码这里不响铃，是"有时候没声音"的三大来源之一
     if(wasPhase==='focus')fpAlert('时间到','离开的这段时间里本轮专注已结束。写一句做了什么吧。',function(){fpOpenNote();});
     else fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
     return;

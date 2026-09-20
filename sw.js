@@ -1,5 +1,5 @@
-const CACHE = 'wb-pwa-v59';
-const ASSETS = ['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'wb-pwa-v60';
+const ASSETS = ['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './happy-stroll.mp3'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
