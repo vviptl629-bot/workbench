@@ -218,7 +218,9 @@
   .task .star.on{opacity:1}
   /* 首页重要任务卡 */
   .imp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
-  .imp-title{font-size:12.5px;font-weight:700;color:var(--warning);margin-bottom:8px;letter-spacing:.3px}
+  .imp-title{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--warning);margin-bottom:8px;letter-spacing:.3px}
+  .imp-more{flex:0 0 auto;font-size:11.5px;font-weight:600;color:var(--accent);background:var(--elev);border:1px solid var(--border);border-radius:20px;padding:3px 10px;cursor:pointer}
+  .imp-more:active{transform:scale(.96)}
   .imp-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
   .imp-item:last-child{border-bottom:none;padding-bottom:2px}
   .imp-item .check{width:19px;height:19px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;transition:.15s}
@@ -783,6 +785,9 @@
   .fp-sec{display:flex;flex-direction:column;gap:10px}
   .fp-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
   .fp-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .fp-chips.sec{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:8px 10px;border:1px dashed var(--border);border-radius:10px}
+  .fp-chips.sec .fp-chip{min-width:56px}
+  .fp-sec-tag{font-size:11px;color:var(--muted);align-self:center;margin-left:2px}
   .fp-chip{padding:12px 0;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);
     font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s}
   .fp-chip:hover{border-color:var(--text)}
@@ -1189,6 +1194,12 @@
         <button class="fp-chip" data-min="45">45′</button>
         <button class="fp-chip" data-min="60">60′</button>
       </div>
+      <div class="fp-chips sec" id="fpSecChips">
+        <button class="fp-chip" data-sec="10">10″</button>
+        <button class="fp-chip" data-sec="30">30″</button>
+        <button class="fp-chip" data-sec="60">60″</button>
+        <span class="fp-sec-tag">秒 · 测试用</span>
+      </div>
       <div class="fp-custom" id="fpCustom">
         <button class="fp-step" id="fpMinus" aria-label="减少 5 分钟">−</button>
         <input class="fp-input" id="fpMinInput" type="number" min="1" max="180" step="1" inputmode="numeric" value="25" aria-label="自定义分钟数">
@@ -1196,7 +1207,7 @@
         <button class="fp-step" id="fpPlus" aria-label="增加 5 分钟">+</button>
       </div>
       <input class="fp-range" id="fpRange" type="range" min="5" max="180" step="5" value="25" aria-label="拖动调整时长">
-      <div class="fp-hint">默认 25 分钟 · 范围 1–180 分钟 · ± 与滑块步长 5 分钟（输入框可直接填任意整数）；开始后需先「结束」才能改</div>
+      <div class="fp-hint">默认 25 分钟 · 范围 1–180 分钟 · ± 与滑块步长 5 分钟（输入框可直接填任意整数）；下方「秒」档用于快速测试倒计时与响铃；开始后需先「结束」才能改</div>
     </div>
 
     <div class="fp-timer">
@@ -1280,8 +1291,8 @@
     </div>
     <div class="sp-fld"><label>截止日期</label><input id="spFDue" type="date"></div>
     <div class="sp-formact">
-      <button class="sp-btn pri" id="spFSave">保存</button>
       <button class="sp-btn" id="spFCancel">取消</button>
+      <button class="sp-btn pri" id="spFSave">保存</button>
     </div>
   </div>
 </div>
@@ -1293,8 +1304,8 @@
     <div class="sub" id="fpNoteSub"></div>
     <textarea id="fpNoteText" maxlength="500" placeholder="一句话记录产出或卡点，方便日/周复盘回看"></textarea>
     <div class="fp-actions" style="margin-top:12px">
-      <button class="fp-big pri" id="fpNoteSave">保存</button>
       <button class="fp-big" id="fpNoteSkip">跳过</button>
+      <button class="fp-big pri" id="fpNoteSave">保存</button>
     </div>
   </div>
 </div>
@@ -2706,9 +2717,10 @@ function addTask(){
   const useTime=document.getElementById('timeChk').checked;
   const start=useTime?document.getElementById('timeStart').value:'';
   const impEl=document.getElementById('impChk');
-  tasks.push({id:Date.now()+'-'+Math.floor(Math.random()*999),text,category,sub,
+  const nt={id:Date.now()+'-'+Math.floor(Math.random()*999),text,category,sub,
     due:selDate||todayStr(),done:false,created:Date.now(),updated:Date.now(),start,
-    imp:(impEl&&impEl.checked)?true:undefined});
+    imp:(impEl&&impEl.checked)?true:undefined};
+  tasks.push(nt);
   inp.value='';
   document.getElementById('timeChk').checked=false;
   if(impEl)impEl.checked=false;
@@ -2716,17 +2728,33 @@ function addTask(){
   tpSyncTrigger(document.getElementById('timeStartTrigger'),'');
   document.getElementById('timeRow').classList.remove('show');
   saveTasks();render();
+  showToast('已添加'); // 不打断连续录入：不 blur、不强制清键盘抬升（根因由 C1 解决）
+  if(document.activeElement!==inp)revealTask(nt.id); // 仅在非输入态把新任务滚入视野
+}
+function revealTask(id){
+  var el=document.querySelector('#listArea .task[data-id="'+id+'"]');
+  if(!el)return;
+  var r=el.getBoundingClientRect();
+  if(r.bottom>(window.innerHeight||0)-20||r.top<20){try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
 }
 function toggle(id){const t=tasks.find(x=>x.id===id);if(!t)return;const now=Date.now();if(t.repeat&&t.repeat!=='none'){t.checks=t.checks||{};const d=todayStr();if(t.checks[d]){delete t.checks[d];if(t.checksAt)delete t.checksAt[d];}else{t.checks[d]=true;t.checksAt=t.checksAt||{};t.checksAt[d]=now;}}else{if(t.done){t.done=false;delete t.completedAt;}else{t.done=true;t.completedAt=now;}}t.updated=now;saveTasks();render();checkAllDone();}
 function toggleImp(id){const t=tasks.find(x=>x.id===id);if(t){t.imp=!t.imp;t.updated=Date.now();saveTasks();render();showToast(t.imp?'★ 已标记为重要':'已取消重要标记');}}
 /* 首页「重要任务」置顶卡（%圆环下方） */
+var IMP_OPEN_MAX=3;
+var impOpen=(function(){try{return lsGet('workbench_imp_open')==='1';}catch(e){return false;}})();
+function impShownAll(){return impOpen;}
+function toggleImpOpen(){impOpen=!impOpen;try{lsSet('workbench_imp_open',impOpen?'1':'0');}catch(e){}renderImpCard();}
 function renderImpCard(){
   const card=document.getElementById('impCard');if(!card)return;
   const imps=tasks.filter(t=>t.imp&&!isDoneToday(t));
   if(view!=='today'||!imps.length){card.style.display='none';card.innerHTML='';return;}
   card.style.display='block';
-  card.innerHTML='<div class="imp-title">★ 重要 · '+imps.length+'</div>'+
-    imps.map(t=>{
+  var shown=impOpen?imps:imps.slice(0,IMP_OPEN_MAX);
+  var head='<div class="imp-title"><span>★ 重要 · '+imps.length+(imps.length>IMP_OPEN_MAX?'（显示前 '+IMP_OPEN_MAX+' 条）':'')+'</span>';
+  if(imps.length>IMP_OPEN_MAX){head+='<span class="imp-more" data-act="more">'+(impOpen?'收起':'全部 '+imps.length+' 条')+'</span>';}
+  head+='</div>';
+  card.innerHTML=head+
+    shown.map(t=>{
       let c=CATS[t.category];let color=c?c.color:'#999',name=c?c.name:t.category;
       if(t.category==='work'&&t.sub){const s=(SUBS.work||[]).find(x=>x.key===t.sub);if(s){name='工作·'+s.name;color=s.color;}}
       return '<div class="imp-item" style="--cat:'+color+'">'+
@@ -2738,6 +2766,7 @@ function renderImpCard(){
   if(!card.dataset.bound){
     card.addEventListener('click',e=>{
       const el=e.target.closest('[data-act]');if(!el)return;
+      if(el.dataset.act==='more')toggleImpOpen();
       if(el.dataset.act==='toggle')toggle(el.dataset.id);
       if(el.dataset.act==='star')toggleImp(el.dataset.id);
     });
@@ -3095,6 +3124,7 @@ function init(){
   initSideFold();  // 侧栏折叠组（主题颜色 / 分析与数据）
   initFocusPage(); // 专注：独立页面 + 番茄钟 + 专注记录
   initStudyPage(); // 学习计划：独立页面 + 计划/打卡/今日建议
+  restoreOpenPage(); // 刷新后停留在上次打开的独立页（专注/学习计划），不跳回主页
   genRoutine(); // 打开即生成今天的例行任务
   // 跨天检测：页面一直开着跨过零点时也能自动生成
   let _lastDay=todayStr();
@@ -3114,7 +3144,7 @@ function init(){
   //   ③ 先按可视区底部滚动页面 / 弹窗内部；滚动无效（独立 PWA）→ 用 transform 把整块浮起来；
   //   ④ 弹窗（#editModal 等）自带滚动时，把可滚动祖先也一起滚动，而不是只算页面坐标。
   // 通用入口：kbAttach(容器, [受布局变化影响的兄弟节点])；页面与弹窗共用同一套。
-  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbFit=null,_kbActs=null;
+  let kbEl=null,kbBox=null,_kbTimers=[],_kbH0=0,_kbFit=null,_kbActs=null,_kbSeen=false;
   function kbClearTimers(){_kbTimers.forEach(t=>clearTimeout(t));_kbTimers=[];}
   // 弹窗卡片在键盘期被我们「限高 + 内部可滚」过，键盘收起 / 关闭弹窗时必须还原
   function kbFitReset(){
@@ -3152,13 +3182,22 @@ function init(){
   }
   function kbMetrics(){
     const vv=window.visualViewport;
-    const h0=_kbH0||window.innerHeight||0;
+    let h0=_kbH0||window.innerHeight||0;
     const nowH=window.innerHeight||h0;
+    if(nowH>h0){h0=nowH;_kbH0=h0;} // 视口变高 = 键盘已收起：抬高基准线，别拿键盘期小基准续算假键盘高
     const vvH=(vv&&typeof vv.height==='number')?vv.height:nowH;
     const off=(vv&&typeof vv.offsetTop==='number')?vv.offsetTop:0;
     let vis=Math.min(h0,Math.max(vvH+off,nowH));   // 两个信号取「更保守（更小）」的那个
     let guessed=false;
-    if(h0-vis<60&&kbTouch()){vis=Math.round(h0*0.5);guessed=true;} // 都不可信 → 保守估计键盘占 50%
+    // ⚠️ 「视口没变化」有两种截然不同的真相，旧写法把它们当成一回事，这就是"抬升永远撤不掉"的真正根因：
+    //    · 浏览器压根不报告键盘（iOS 独立 PWA / 内嵌浏览器）→ 必须保守估计 50%，否则永远不避让；
+    //    · 键盘**收起了**（安卓点「收起」，视口回到满高）→ 此刻 h0-vis=0，旧逻辑反而猜出 50% 键盘，
+    //      于是 kb 恒 > 0，`if(M.kb<=0)` 分支（撤抬升）在触屏上成了死代码，输入框就一直吊着。
+    //   区分办法：本次聚焦期间**真的观测到过**键盘（视口确实被压矮 ≥60px）→ 视口回到满高就是收起了，别再猜。
+    const diff=h0-vis;
+    if(diff>=60){_kbSeen=true;}                       // 真的观测到键盘弹起
+    else if(_kbSeen){vis=h0;}                         // 观测到过 + 现已满高 = 键盘已收起 → kb=0
+    else if(kbTouch()){vis=Math.round(h0*0.5);guessed=true;} // 从未观测到 → 保守估计占 50%
     return {h0:h0,vis:vis,kb:Math.max(0,h0-vis),guessed:guessed};
   }
   // 键盘期底部固定导航：**什么都不做，让它固定在最下方**（v59）。
@@ -3260,13 +3299,17 @@ function init(){
     //    只在「换了卡片」时才彻底还原；其余一律增量、幂等。
     if(_kbFit&&_kbFit!==card)kbFitReset();
     const M=kbMetrics();
-    if(M.kb<=0){kbFitReset();document.documentElement.style.paddingBottom='';return;} // 键盘没弹出：什么都不做
+    if(M.kb<=0){kbFitReset();document.documentElement.style.paddingBottom='';if(liftEl)kbResetKb(liftEl);if(kbBox&&kbBox!==liftEl)kbResetKb(kbBox);return;} // 键盘收起：必须撤掉抬升，否则输入框会永远吊在"重要"卡上方
     // ① 先试最自然的：容器滚动 / 整块本来就在可视区内。
     //    已经能看见就直接返回 —— 但**不要在这里清底部留白**：后续校正会走到这条分支，
     //    一清一设会让页面高度反复变化（也是"晃动"的来源之一）。留白只在键盘收起时（上面 / kbRelease）清。
+    // ⚠️ 「已经能看见」必须用**自然位置**（减掉当前抬升）来判断，不能用抬起后的 rect：
+    //    抬起过一次之后，抬起态的 rect 自己就满足"能看见" → 直接 return → 抬升永远撤不掉。
+    //    这正是安卓点「收起」不 blur（不触发 focusout → 不 kbRelease）时输入框一直吊在
+    //    「重要」卡上方、看起来像"任务窗口还在"的根因。自然位置可见 = 不需要抬升 → 撤掉。
+    if(whole.getBoundingClientRect().bottom-kbShift(whole)<=M.vis-12){kbSetLift(whole,0);return;}
     const sc0=kbScroller(kbEl)||kbScroller(whole);
     if(sc0){ if(kbScrollToShow(whole))return; }
-    else if(whole.getBoundingClientRect().bottom<=M.vis-12)return;
     if(card){
       // ② 弹窗：卡片比键盘上方的可视区还高 → 直接抬会把标题顶出屏幕。
       //    正确做法：把卡片「压进」可视区（限高 + 内部可滚），再把卡片顶边对齐可视区顶边，
@@ -3312,8 +3355,10 @@ function init(){
     //    （只抬输入框会漏掉它下面的分类下拉 / 添加按钮）。
     const V=kbVisibleRect(M,whole);
     const fr=kbEl.getBoundingClientRect(), lr=whole.getBoundingClientRect(), sf=kbShift(whole);
-    // fr 已含位移（输入框本身没有 transform），lr 要减掉位移才是"自然位置"
-    const fieldOver=Math.round(fr.bottom-(V.bottom-12));
+    // fr 与 lr 都含位移（输入框是 whole 的后代，祖先的 transform 会带上它），减掉 sf 才是"自然位置"。
+    // ⚠️ 两处都必须用自然位置：用抬起后的 rect 算，抬起态自己就"不溢出" → 下一轮把抬升清零 →
+    //    再下一轮又抬起 = 每 80/200/350…ms 来回抖（而且抖动时 mousedown/mouseup 落在不同元素 → 点击丢失）。
+    const fieldOver=Math.round((fr.bottom-sf)-(V.bottom-12));
     const wholeOver=Math.round((lr.bottom-sf)-(V.bottom-12));
     const maxUp=Math.max(0,Math.round((lr.top-sf)-(V.top+12)));
     let use=Math.max(0,fieldOver);
@@ -3324,6 +3369,7 @@ function init(){
   function kbSchedule(){
     kbClearTimers();
     _kbH0=window.innerHeight||0;                   // 记录键盘弹出前的视口高度作为基准
+    _kbSeen=false;                                 // 每次重新聚焦都是新的一轮："这次有没有真的观测到键盘"
     kbKeepVisible();
     [80,200,350,550,800,1200,1700].forEach(d=>_kbTimers.push(setTimeout(kbKeepVisible,d)));
   }
@@ -3368,7 +3414,7 @@ function init(){
     window.visualViewport.addEventListener('resize',()=>{if(kbEl)kbKeepVisible();});
     window.visualViewport.addEventListener('scroll',()=>{if(kbEl)kbKeepVisible();}); // 原生滚动后再次校正
   }
-  window.addEventListener('orientationchange',()=>{if(kbEl){_kbH0=window.innerHeight||0;kbKeepVisible();}});
+  window.addEventListener('orientationchange',()=>{if(kbEl){_kbH0=window.innerHeight||0;_kbSeen=false;kbKeepVisible();}});
   document.getElementById('dayPrev').onclick=()=>shiftDay(-1);
   document.getElementById('dayNext').onclick=()=>shiftDay(1);
   document.getElementById('dayToday').onclick=()=>{
@@ -3538,21 +3584,24 @@ if(document.readyState!=='loading')init();else document.addEventListener('DOMCon
    计时基于绝对结束时间戳 endAt，标签节流/休眠后回前台不走偏；运行状态与所选时长持久化，刷新可续。
    记录字段：id / start(开始时间戳) / durMs(实际专注时长) / text(用户填写的产出)。 */
 var FP_KEY='workbench_focus_v1', FP_STATE='workbench_focus_state_v1',
-    FP_DURKEY='workbench_focus_dur', FP_SNDKEY='workbench_focus_sound';
-var FP_DEF_MIN=25, FP_MIN_MIN=1, FP_MIN_MAX=180, FP_MIN_STEP=5;
+    FP_DURKEY='workbench_focus_dur', FP_SNDKEY='workbench_focus_sound',
+    FP_SECKEY='workbench_focus_sec', FP_PAGEKEY='workbench_page_v1';
+var FP_DEF_MIN=25, FP_MIN_MIN=1, FP_MIN_MAX=180, FP_MIN_STEP=5, FP_SEC_MAX=1800;
 var BREAK_MS=5*60000, FP_MAX=300;
-var focusList=[], fpDurMin=FP_DEF_MIN, fpSound=true;
+var focusList=[], fpDurMin=FP_DEF_MIN, fpDurSec=0, fpSound=true;
 var fpOpenDays={}, _fpHsDirty=true; // 记录按日折叠的展开状态 / 列表是否需要重建
 var fp={phase:'focus',total:FP_DEF_MIN*60000,remain:FP_DEF_MIN*60000,endAt:0,running:false,startedAt:0,_t:null};
 try{focusList=JSON.parse(lsGet(FP_KEY)||'[]');if(!Array.isArray(focusList))focusList=[];}catch(e){focusList=[];}
 try{var _fd=parseInt(lsGet(FP_DURKEY)||'',10);if(_fd>=FP_MIN_MIN&&_fd<=FP_MIN_MAX)fpDurMin=_fd;}catch(e){}
-fp.total=fpDurMin*60000;fp.remain=fp.total;
+try{var _sd=parseInt(lsGet(FP_SECKEY)||'',10);if(_sd>=1&&_sd<=FP_SEC_MAX)fpDurSec=_sd;}catch(e){}
+fp.total=fpBaseMs();fp.remain=fp.total;
 try{if(lsGet(FP_SNDKEY)==='0')fpSound=false;}catch(e){}
 try{var _fs=JSON.parse(lsGet(FP_STATE)||'{}');
   if(_fs&&typeof _fs==='object'&&(_fs.running||+_fs.remain>0)){
     fp.phase=_fs.phase==='break'?'break':'focus';
     var _ft=parseInt(_fs.total,10);
-    if(_ft>=FP_MIN_MIN*60000&&_ft<=FP_MIN_MAX*60000){fp.total=_ft;fpDurMin=Math.round(_ft/60000);}
+    if(_ft>=1000&&_ft<FP_MIN_MIN*60000){fpDurSec=Math.round(_ft/1000);fp.total=_ft;}
+    else if(_ft>=FP_MIN_MIN*60000&&_ft<=FP_MIN_MAX*60000){fp.total=_ft;fpDurMin=Math.round(_ft/60000);}
     fp.remain=Math.max(0,+_fs.remain||0);
     fp.running=!!_fs.running;fp.endAt=+_fs.endAt||0;fp.startedAt=+_fs.startedAt||0;
   }}catch(e){}
@@ -3562,6 +3611,9 @@ function fpTotal(){return fp.phase==='break'?BREAK_MS:fp.total;}
 function fpIdle(){return !fp.running&&fp.phase==='focus'&&fp.remain===fp.total&&!fp.startedAt;}
 function fpSec2(ms){var s=Math.max(0,Math.ceil((ms||0)/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 function fpMin(ms){var m=Math.round((ms||0)/60000);return m<1?1:m;}
+function fpBaseMs(){return fpDurSec>0?fpDurSec*1000:fpDurMin*60000;}
+function fpDurTxt(){return fpDurSec>0?(fpDurSec+' 秒'):(fpDurMin+' 分钟');}
+function fpDurLabel(ms){ms=ms||0;return ms<60000?(Math.round(ms/1000)+' 秒'):(fpMin(ms)+' 分钟');}
 function fpDayKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fpClock(ts){var d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 function fpWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime();}
@@ -3753,12 +3805,21 @@ function fpSetDuration(min,syncInput){
   min=Math.round(+min||0);
   if(!(min>=FP_MIN_MIN))return false; // 非法输入（空/0/非数字）：交调用方回填原值
   min=Math.min(FP_MIN_MAX,min);
-  fpDurMin=min;lsSet(FP_DURKEY,String(min));
+  fpDurMin=min;fpDurSec=0;lsSet(FP_DURKEY,String(min));try{localStorage.removeItem(FP_SECKEY);}catch(e){}
   if(fpIdle()){fp.total=min*60000;fp.remain=fp.total;saveFpState();}
   if(syncInput!==true){
     var inp=document.getElementById('fpMinInput'),rg=document.getElementById('fpRange');
     if(inp)inp.value=min;if(rg)rg.value=min;
   }
+  fpRender();
+  return true;
+}
+function fpSetDurSec(sec){
+  sec=Math.round(+sec||0);
+  if(!(sec>=1))return false;
+  sec=Math.min(FP_SEC_MAX,sec);
+  fpDurSec=sec;lsSet(FP_SECKEY,String(sec));
+  if(fpIdle()){fp.total=sec*1000;fp.remain=fp.total;saveFpState();}
   fpRender();
   return true;
 }
@@ -3769,7 +3830,11 @@ function fpSyncDurUI(){
   var rg=document.getElementById('fpRange');if(rg&&+rg.value!==fpDurMin)rg.value=fpDurMin;
   var box=document.getElementById('fpChips');
   if(box)Array.prototype.forEach.call(box.querySelectorAll('.fp-chip'),function(c){
-    c.classList.toggle('active',+c.getAttribute('data-min')===fpDurMin);
+    c.classList.toggle('active',fpDurSec===0&&+c.getAttribute('data-min')===fpDurMin);
+  });
+  var sbox=document.getElementById('fpSecChips');
+  if(sbox)Array.prototype.forEach.call(sbox.querySelectorAll('.fp-chip'),function(c){
+    c.classList.toggle('active',fpDurSec>0&&+c.getAttribute('data-sec')===fpDurSec);
   });
 }
 
@@ -3784,9 +3849,9 @@ function fpRender(){
   var st=document.getElementById('fpStatus');
   if(st){
     if(fp.phase==='break')st.innerHTML=fp.running?'休息中 · 剩余 <b>'+fpSec2(r)+'</b>':'休息已暂停 · 剩余 <b>'+fpSec2(r)+'</b>';
-    else if(fp.running)st.innerHTML='专注中 · 已专注 <b>'+fpSec2(tot-r)+'</b> / '+Math.round(tot/60000)+' 分钟';
+    else if(fp.running)st.innerHTML='专注中 · 已专注 <b>'+fpSec2(tot-r)+'</b> / '+fpDurTxt();
     else if(!fpIdle())st.innerHTML='已暂停 · 剩余 <b>'+fpSec2(r)+'</b>';
-    else st.innerHTML='待机 · 本轮 <b>'+fpDurMin+'</b> 分钟，休息 5 分钟';
+    else st.innerHTML='待机 · 本轮 <b>'+fpDurTxt()+'</b>，休息 5 分钟';
   }
   var b=document.getElementById('fpStart');
   if(b)b.textContent=fp.running?'暂停':(fp.phase==='break'?'暂停休息':(fpIdle()?'开始':'继续'));
@@ -3856,7 +3921,7 @@ function fpToggle(){
     fp.remain=Math.max(0,fp.endAt-Date.now());fp.running=false;clearInterval(fp._t);fp._t=null;
     fpRingStop(); // 手动取消：铃声/振动立即停
   }else{
-    if(fpIdle()){fp.total=fpDurMin*60000;fp.remain=fp.total;}
+    if(fpIdle()){fp.total=fpBaseMs();fp.remain=fp.total;}
     if(!fp.startedAt)fp.startedAt=Date.now();
     fpPrimeAudio();fpLoadRing(); // 用户手势里解锁音频 + 预解码铃声，保证到点自动响铃发得出声
     fp.endAt=Date.now()+fp.remain;fp.running=true;
@@ -3870,7 +3935,7 @@ function fpEnd(){
   clearInterval(fp._t);fp._t=null;
   var wasFocus=fp.phase==='focus';
   var elapsed=wasFocus?Math.max(0,fp.total-fp.remain):0;
-  fp.running=false;fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
+  fp.running=false;fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
   saveFpState();fpRender();
   if(wasFocus&&elapsed>=60000){fpAddRecord(Date.now()-elapsed,elapsed);fpOpenNote();}
 }
@@ -3902,10 +3967,10 @@ function fpComplete(){
     fp.running=true;fp._t=setInterval(fpTick,250);
     saveFpState();fpRender();
     // 到点先给一个明确的「时间到」弹窗，点「知道了」再进入产出填写
-    fpAlert('时间到','本轮专注 '+fpMin(fp.total)+' 分钟已完成，休息 5 分钟。写一句这轮做了什么吧。',function(){fpOpenNote();});
+    fpAlert('时间到','本轮专注 '+fpDurLabel(fp.total)+' 已完成，休息 5 分钟。写一句这轮做了什么吧。',function(){fpOpenNote();});
   }else{
     fpRingPlay();
-    fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
+    fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     saveFpState();fpRender();
     fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
   }
@@ -3924,9 +3989,9 @@ function fpOpenNote(id){
   if(!rec)return;
   _fpEditId=rec.id;
   var ta=document.getElementById('fpNoteText');if(ta)ta.value=rec.text||'';
-  var ti=document.getElementById('fpNoteTitle');if(ti)ti.textContent='这 '+fpMin(rec.durMs)+' 分钟做了什么？';
+  var ti=document.getElementById('fpNoteTitle');if(ti)ti.textContent='这 '+fpDurLabel(rec.durMs)+' 做了什么？';
   var sub=document.getElementById('fpNoteSub');
-  if(sub)sub.textContent=fpClock(rec.start)+' 开始 · 专注 '+fpMin(rec.durMs)+' 分钟';
+  if(sub)sub.textContent=fpClock(rec.start)+' 开始 · 专注 '+fpDurLabel(rec.durMs);
   if(window.fpKbRelease)window.fpKbRelease(); // 清掉上一场景残留的位移/限高/底部留白
   document.getElementById('fpNoteModal').classList.add('show');
   setTimeout(function(){if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},80);
@@ -3944,20 +4009,22 @@ function fpSaveNote(){
 }
 
 /* ---------- 独立页面开关 ---------- */
-function fpOpenPage(){
+function fpOpenPage(silent){
   var pg=document.getElementById('fpPage');if(!pg)return;
   _fpHsDirty=true;
-  fpPrimeAudio();fpLoadRing(); // 进专注页就是一次用户手势：解锁音频 + 预解码铃声
+  if(!silent){fpPrimeAudio();fpLoadRing();} // 进专注页就是一次用户手势：解锁音频 + 预解码铃声（刷新恢复时无手势，跳过避免硬建 AudioContext）
   pg.classList.add('show');pg.scrollTop=0;
   document.body.style.overflow='hidden'; // 专注页自己滚，防止背后列表跟着动
   var e=document.getElementById('fpEntry');if(e)e.classList.add('active');
   fpRender();
+  try{lsSet(FP_PAGEKEY,'fp');}catch(_){}
 }
 function fpClosePage(){
   var pg=document.getElementById('fpPage');if(!pg)return;
   pg.classList.remove('show');
   document.body.style.overflow='';
   var e=document.getElementById('fpEntry');if(e)e.classList.remove('active');
+  try{lsSet(FP_PAGEKEY,'');}catch(_){}
   closeSidebar();
 }
 
@@ -3977,6 +4044,10 @@ function initFocusPage(){
   var chips=document.getElementById('fpChips');
   if(chips)Array.prototype.forEach.call(chips.querySelectorAll('.fp-chip'),function(c){
     c.onclick=function(){fpSetDuration(+c.getAttribute('data-min'));};
+  });
+  var secChips=document.getElementById('fpSecChips');
+  if(secChips)Array.prototype.forEach.call(secChips.querySelectorAll('.fp-chip'),function(c){
+    c.onclick=function(){fpSetDurSec(+c.getAttribute('data-sec'));};
   });
   var inp=document.getElementById('fpMinInput');
   if(inp){
@@ -4015,7 +4086,7 @@ function initFocusPage(){
     if(left>0){fp.remain=left;clearInterval(fp._t);fp._t=setInterval(fpTick,250);fpRender();return;}
     var wasPhase=fp.phase, st=fp.startedAt||(Date.now()-(fp.total||0)), tt=fp.total||0;
     fp.running=false;
-    fp.phase='focus';fp.total=fpDurMin*60000;fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
+    fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     if(wasPhase==='focus')fpAddRecord(st,tt);
     saveFpState();fpRender();
     fpRingPlay(); // 补算也要响：旧代码这里不响铃，是"有时候没声音"的三大来源之一
@@ -4074,20 +4145,29 @@ function spSugText(p){
 function spTodayRec(id){var t=spToday();return spData.records.filter(function(r){return r.planId===id&&r.date===t;});}
 
 /* ---------- 页面开关 ---------- */
-function spOpenPage(){
+function spOpenPage(silent){
   var pg=document.getElementById('spPage');
   if(!pg)return;
   pg.classList.add('show');
   document.body.style.overflow='hidden';
   var e=document.getElementById('spEntry');if(e)e.classList.add('active');
   spRender();
+  try{lsSet(FP_PAGEKEY,'sp');}catch(_){}
 }
 function spClosePage(){
   var pg=document.getElementById('spPage');if(!pg)return;
   pg.classList.remove('show');
   document.body.style.overflow='';
   var e=document.getElementById('spEntry');if(e)e.classList.remove('active');
+  try{lsSet(FP_PAGEKEY,'');}catch(_){}
   closeSidebar();
+}
+
+/* ---------- 刷新后停留独立页：恢复上次打开的页面（silent 不硬建音频） ---------- */
+function restoreOpenPage(){
+  var p='';try{p=lsGet(FP_PAGEKEY)||'';}catch(_){}
+  if(p==='fp')fpOpenPage(true);
+  else if(p==='sp')spOpenPage(true);
 }
 
 /* ---------- 渲染 ---------- */
