@@ -57,7 +57,6 @@
     --chip-work:#EAEFFC; --chip-work-text:#2C4B8D;;;;;;;; --chip-waishi-text:#2C4B8D;;;
     --btn-primary:#2C4B8D; --btn-primary-hover:#23396E;
     /* 图表分级：由浅到深，热力图/柱状图/趋势统一复用 */
-    --chart-1:#EDF1F8;;;;
     /* 彩色底上的前景色（图标/对勾等） */
     --on-color:#FFFFFF;
     /* 页面底色渐变（深色块另有覆盖） */
@@ -267,6 +266,11 @@
      吸底后按钮永远贴在卡片底部，看得见也点得到。 */
   .edit-modal.kb-fit .edit-actions,.edit-modal.kb-fit .tpl-edit-actions{
     position:sticky;bottom:0;z-index:4;background:var(--elev);padding-top:10px;}
+  /* v65 例行任务弹窗：键盘期让「卡片」成为唯一滚动容器（列表放开高度限制）。
+     否则 sticky 的参照滚动容器是 .tpl-list；列表内容不足不滚动时 sticky 等于没生效，
+     键盘一弹「保存/取消」就被顶出可视区（点上去其实是点到遮罩）。 */
+  .edit-modal.kb-fit .tpl-list{max-height:none;overflow:visible}
+  .edit-modal.kb-fit .tpl-edit-actions{background:var(--accent-soft)}
   /* day navigator */
   .daynav{display:none;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);position:relative}
   .dn-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card-2);font-size:20px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;transition:.15s}
@@ -374,12 +378,16 @@
   .tpl-list{margin-top:16px;max-height:45vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;
     -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
   .tpl-empty{font-size:14px;color:var(--muted);padding:20px 8px;text-align:center;line-height:1.7}
-  .tpl-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--card-2);transition:.15s;}
+  .tpl-row{display:block;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--card-2);transition:.15s;}
   .tpl-row:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.04);}
   .tpl-row.paused{opacity:.5}
-  .tpl-info{flex:1;min-width:0}
-  .tpl-text{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;color:var(--text)}
-  .tpl-meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .tpl-info{min-width:0}
+  /* v65：任务名称**完整展示**，不再省略。原来是 nowrap+ellipsis，长名称只剩「专业书籍每日…」，
+     用户明确要求不要省略。名称独占整行宽度，超长就自然换行（不截断、不横向溢出）。 */
+  .tpl-text{font-size:15px;font-weight:600;line-height:1.35;color:var(--text);word-break:break-word}
+  /* 第二行：左侧分类/时间等元信息，右侧操作按钮 —— 名称因此拿到整行宽度 */
+  .tpl-sub{display:flex;align-items:center;gap:10px;margin-top:5px}
+  .tpl-meta{flex:1;min-width:0;font-size:12px;color:var(--muted);line-height:1.4;word-break:break-word}
   .tpl-meta .tpl-time{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums;margin-right:2px}
   .tpl-ops{display:flex;align-items:center;gap:4px;flex-shrink:0}
   .tpl-op{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;font-size:15px;color:var(--muted);user-select:none;-webkit-user-select:none;transition:.15s;flex-shrink:0;}
@@ -430,8 +438,6 @@
     opacity:0;pointer-events:none;transition:.3s;max-width:90vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   /* ---------- 统计分析 ---------- */
-  .stats-tabs{display:flex;gap:10px;margin-bottom:16px}
-  .stab.active{background:var(--btn-primary);color:#fff;border-color:transparent}
   .stats-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
   .stats-summary .sbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
   .stats-summary .sbox .n{font-size:24px;font-weight:800;color:var(--text);line-height:1.1}
@@ -453,9 +459,6 @@
   .ovr-meta b{color:var(--error)}
   .ovr-count-badge{display:inline-block;background:var(--error-soft);color:var(--error);font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle;line-height:1.6}
   .ovr-item.merged{border-left-color:var(--error);border-left-width:4px}
-  .bar-col .bar{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),var(--accent-strong));border-radius:7px 7px 3px 3px;transition:.3s;min-height:3px}
-  .bar-col.zero .bar{background:var(--border)}
-  .pie-leg .dot{width:12px;height:12px;border-radius:4px;flex-shrink:0}
   .analysis{padding-bottom:18px}
   .analysis ul{margin:0;padding-left:18px}
   .analysis li{font-size:13.5px;color:var(--text);line-height:1.7;margin-bottom:8px}
@@ -562,12 +565,9 @@
 
   /* ---- 目标管理视图 ---- */
     /* ---------- 灵感笔记 ---------- */
-    textarea.idea-input{width:100%;min-height:130px;resize:vertical;background:var(--card-2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.6;font-family:inherit;box-sizing:border-box}
     /* ---------- 目标管理视图（改造） ---------- */
-    .glist-empty{padding:30px 12px;text-align:center;color:var(--muted);font-size:14px}
     .gfm-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
     .gfm-mask.show{display:flex}
-    .gfm-color.on{border-color:var(--text)}
   /* ---------- PWA 安装引导 ---------- */
   .install-hint{position:fixed;left:12px;right:12px;bottom:12px;z-index:300;display:none;align-items:center;gap:10px;
     background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.18);}
@@ -1984,14 +1984,14 @@ function renderTplList(filter){
     if(editingTplId===tpl.id)return tplEditRowHtml(tpl);
     return '<div class="tpl-row'+(tpl.paused?' paused':'')+'" data-tpl-id="'+tpl.id+'">'+
       '<div class="tpl-info"><div class="tpl-text">'+escapeHtml(tpl.text)+'</div>'+
-      '<div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · <span class="tpl-time">'+tpl.start+'</span>':'')+(tpl.paused?' · 已暂停':' · 每天自动生成')+'</div></div>'+
+      '<div class="tpl-sub"><div class="tpl-meta">'+tplCatName(tpl)+(tpl.start?' · <span class="tpl-time">'+tpl.start+'</span>':'')+(tpl.paused?' · 已暂停':'')+'</div>'+
       '<div class="tpl-ops">'+
         '<span class="tpl-op" data-tpl-act="edit" data-id="'+tpl.id+'" title="编辑">✎</span>'+
         '<span class="tpl-op" data-tpl-act="up" data-id="'+tpl.id+'" title="上移">▲</span>'+
         '<span class="tpl-op" data-tpl-act="down" data-id="'+tpl.id+'" title="下移">▼</span>'+
         '<span class="tpl-op" data-tpl-act="pause" data-id="'+tpl.id+'" title="'+(tpl.paused?'启用':'暂停')+'">'+(tpl.paused?'▶':'⏸')+'</span>'+
         '<span class="tpl-op danger" data-tpl-act="deltpl" data-id="'+tpl.id+'" title="删除模板">×</span>'+
-      '</div>'+
+      '</div></div></div>'+
     '</div>';
   }).join('');
 }
@@ -2734,7 +2734,6 @@ function toggleImp(id){const t=tasks.find(x=>x.id===id);if(t){t.imp=!t.imp;t.upd
 /* 首页「重要任务」置顶卡（%圆环下方） */
 var IMP_OPEN_MAX=3;
 var impOpen=(function(){try{return lsGet('workbench_imp_open')==='1';}catch(e){return false;}})();
-function impShownAll(){return impOpen;}
 function toggleImpOpen(){impOpen=!impOpen;try{lsSet('workbench_imp_open',impOpen?'1':'0');}catch(e){}renderImpCard();}
 function renderImpCard(){
   const card=document.getElementById('impCard');if(!card)return;
@@ -3367,7 +3366,7 @@ function init(){
   }
   function kbRelease(){
     kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
-    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['fpNoteModal','.fp-note']].forEach(pair=>{
+    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['fpNoteModal','.fp-note'],['tplModal','.edit-modal']].forEach(pair=>{
       const el=document.getElementById(pair[0]);
       kbResetKb(el);
       try{const p=el&&el.querySelector(pair[1]);if(p)kbResetKb(p);}catch(_){}
@@ -3375,11 +3374,14 @@ function init(){
     document.documentElement.style.paddingBottom='';
     try{window.scrollTo(0,0);}catch(_){}   // 清掉避让过程中对页面滚动位置的改动，避免影响下一次打开弹窗
   }
-  function kbAttach(box,watchIds){
+  function kbAttach(box,watchIds,noSelect){
     if(!box)return;
     box.addEventListener('focusin',e=>{
       const el=e.target;
       if(!el||!el.tagName||!(el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'))return;
+      // 下拉框只是弹原生选择器、不弹键盘：若也走避让，会凭"视口没变化"猜出 50% 键盘高度，
+      // 卡片被凭空压扁抬起来一下（原生选择器一关又复位），纯属视觉噪声。
+      if(noSelect&&el.tagName==='SELECT')return;
       kbEl=el;kbBox=box;kbSchedule();
     });
     box.addEventListener('focusout',()=>{setTimeout(()=>{if(!document.activeElement||!box.contains(document.activeElement)){if(kbBox===box)kbRelease();}},120);});
@@ -3392,6 +3394,7 @@ function init(){
   }
   kbAttach(document.getElementById('taskAddBox'),['ringCard','impCard','taskAddBox','listArea']);
   kbAttach(document.getElementById('fpNoteModal'),[]); // 专注产出弹窗：同一套避让，别再抄一份
+  kbAttach(document.getElementById('tplModal'),[],true); // 例行任务弹窗：行内编辑落在最下面那条时，键盘会盖住输入框与「保存」
   // 专注弹窗专用的"清残留"入口。注意**不能**顺手把 kbRelease 挂到 window 上：
   // openEdit/closeEdit 里那句 `if(typeof kbRelease==='function')kbRelease()` 一直够不到局部函数所以是空转，
   // 一旦挂上去就会连 window.scrollTo(0,0) 一起生效 —— 每次编辑任务都把列表滚回顶部。只清这一个弹窗更安全。
@@ -3400,6 +3403,15 @@ function init(){
     const el=document.getElementById('fpNoteModal');
     kbResetKb(el);
     try{const c=el&&el.querySelector('.fp-note');if(c)kbResetKb(c);}catch(_){}
+    document.documentElement.style.paddingBottom='';
+  };
+  // 例行任务弹窗：关闭时清掉键盘期的限高/位移，否则下次打开卡片还是被压扁的、还带着位移
+  window.tplKbRelease=function(){
+    if(kbBox&&kbBox.id==='tplModal'){kbEl=null;kbBox=null;kbClearTimers();}
+    kbFitReset();
+    const el=document.getElementById('tplModal');
+    kbResetKb(el);
+    try{const c=el&&el.querySelector('.edit-modal');if(c)kbResetKb(c);}catch(_){}
     document.documentElement.style.paddingBottom='';
   };
   if(window.visualViewport){
@@ -3475,8 +3487,14 @@ function init(){
   document.getElementById('btnClear').onclick=clearAll;
   document.getElementById('btnSync').onclick=openSync;
   document.getElementById('btnTpl').onclick=()=>{openTpl();closeSidebar();};
-  document.getElementById('tplClose').onclick=()=>document.getElementById('tplModal').classList.remove('show');
-  document.getElementById('tplModal').addEventListener('click',e=>{if(e.target.id==='tplModal')e.currentTarget.classList.remove('show');});
+  const tplCloseFn=()=>{document.getElementById('tplModal').classList.remove('show');if(window.tplKbRelease)window.tplKbRelease();};
+  document.getElementById('tplClose').onclick=tplCloseFn;
+  document.getElementById('tplModal').addEventListener('click',e=>{
+    if(e.target.id!=='tplModal')return;
+    // 键盘还弹着时点到遮罩空白：先收键盘，别把正在编辑的内容一起丢掉（与 #editModal 同一规则）
+    if(typeof kbTyping==='function'&&kbTyping()){try{kbEl.blur();}catch(_){}return;}
+    tplCloseFn();
+  });
   document.getElementById('tplAddBtn').onclick=addTpl;
   document.getElementById('tplText').addEventListener('keydown',e=>{if(e.key==='Enter')addTpl();});
   document.getElementById('tplCat').addEventListener('change',e=>{renderTplList(e.target.value);});
@@ -3637,7 +3655,20 @@ function fpAudio(){
 }
 /* iOS 16.4+ 音频会话：声明为「媒体播放」，这是网页唯一有可能绕开静音开关的手段。不支持则跳过。 */
 function fpAudioSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}}
-/* 在用户手势里唤醒上下文 + 播一帧静音 buffer（经典 unlock）。返回上下文。 */
+/* 在用户手势里一次性完成解锁 + 预解码 + 创建已由手势初始化的 audio 元素并播放暂停一次。
+   v64：这一步是响铃可靠的关键 —— 只有由用户手势创建或播放过的媒体，在之后无手势的到点时刻才被浏览器放行播放。
+   否则到点靠代码 new Audio() 去 play() 会被自动播放策略静默拒绝（尤其 iOS Safari），即有时候没响。 */
+function fpInitRing(){
+  fpPrimeAudio();fpLoadRing();
+  try{
+    if(!_fpElem){_fpElem=new Audio(FP_RING_SRC);_fpElem.loop=true;_fpElem.preload='auto';}
+    _fpElem.volume=1;
+    var pr=_fpElem.play();
+    if(pr&&pr.then)pr.then(function(){try{_fpElem.pause();}catch(e){}},function(){});
+    else {try{_fpElem.pause();}catch(e){}}
+  }catch(e){}
+}
+/* 在用户手势里唤醒上下文 + 播一帧静音 buffer（经典 unlock），同时尝试拉起被系统挂起的 AC。返回上下文或 null。 */
 function fpPrimeAudio(){
   fpAudioSession();
   var ac=fpAudio();if(!ac)return null;
@@ -3729,13 +3760,13 @@ function fpRingStop(){
   try{if(_fpElem)_fpElem.pause();}catch(e){}
   try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
 }
-/* 万一声音被策略拦下：留一个"下一拍补响"，用户第一次点屏幕就把这声铃补上（30 秒内有效） */
+/* 万一声音被策略拦下：留一个"下一拍补响"，用户第一次点屏幕就把这声铃补上（60 秒内有效） */
 function fpArmUnlock(){
   _fpRingWant=true;
   if(_fpUnlockArmed)return;_fpUnlockArmed=true;
   var go=function(){
     document.removeEventListener('pointerdown',go,true);_fpUnlockArmed=false;
-    if(!_fpRingWant||Date.now()-_fpWantAt>30000){_fpRingWant=false;return;}
+    if(!_fpRingWant||Date.now()-_fpWantAt>60000){_fpRingWant=false;return;}
     fpRingPlay();
   };
   document.addEventListener('pointerdown',go,true);
@@ -3744,29 +3775,21 @@ function fpRingPlay(){
   if(!fpSound)return;
   fpAudioSession();     // 到点这一刻再声明一次"这是媒体播放"（iOS 静音开关唯一可能的绕法）
   fpRingStop();         // 先清上一次的（缓冲源/audio 元素/振动），避免两条音源叠着播
-  _fpWantAt=Date.now();_fpRingWant=true;
   fpVibrate();          // 静音下最可靠的一条通道：先起振，它不依赖任何手势
-  fpLoadRing();         // 顺手预热，下次到点无需等解码
-  var ac=fpAudio();
-  if(!ac){fpElemRing(FP_RING_MS);return;}
-  var settled=false;
-  var ok=function(){
-    if(settled)return;settled=true;
-    _fpRingWant=false;
-    if(fpPlayBuf(ac,FP_RING_MS))return;
-    fpSynth(ac,FP_RING_MS,0.3,false);   // 没缓冲好也要响，别静默
-  };
-  var alt=function(){
-    if(settled)return;settled=true;
-    fpElemRing(FP_RING_MS);fpArmUnlock();
-  };
-  try{
-    var pr=ac.resume();
-    if(pr&&pr.then)pr.then(ok,alt);else ok();
-  }catch(e){ok();}
-  // ⚠️ 没有任何用户手势时 resume() 会**一直挂着等手势**（不是 reject）→ 光靠 then 永远等不到兜底。
-  //    450ms 还没落地就换 <audio> 顶上，并挂"下一拍补响"：用户点一下屏幕立刻补一声完整的铃。
-  setTimeout(alt,450);
+  fpLoadRing();         // 顺手预热，下次到点无需等解码（若已解码则直接命中）
+  _fpWantAt=Date.now();_fpRingWant=true;   // 标记"本声铃需要被听到"，供 tap 补响兜底
+  var ac=fpAudio(), played=false;
+  /* v64 关键修复：不再依赖 ac.resume() 的 promise —— 无用户手势时它永远 pending，会让"等 450ms 才换 audio"
+     且 audio 又是代码新建（非手势创建）→ iOS 静音策略直接拒 → 完全没声（25/45/60 分钟必现）。
+     改法：① ac 此刻已是 running（开始已解锁，大概率）→ 直接播 mp3 buffer；
+           ② 否则优先用"开始时已由用户手势创建并预加载"的 audio 元素（对无手势最宽容）；
+           ③ 都没有才合成音。三条路径统一在末尾收口。 */
+  if(!ac){ played=fpElemRing(FP_RING_MS); }
+  else if(ac.state==='running'){ played=fpPlayBuf(ac,FP_RING_MS)||fpSynth(ac,FP_RING_MS,0.3,false); }
+  else { played=fpElemRing(FP_RING_MS)||fpSynth(ac,FP_RING_MS,0.3,false); }
+  _fpRingWant=!played;  // 真出声了就不再补响；万一全失败，仍允许 tap 补一声
+  if(ac)try{ac.resume();}catch(e){} // fire-and-forget：拉回 running，供下一声或 tap 补响
+  fpArmUnlock();        // 挂"下一拍补响"兜底（窗口 60s）
 }
 /* 「试听」：在用户手势里播 3 秒，同时完成解锁与预解码 */
 function fpPreview(){
@@ -3916,7 +3939,7 @@ function fpToggle(){
   }else{
     if(fpIdle()){fp.total=fpBaseMs();fp.remain=fp.total;}
     if(!fp.startedAt)fp.startedAt=Date.now();
-    fpPrimeAudio();fpLoadRing(); // 用户手势里解锁音频 + 预解码铃声，保证到点自动响铃发得出声
+    fpInitRing(); // v64：用户手势里解锁音频+预解码+初始化可由无手势播放的 audio 元素，保证长时间后到点也能响
     fp.endAt=Date.now()+fp.remain;fp.running=true;
     clearInterval(fp._t);fp._t=setInterval(fpTick,250);
   }
@@ -3954,6 +3977,7 @@ function fpStartBreak(){
   clearInterval(fp._t);fp._t=null;
   fp.phase='break';fp.remain=BREAK_MS;fp.endAt=Date.now()+BREAK_MS;fp.startedAt=Date.now();fp.running=true;
   fp._t=setInterval(fpTick,250);
+  fpInitRing(); // v64：休息由用户手势开，同样初始化 ring，让 5 分钟后结束也能响
   saveFpState();fpRender();
 }
 function fpComplete(){
