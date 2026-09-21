@@ -377,6 +377,10 @@
   .tpl-edit-actions .btn-ghost,.tpl-edit-actions .btn-add{flex:1;padding:9px 12px;font-size:14px;border-radius:11px;}
   .tpl-list{margin-top:16px;max-height:45vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;
     -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+  /* v66 修复：进入行内编辑时放开列表自身的 45vh 高度限制，让卡片成为唯一滚动容器。
+     否则展开后的编辑表单会被列表这个内层滚动窗口裁掉 —— 最后几行的输入框直接跑到可视区外，
+     点 ✎ 后「连输入框都调不出来」，中间的模板还会把「保存」裁到列表外（点上去命中遮罩 → 误关弹窗丢数据）。 */
+  .tpl-list.editing-open{max-height:none;overflow:visible}
   .tpl-empty{font-size:14px;color:var(--muted);padding:20px 8px;text-align:center;line-height:1.7}
   .tpl-row{display:block;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--card-2);transition:.15s;}
   .tpl-row:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.04);}
@@ -1972,6 +1976,8 @@ function tplCatName(tpl){
 }
 function renderTplList(filter){
   const box=document.getElementById('tplList');if(!box)return;
+  // v66：编辑态与列表的高度限制联动（取消/保存后 editingTplId 归 null，这个类会自动收掉）
+  box.classList.toggle('editing-open', !!editingTplId);
   let list=templates;
   if(filter&&filter!=='all'){
     if(['waishi','coffee','trade'].includes(filter))
@@ -1996,6 +2002,7 @@ function renderTplList(filter){
   }).join('');
 }
 function openTpl(){
+  editingTplId=null; // v66：每次打开都从「非编辑态」开始，避免上次残留的编辑行被重新渲染出来
   renderTplList(document.getElementById('tplCat').value);
   // 添加框的时间选择：每次打开重置为空，并绑定点击
   const tAdd=document.getElementById('tplAddTime');
@@ -3500,7 +3507,17 @@ function init(){
   document.getElementById('tplCat').addEventListener('change',e=>{renderTplList(e.target.value);});
   document.getElementById('tplList').addEventListener('click',e=>{
     const editBtn=e.target.closest('[data-tpl-act="edit"]');
-    if(editBtn){editingTplId=editBtn.dataset.id;renderTplList(document.getElementById('tplCat').value);
+    if(editBtn){
+      editingTplId=editBtn.dataset.id;
+      renderTplList(document.getElementById('tplCat').value);
+      // v66：进入行内编辑后必须①把编辑行滚进可视区 ②自动聚焦输入框。
+      // 渲染做完（同步）才拿得到新节点；scrollIntoView 用 block:'center' 让「输入框+保存/取消」整块都露出来；
+      // focus 用 preventScroll 避免和上面的滚动互相打架。聚焦后软键盘才会弹、v65 的避让逻辑才跑得起来。
+      const _tbox=document.getElementById('tplList');
+      const _erow=_tbox? _tbox.querySelector('.tpl-row.editing') : null;
+      if(_erow){try{_erow.scrollIntoView({block:'center'});}catch(_){}}
+      const _einp=_tbox? _tbox.querySelector('.tpl-edit-text') : null;
+      if(_einp){try{_einp.focus({preventScroll:true});}catch(_){try{_einp.focus();}catch(__){}}}
       // 绑定模板编辑中的时间触发器
       const tid=editingTplId;
       const trigEl=document.getElementById('tplStartTrigger_'+tid);
