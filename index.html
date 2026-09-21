@@ -810,6 +810,12 @@
   .fp-range::-moz-range-track{height:4px;border-radius:4px;background:var(--border)}
   .fp-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--card)}
   .fp-hint{font-size:11.5px;color:var(--muted);line-height:1.6}
+  .fp-diag{display:flex;flex-direction:column;gap:6px;background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+  .fp-diag-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;line-height:1.5}
+  .fp-diag-row .k{color:var(--muted);white-space:nowrap}
+  .fp-diag-row .v{color:var(--text);font-weight:600;text-align:right}
+  .fp-diag-row.ok .v{color:#2E9E6B}
+  .fp-diag-row.warn .v{color:#E0803A}
   .fp-timer{display:flex;flex-direction:column;align-items:center;gap:12px;padding:2px 0}
   .fp-ring{position:relative;width:196px;height:196px}
   .fp-ring svg{width:196px;height:196px;transform:rotate(-90deg);display:block}
@@ -1222,6 +1228,14 @@
     <div class="fp-sumrow">
       <span id="fpToday">今日 <b>0</b> 段 · <b>0</b> 分钟</span>
       <span id="fpWeek">本周 <b>0</b> 段 · <b>0</b> 分钟</span>
+    </div>
+
+    <div class="fp-sec" id="fpDiagSec">
+      <div class="fp-label">锁屏提醒自检</div>
+      <div class="fp-diag" id="fpDiag"></div>
+      <button class="fp-big" id="fpNotifBtn" style="display:none">开启系统通知</button>
+      <button class="fp-big" id="fpTestBtn">铃声 + 通知测试</button>
+      <div class="fp-hint">要锁屏也能响：① 通知已授权 ② 用「添加到主屏幕」的独立方式打开（浏览器标签页会被系统冻结）③ 系统设置里给本站点关掉「电池优化/后台限制」④ 媒体音量不为 0。测试按钮会同时响铃并发一条通知，可直接在锁屏状态验证。</div>
     </div>
 
     <div class="fp-sec" id="fpHistSec">
@@ -3675,6 +3689,8 @@ function fpStat(from){var a=focusList.filter(function(r){return (r.start||0)>=fr
 var _fpAC=null,_fpBuf=null,_fpLoad=null,_fpRingSrc=null,_fpElem=null,_fpRingWant=false,_fpUnlockArmed=false,_fpWantAt=0;
 var FP_RING_SRC='./happy-stroll.mp3';
 var FP_RING_MS=9000;    // 到点响铃总时长：9 秒（用户 2026-09-20 要求 8~10 秒）
+var FP_SNOOZE_MS=5*60000; // 通知上「稍后」的默认延时
+var _fpWakeLock=null,_fpKASrc=null,_fpKAGain=null,_fpSnzT=null,_fpSnzAt=0;
 var FP_PREVIEW_MS=3000; // 「试听」播放时长
 var FP_RING_GAIN=1;     // 实测 mp3 峰值 0.86 / RMS 0.147，属正常母带响度，不再加增益
 function fpAudio(){
@@ -3842,6 +3858,166 @@ function fpAlertClose(){
   if(cb){try{cb();}catch(e){}}
 }
 function fpSoundUI(){var b=document.getElementById('fpSoundBtn');if(b)b.classList.toggle('on',fpSound);}
+/* ---------- v68 锁屏也要响铃：系统通知 + 后台保活 + 唤醒锁 ----------
+   为什么旧实现锁屏必哑：浏览器把"看不见的页面"当成可以随便停的东西 ——
+     · 桌面 Chrome：后台标签的定时器被节流到最快一分钟一次；
+     · Android Chrome：切后台几分钟后渲染进程可能被冻结，定时器彻底停摆；
+     · iOS Safari / 独立 PWA：切后台或锁屏那一刻 JS 基本立刻停摆。
+   旧代码只有一个页面内 setInterval + 一个页面内 DOM 弹窗 → 到点那一刻 fpComplete() 压根没被调用，
+   就算被调用，弹窗也只是页面里的 div，锁屏时看不见。于是只能等回到前台才结算 —— 也就是"解锁才响"。
+   三层递进修：
+   ① 系统通知（Notification / SW showNotification）：能盖在锁屏之上，带「稍后 5 分钟 / 知道了」按钮；
+   ② 后台音频保活：起一条 -56dB 白噪音 loop，让系统把本 App 归类成"正在播放媒体" ——
+      进程不冻结、AudioContext 不挂起，这是锁屏期间仍能出声的唯一可靠通道；
+   ③ 唤醒锁：阻止自动熄屏（用户手动按电源键锁屏则失效）。 */
+function fpNotifyPerm(){
+  if(typeof Notification==='undefined')return 'unsupported';
+  try{return Notification.permission||'default';}catch(e){return 'unsupported';}
+}
+/* 只读状态快照：自检面板用，控制台输入 fpState() 也能查 */
+function fpState(){
+  var ac=null;try{ac=_fpAC;}catch(e){}
+  return {running:fp.running,phase:fp.phase,remain:fp.remain,endAt:fp.endAt,
+    keepAlive:!!_fpKASrc,wakeLock:!!_fpWakeLock,ac:ac?ac.state:'none',
+    perm:fpNotifyPerm(),standalone:fpIsStandalone(),snooze:_fpSnzAt};
+}
+function fpIsStandalone(){
+  try{if(navigator.standalone)return true;
+    if(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)return true;}catch(e){}
+  return false;
+}
+/* 请求通知权限：必须放在用户手势里第一次调用才最可能通过（点「开始」或「开启系统通知」） */
+function fpNotifyAsk(cb){
+  if(typeof Notification==='undefined'||!Notification.requestPermission){if(cb)cb('unsupported');return;}
+  try{
+    if(Notification.permission!=='default'){if(cb)cb(Notification.permission);return;}
+    var once=false,done=function(p){if(once)return;once=true;if(cb)cb(p||'default');};
+    var r=Notification.requestPermission(done);
+    if(r&&r.then)r.then(done,function(){done('default');});
+  }catch(e){if(cb)cb('default');}
+}
+/* 到点通知：优先走 Service Worker（支持按钮 action，iOS 已安装 PWA 也可用），退化到普通 Notification。
+   at 传毫秒时间戳：仅当浏览器支持 Notification Triggers 时由系统到点拉起（页面全冻结也管用），不支持就忽略。 */
+function fpNotify(title,body,at){
+  if(typeof Notification==='undefined')return false;
+  if(fpNotifyPerm()!=='granted')return false;
+  var full={body:body||'',tag:'wb-focus-alarm',renotify:true,requireInteraction:true,silent:false,lang:'zh-CN',
+    icon:'./icon-192.png',badge:'./icon-192.png',vibrate:[500,220,500,220,500],
+    actions:[{action:'snooze',title:'稍后 5 分钟'},{action:'stop',title:'知道了'}]};
+  try{if(at&&at>Date.now()&&typeof TimestampTrigger!=='undefined')full.showTrigger=new TimestampTrigger(at);}catch(e){}
+  try{
+    var plain={body:full.body,tag:full.tag,icon:full.icon,requireInteraction:true};
+    if(navigator.serviceWorker&&typeof navigator.serviceWorker.getRegistration==='function'){
+      navigator.serviceWorker.getRegistration().then(function(reg){
+        if(reg&&reg.showNotification){try{reg.showNotification(title,full);return;}catch(e){}}
+        try{new Notification(title,plain);}catch(e){}
+      },function(){try{new Notification(title,plain);}catch(e){}});
+      return true;
+    }
+    new Notification(title,plain);return true;
+  }catch(e){return false;}
+}
+/* 预约通知：在「开始」那一刻就把到点这一下托付给系统闹钟。只有支持 TimestampTrigger 才排，
+   不支持则完全不排（否则那条通知会立刻弹出来，变成误报）。 */
+function fpNotifySchedule(at,title,body){
+  if(typeof TimestampTrigger==='undefined')return false;
+  return fpNotify(title,body,at);
+}
+/* 唤醒锁：阻止自动熄屏（用户主动按电源键锁屏它管不了，那时靠②保活） */
+function fpWakeLockGet(){
+  try{
+    if(!navigator.wakeLock||!navigator.wakeLock.request)return;
+    navigator.wakeLock.request('screen').then(function(l){
+      _fpWakeLock=l;
+      try{l.addEventListener('release',function(){_fpWakeLock=null;});}catch(e){}
+    }).catch(function(){});
+  }catch(e){}
+}
+function fpWakeLockRelease(){
+  try{if(_fpWakeLock&&_fpWakeLock.release)_fpWakeLock.release();}catch(e){}
+  _fpWakeLock=null;
+}
+/* 后台音频保活：一条 -56dB 的白噪音 loop（人耳听不到），让系统把本 App 当"正在放音乐"：
+   进程不被冻结、音频会话不被挂起 → 锁屏期间倒计时照走、到点照响。代价是略微耗电。 */
+function fpKeepAliveStart(){
+  if(_fpKASrc)return;
+  var ac=fpAudio();if(!ac)return;
+  try{
+    if(ac.state==='suspended')ac.resume();
+    var sr=ac.sampleRate||44100,n=Math.floor(sr*2);
+    var b=ac.createBuffer(1,n,sr),d=b.getChannelData(0),last=0,mx=0;
+    for(var i=0;i<n;i++){var w=Math.random()*2-1;last=(last+0.02*w)/1.02;d[i]=last;if(Math.abs(last)>mx)mx=Math.abs(last);}
+    if(mx>0){for(var j=0;j<n;j++)d[j]=d[j]/mx*0.5;}
+    var s=ac.createBufferSource();s.buffer=b;s.loop=true;
+    var g=ac.createGain();g.gain.value=0.0015;
+    s.connect(g);g.connect(ac.destination);s.start(0);
+    _fpKASrc=s;_fpKAGain=g;
+  }catch(e){}
+}
+function fpKeepAliveStop(){
+  try{if(_fpKASrc){_fpKASrc.stop();_fpKASrc.disconnect();}}catch(e){}
+  try{if(_fpKAGain)_fpKAGain.disconnect();}catch(e){}
+  _fpKASrc=null;_fpKAGain=null;
+}
+/* 统一开关：开始/恢复计时时把三条同时拉起；结束/暂停时一起收掉 */
+function fpAmbientStart(){
+  fpAudioSession();
+  fpKeepAliveStart();
+  fpWakeLockGet();
+  try{if(_fpAC&&_fpAC.state==='suspended')_fpAC.resume();}catch(e){}
+  fpNotifyAsk(function(p){
+    if(p==='granted'&&fp.running&&fp.endAt)fpNotifySchedule(fp.endAt,'专注时间到','本轮专注已结束，点击查看。');
+  });
+}
+function fpAmbientStop(){fpKeepAliveStop();fpWakeLockRelease();}
+/* 通知上点「稍后 5 分钟」→ SW 打开 ./?fp=snooze → 这里起一个延后再提醒（同样带保活） */
+function fpSnoozeStart(min){
+  min=min||Math.round(FP_SNOOZE_MS/60000);
+  _fpSnzAt=Date.now()+min*60000;
+  clearInterval(_fpSnzT);_fpSnzT=setInterval(fpSnoozeTick,1000);
+  fpKeepAliveStart();fpWakeLockGet();
+  try{if(typeof toast==='function')toast('已延后 '+min+' 分钟再提醒');}catch(e){}
+}
+function fpSnoozeTick(){
+  if(!_fpSnzAt||Date.now()<_fpSnzAt)return;
+  fpSnoozeStop();
+  fpRingPlay();
+  fpNotify('专注提醒','延后时间已到，接着做吧。');
+  fpAlert('时间到','延后的提醒已经到了。',null);
+}
+function fpSnoozeStop(){
+  clearInterval(_fpSnzT);_fpSnzT=null;_fpSnzAt=0;
+  fpKeepAliveStop();fpWakeLockRelease();
+}
+/* 从系统通知点回来时带的指令参数（处理完立刻从地址栏抹掉，避免下次 Enter 又被触发一次） */
+function fpHandleUrlCmd(){
+  try{
+    var m=/[?&]fp=([a-z0-9]+)/i.exec(location.search||'');if(!m)return;
+    var cmd=m[1];
+    try{history.replaceState(null,'',location.pathname);}catch(e){}
+    if(cmd==='snooze')fpSnoozeStart(5);
+    else if(cmd==='ack'){fpRingStop();fpSnoozeStop();}
+  }catch(e){}
+}
+/* 自检面板：把"为什么锁屏不响"拆成几条能自己核对的项 */
+function fpDiagRender(){
+  var box=document.getElementById('fpDiag');if(!box)return;
+  var s=fpState();
+  var PM={granted:'已授权',denied:'被拒绝',default:'未授权',unsupported:'本浏览器不支持'};
+  var rows=[
+    ['系统通知', PM[s.perm]||s.perm, s.perm==='granted'],
+    ['运行方式', s.standalone?'独立模式（推荐）':'浏览器标签页（易被冻结）', s.standalone],
+    ['后台保活音', s.keepAlive?'运行中':'未运行', s.keepAlive],
+    ['屏幕唤醒锁', s.wakeLock?'已持有（不会自动熄屏）':'未持有（仅防自动息屏，手动锁屏无效）', s.wakeLock],
+    ['音频通道', s.ac==='running'?'running（可出声）':s.ac+'（点击任意处解锁）', s.ac==='running']
+  ];
+  box.innerHTML=rows.map(function(r){
+    return '<div class="fp-diag-row '+(r[2]?'ok':'warn')+'"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>';
+  }).join('');
+  var nb=document.getElementById('fpNotifBtn');
+  if(nb)nb.style.display=(s.perm==='granted'||s.perm==='unsupported')?'none':'';
+}
+window.fpState=fpState;
 
 /* ---------- 时长选择：预设 / ± 微调 / 滑块 / 直接输入 ---------- */
 function fpSetDuration(min,syncInput){
@@ -3962,6 +4138,7 @@ function fpHistRender(){
 function fpToggle(){
   if(fp.running){
     fp.remain=Math.max(0,fp.endAt-Date.now());fp.running=false;clearInterval(fp._t);fp._t=null;
+    fpAmbientStop(); // v68：暂停了就没必要继续占着保活音和唤醒锁
     fpRingStop(); // 手动取消：铃声/振动立即停
   }else{
     if(fpIdle()){fp.total=fpBaseMs();fp.remain=fp.total;}
@@ -3969,6 +4146,7 @@ function fpToggle(){
     fpInitRing(); // v64：用户手势里解锁音频+预解码+初始化可由无手势播放的 audio 元素，保证长时间后到点也能响
     fp.endAt=Date.now()+fp.remain;fp.running=true;
     clearInterval(fp._t);fp._t=setInterval(fpTick,250);
+    fpAmbientStart(); // v68：解锁后立即起保活音+唤醒锁+申请通知，到点才能在锁屏之下也响
   }
   saveFpState();fpRender();
 }
@@ -3976,6 +4154,7 @@ function fpToggle(){
 function fpEnd(){
   if(fpIdle())return;
   clearInterval(fp._t);fp._t=null;
+  fpAmbientStop();
   var wasFocus=fp.phase==='focus';
   var elapsed=wasFocus?Math.max(0,fp.total-fp.remain):0;
   fp.running=false;fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
@@ -4005,6 +4184,7 @@ function fpStartBreak(){
   fp.phase='break';fp.remain=BREAK_MS;fp.endAt=Date.now()+BREAK_MS;fp.startedAt=Date.now();fp.running=true;
   fp._t=setInterval(fpTick,250);
   fpInitRing(); // v64：休息由用户手势开，同样初始化 ring，让 5 分钟后结束也能响
+  fpAmbientStart(); // v68：休息计时同样要能在锁屏时到点
   saveFpState();fpRender();
 }
 function fpComplete(){
@@ -4014,14 +4194,18 @@ function fpComplete(){
   clearInterval(fp._t);fp._t=null;fp.running=false;
   if(fp.phase==='focus'){
     fpAddRecord(fp.startedAt||(Date.now()-fp.total),fp.total);
+    fpAmbientStop();
     fpRingPlay();
+    fpNotify('专注时间到','本轮 '+fpDurLabel(fp.total)+' 专注已完成。'); // v68：锁屏之上也要看得见
     // v63：到点只响铃 + 记账 + 回到待机，不再自动进入休息（休息由待机页「休息 5 分钟」手动开始）
     fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     saveFpState();fpRender();
     // 到点先给一个明确的「时间到」弹窗，点「知道了」再进入产出填写
     fpAlert('时间到','本轮专注 '+fpDurLabel(fp.total)+' 已完成。写一句这轮做了什么吧。',function(){fpOpenNote();});
   }else{
+    fpAmbientStop();
     fpRingPlay();
+    fpNotify('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
     fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     saveFpState();fpRender();
     fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
@@ -4114,7 +4298,12 @@ function initFocusPage(){
   document.getElementById('fpAlertOk').onclick=fpAlertClose;
   document.getElementById('fpAlertModal').addEventListener('click',function(e){if(e.target.id==='fpAlertModal')fpAlertClose();});
   // 手机端切后台/锁屏时定时器可能被冻结：回到前台立刻补算，保证到点一定弹窗
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)fpResync();});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden)return;
+    fpResync();
+    if(fp.running)fpWakeLockGet(); // v68：回前台重新拿一次唤醒锁（切走时系统会把它收回去）
+    fpDiagRender();
+  });
   window.addEventListener('focus',fpResync);
   window.addEventListener('pageshow',fpResync);
   document.getElementById('fpNoteModal').addEventListener('click',function(e){if(e.target.id==='fpNoteModal')fpCloseNote(true);});
@@ -4130,16 +4319,40 @@ function initFocusPage(){
     if(al&&al.classList.contains('show'))return;
     if(document.getElementById('fpPage').classList.contains('show'))fpClosePage();
   });
+  /* v68：从系统通知点回来时带回来的指令（稍后 / 知道了） */
+  fpHandleUrlCmd();
+  fpDiagRender();
+  setInterval(fpDiagRender,4000);
+  var nb2=document.getElementById('fpNotifBtn');
+  if(nb2)nb2.onclick=function(){
+    fpNotifyAsk(function(p){
+      fpDiagRender();
+      if(p==='granted')fpNotify('测试提醒','到点时就是这样出现的，锁屏状态下也会显示。');
+      else {try{if(typeof toast==='function')toast('未授权：请到系统「设置 → 通知」允许本站点');}catch(e){}}
+    });
+  };
+  var tb2=document.getElementById('fpTestBtn');
+  if(tb2)tb2.onclick=function(){
+    fpPrimeAudio();fpKeepAliveStart();fpWakeLockGet();
+    var ok=fpNotify('测试提醒','点「稍后 5 分钟」可验证延时提醒，点通知本体可回到应用。');
+    fpRingPlay();
+    fpDiagRender();
+    if(!ok){try{if(typeof toast==='function')toast('通知未授权：先点上面的「开启系统通知」');}catch(e){}}
+  };
+
   /* 恢复上次运行状态：仍在计时则续走；页面关闭期间已走完的那轮补记一条并请用户补写 */
   if(fp.running){
     var left=fp.endAt-Date.now();
-    if(left>0){fp.remain=left;clearInterval(fp._t);fp._t=setInterval(fpTick,250);fpRender();return;}
+    if(left>0){fp.remain=left;clearInterval(fp._t);fp._t=setInterval(fpTick,250);fpRender();
+      fpKeepAliveStart();fpWakeLockGet(); // v68：刷新恢复的计时也要补上保活，否则后台被冻结后只能在回前台时补算
+      return;}
     var wasPhase=fp.phase, st=fp.startedAt||(Date.now()-(fp.total||0)), tt=fp.total||0;
     fp.running=false;
     fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
     if(wasPhase==='focus')fpAddRecord(st,tt);
     saveFpState();fpRender();
     fpRingPlay(); // 补算也要响：旧代码这里不响铃，是"有时候没声音"的三大来源之一
+    fpNotify('专注时间到','离开的这段时间里本轮专注已结束。');
     if(wasPhase==='focus')fpAlert('时间到','离开的这段时间里本轮专注已结束。写一句做了什么吧。',function(){fpOpenNote();});
     else fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
     return;
