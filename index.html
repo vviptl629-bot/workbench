@@ -3691,6 +3691,7 @@ var FP_RING_SRC='./happy-stroll.mp3';
 var FP_RING_MS=9000;    // 到点响铃总时长：9 秒（用户 2026-09-20 要求 8~10 秒）
 var FP_SNOOZE_MS=5*60000; // 通知上「稍后」的默认延时
 var _fpWakeLock=null,_fpKASrc=null,_fpKAGain=null,_fpSnzT=null,_fpSnzAt=0;
+var _fpKAElem=null,_fpNoiseUrl=null,_fpWatchT=null; // v69：媒体元素保活（_elem）、噪声 blob（_noiseUrl）、自愈狗（_watchT）
 var FP_PREVIEW_MS=3000; // 「试听」播放时长
 var FP_RING_GAIN=1;     // 实测 mp3 峰值 0.86 / RMS 0.147，属正常母带响度，不再加增益
 function fpAudio(){
@@ -3827,9 +3828,14 @@ function fpRingPlay(){
      改法：① ac 此刻已是 running（开始已解锁，大概率）→ 直接播 mp3 buffer；
            ② 否则优先用"开始时已由用户手势创建并预加载"的 audio 元素（对无手势最宽容）；
            ③ 都没有才合成音。三条路径统一在末尾收口。 */
-  if(!ac){ played=fpElemRing(FP_RING_MS); }
-  else if(ac.state==='running'){ played=fpPlayBuf(ac,FP_RING_MS)||fpSynth(ac,FP_RING_MS,0.3,false); }
-  else { played=fpElemRing(FP_RING_MS)||fpSynth(ac,FP_RING_MS,0.3,false); }
+  /* v69：到点这一声必须优先走「媒体元素」通道 —— 后台/锁屏时 Web Audio 的 AudioContext 会被挂起，
+     Android 上更麻烦：它仍报 running，但输出已被系统掐掉，结果就是"代码到了点、声音全无"。
+     <audio> 属于真正的媒体会话，后台允许继续发声；只有它失败时才退回 Web Audio（合成音兜底）。 */
+  played=fpElemRing(FP_RING_MS);
+  if(!played&&ac){
+    if(ac.state==='running'&&fpPlayBuf(ac,FP_RING_MS))played=true;
+    else {fpSynth(ac,FP_RING_MS,0.3,false);played=true;}
+  }
   _fpRingWant=!played;  // 真出声了就不再补响；万一全失败，仍允许 tap 补一声
   if(ac)try{ac.resume();}catch(e){} // fire-and-forget：拉回 running，供下一声或 tap 补响
   fpArmUnlock();        // 挂"下一拍补响"兜底（窗口 60s）
@@ -3879,7 +3885,9 @@ function fpState(){
   var ac=null;try{ac=_fpAC;}catch(e){}
   return {running:fp.running,phase:fp.phase,remain:fp.remain,endAt:fp.endAt,
     keepAlive:!!_fpKASrc,wakeLock:!!_fpWakeLock,ac:ac?ac.state:'none',
-    perm:fpNotifyPerm(),standalone:fpIsStandalone(),snooze:_fpSnzAt};
+    perm:fpNotifyPerm(),standalone:fpIsStandalone(),snooze:_fpSnzAt,
+    kaElem:_fpKAElem?(_fpKAElem.paused?'paused':'playing'):'none',
+    ms:('mediaSession' in navigator)?'yes':'no'};
 }
 function fpIsStandalone(){
   try{if(navigator.standalone)return true;
@@ -3924,6 +3932,66 @@ function fpNotifySchedule(at,title,body){
   return fpNotify(title,body,at);
 }
 /* 唤醒锁：阻止自动熄屏（用户主动按电源键锁屏它管不了，那时靠②保活） */
+/* ---- v69：后台保活改走「媒体元素」通道 ----
+   v68 的 Web Audio loop 在移动端后台不成立：iOS 只认 <audio>/<video> 的媒体播放允许后台继续，
+   Android Chrome 判定页面"正在播放音频"从而豁免节流/冻结的依据同样只是媒体元素。
+   这里改成用一条 <audio loop> 播一段低电平背景音 —— 它是真实的媒体会话，系统会把本 App 当"正在放音乐"，
+   渲染进程不被冻结、定时器照走、音频通道保持打开；电平约 -36dBFS，正常环境基本听不到，代价只是略微耗电。
+   再配 MediaSession 向系统登记一次会话：Android 会在通知栏挂常驻媒体控件，进一步防止被省电策略杀掉。 */
+function fpNoiseUrl(){
+  if(_fpNoiseUrl)return _fpNoiseUrl;
+  try{
+    var sr=22050,sec=3,n=sr*sec;
+    var ab=new ArrayBuffer(44+n*2),v=new DataView(ab);
+    var put=function(o,str){for(var i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i));};
+    put(0,'RIFF');v.setUint32(4,36+n*2,true);put(8,'WAVE');
+    put(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+    put(36,'data');v.setUint32(40,n*2,true);
+    // 低频为主的粉噪：比白噪更"有内容"，也更容易被系统判定成有效音频流（全静音会被当作 non-audible 照冻不误）
+    var raw=new Float32Array(n),last=0,mx=0,i,a;
+    for(i=0;i<n;i++){var w=Math.random()*2-1;last=(last+0.02*w)/1.02;raw[i]=last;a=Math.abs(last);if(a>mx)mx=a;}
+    var scale=mx>0?(520/mx):0; // 目标峰值 ≈ 520/32767 ≈ -36dBFS：足够触发 audible，正常环境听不见
+    for(i=0;i<n;i++){var q=Math.round(raw[i]*scale);if(q>32767)q=32767;else if(q<-32768)q=-32768;v.setInt16(44+i*2,q,true);}
+    _fpNoiseUrl=URL.createObjectURL(new Blob([ab],{type:'audio/wav'}));
+    return _fpNoiseUrl;
+  }catch(e){return null;}
+}
+/* 媒体会话：给系统一个"这里在放东西"的名分。缺了它，Android 不会给出常驻媒体控件，
+   省电策略（MIUI / 神隐 / Doze）会把后台热度最低的进程优先收走。 */
+function fpMediaSession(on){
+  try{
+    if(!navigator.mediaSession)return;
+    if(on){
+      try{
+        navigator.mediaSession.metadata=new (window.MediaMetadata||Object)({
+          title:'专注计时进行中',artist:'Workbench',album:'到点会响铃提醒'});
+      }catch(e){}
+      try{navigator.mediaSession.playbackState='playing';}catch(e){}
+      // 注册空 handler：让系统认为这是可控媒体会话（有 handler 才会按"媒体"对待），点暂停不影响计时。
+      var noop=function(){};
+      try{
+        navigator.mediaSession.setActionHandler('play',noop);
+        navigator.mediaSession.setActionHandler('pause',noop);
+        navigator.mediaSession.setActionHandler('stop',noop);
+      }catch(e){}
+    }else{
+      try{navigator.mediaSession.playbackState='none';}catch(e){}
+      try{navigator.mediaSession.metadata=null;}catch(e){}
+    }
+  }catch(e){}
+}
+/* 自愈看门狗：后台播放被系统短暂掐掉时，只要有机会跑一拍就立刻续上。跑不到也没损失 ——
+   到点仍有 fpResync 兜底补算，这里只是尽量让"后台这条链路"维持不断。 */
+function fpWatchdog(){
+  if(_fpWatchT)return;
+  _fpWatchT=setInterval(function(){
+    try{
+      if(!_fpKAElem||!fp.running)return;
+      if(_fpKAElem.paused){var p=_fpKAElem.play();if(p&&p.catch)p.catch(function(){});}
+    }catch(e){}
+  },8000);
+}
 function fpWakeLockGet(){
   try{
     if(!navigator.wakeLock||!navigator.wakeLock.request)return;
@@ -3937,9 +4005,33 @@ function fpWakeLockRelease(){
   try{if(_fpWakeLock&&_fpWakeLock.release)_fpWakeLock.release();}catch(e){}
   _fpWakeLock=null;
 }
-/* 后台音频保活：一条 -56dB 的白噪音 loop（人耳听不到），让系统把本 App 当"正在放音乐"：
-   进程不被冻结、音频会话不被挂起 → 锁屏期间倒计时照走、到点照响。代价是略微耗电。 */
+/* 后台保活（v69 重写）：媒体元素为主 + Web Audio 为辅。
+   ① <audio loop> 播低电平噪声 —— 移动端后台唯一认的"正在播放媒体"通道，冰冻结/掐音频这两件事都靠它挡；
+   ② Web Audio loop —— 桌面环境或某些内核里它是唯一能跑的，留作第二层，两层互不冲突。 */
 function fpKeepAliveStart(){
+  try{
+    if(!_fpKAElem){
+      var u=fpNoiseUrl();
+      if(u){
+        var a=new Audio();
+        a.src=u;a.loop=true;a.preload='auto';a.volume=1;
+        a.setAttribute('playsinline','');a.setAttribute('webkit-playsinline','');
+        try{a.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;';}catch(e){}
+        (document.body||document.documentElement).appendChild(a); // 挂到 DOM：部分内核只认文档里的媒体元素
+        _fpKAElem=a;
+      }
+    }
+    if(_fpKAElem){
+      var pr=_fpKAElem.play();
+      if(pr&&pr.catch)pr.catch(function(){}); // 被自动播放策略拒也不报错，回前台由看门狗/visibilitychange 补回
+    }
+  }catch(e){}
+  fpKAWebStart();
+  fpMediaSession(true);
+  fpWatchdog();
+}
+/* 原 v68 的 Web Audio 保活，降级为辅助层 */
+function fpKAWebStart(){
   if(_fpKASrc)return;
   var ac=fpAudio();if(!ac)return;
   try{
@@ -3958,6 +4050,10 @@ function fpKeepAliveStop(){
   try{if(_fpKASrc){_fpKASrc.stop();_fpKASrc.disconnect();}}catch(e){}
   try{if(_fpKAGain)_fpKAGain.disconnect();}catch(e){}
   _fpKASrc=null;_fpKAGain=null;
+  try{if(_fpKAElem)_fpKAElem.pause();}catch(e){} // 元素保留复用（下次 start 更快），只停播放
+  try{clearInterval(_fpWatchT);}catch(e){}
+  _fpWatchT=null;
+  fpMediaSession(false);
 }
 /* 统一开关：开始/恢复计时时把三条同时拉起；结束/暂停时一起收掉 */
 function fpAmbientStart(){
@@ -3968,14 +4064,18 @@ function fpAmbientStart(){
   fpNotifyAsk(function(p){
     if(p==='granted'&&fp.running&&fp.endAt)fpNotifySchedule(fp.endAt,'专注时间到','本轮专注已结束，点击查看。');
   });
+  // v69：立即刷新自检面板。它平时 4 秒一刷，刚按下「开始」那几秒显示的还是旧快照，
+  // 用户照着面板排查"为什么后台不响"时会看到假的"未运行"。这里 +600ms 再补一次，等媒体元素真正进入 playing。
+  try{fpDiagRender();setTimeout(fpDiagRender,600);}catch(e){}
 }
-function fpAmbientStop(){fpKeepAliveStop();fpWakeLockRelease();}
+function fpAmbientStop(){fpKeepAliveStop();fpWakeLockRelease();try{fpDiagRender();}catch(e){}}
 /* 通知上点「稍后 5 分钟」→ SW 打开 ./?fp=snooze → 这里起一个延后再提醒（同样带保活） */
 function fpSnoozeStart(min){
   min=min||Math.round(FP_SNOOZE_MS/60000);
   _fpSnzAt=Date.now()+min*60000;
   clearInterval(_fpSnzT);_fpSnzT=setInterval(fpSnoozeTick,1000);
   fpKeepAliveStart();fpWakeLockGet();
+  try{fpDiagRender();}catch(e){}
   try{if(typeof toast==='function')toast('已延后 '+min+' 分钟再提醒');}catch(e){}
 }
 function fpSnoozeTick(){
@@ -4007,7 +4107,8 @@ function fpDiagRender(){
   var rows=[
     ['系统通知', PM[s.perm]||s.perm, s.perm==='granted'],
     ['运行方式', s.standalone?'独立模式（推荐）':'浏览器标签页（易被冻结）', s.standalone],
-    ['后台保活音', s.keepAlive?'运行中':'未运行', s.keepAlive],
+    ['后台保活音', s.kaElem==='playing'?'运行中（媒体通道，可被后台豁免）':(s.kaElem==='paused'?'已暂停（回前台会自动续上）':'未运行'), s.kaElem==='playing'],
+    ['媒体会话', s.ms==='yes'?'已登记（通知栏会挂媒体控件）':'本浏览器不支持', s.ms==='yes'],
     ['屏幕唤醒锁', s.wakeLock?'已持有（不会自动熄屏）':'未持有（仅防自动息屏，手动锁屏无效）', s.wakeLock],
     ['音频通道', s.ac==='running'?'running（可出声）':s.ac+'（点击任意处解锁）', s.ac==='running']
   ];
@@ -4302,6 +4403,7 @@ function initFocusPage(){
     if(document.hidden)return;
     fpResync();
     if(fp.running)fpWakeLockGet(); // v68：回前台重新拿一次唤醒锁（切走时系统会把它收回去）
+    if(fp.running)fpKeepAliveStart(); // v69：同样补回被系统打断的保活播放与媒体会话（幂等）
     fpDiagRender();
   });
   window.addEventListener('focus',fpResync);
