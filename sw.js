@@ -1,4 +1,4 @@
-const CACHE = 'wb-pwa-v66';
+const CACHE = 'wb-pwa-v67';
 const ASSETS = ['./index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './happy-stroll.mp3'];
 
 self.addEventListener('install', e => {

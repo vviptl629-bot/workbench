@@ -3345,6 +3345,14 @@ function init(){
         kbSetLift(card,up);
       }
       kbScrollToShow(whole);
+      // v66：例行任务行内编辑专用补正。kbScrollToShow 只把「输入框」露出来（吸底条高度虽已从可视底扣掉，
+      // 但输入框下面还有「分类/设置时间」那一行），结果那行正好落在吸底按钮条底下、被挡住点不到。
+      // 这里再把**整个编辑行**滚出来：block:'end' 让行底边贴住卡片底部＝吸底条的自然位置，
+      // 于是输入框/分类/时间/保存/取消五块全都露在吸底条之上。幂等，多次 tick 收敛。
+      try{
+        const _erow2=(kbEl&&kbEl.closest)?kbEl.closest('.tpl-row.editing'):null;
+        if(_erow2)_erow2.scrollIntoView({block:'end'});
+      }catch(_){}
       document.documentElement.style.paddingBottom=(M.kb+24)+'px';
       return;
     }
@@ -3511,11 +3519,13 @@ function init(){
       editingTplId=editBtn.dataset.id;
       renderTplList(document.getElementById('tplCat').value);
       // v66：进入行内编辑后必须①把编辑行滚进可视区 ②自动聚焦输入框。
-      // 渲染做完（同步）才拿得到新节点；scrollIntoView 用 block:'center' 让「输入框+保存/取消」整块都露出来；
-      // focus 用 preventScroll 避免和上面的滚动互相打架。聚焦后软键盘才会弹、v65 的避让逻辑才跑得起来。
+      // 渲染做完（同步）才拿得到新节点；scrollIntoView 用 block:'end' 让编辑行的**底边**对齐卡片底部 ——
+      // 键盘期限高时「保存/取消」是 sticky 吸底的，居中对齐会让吸底条盖住上面的「分类/时间」那一行；
+      // 底边对齐后吸底条正好落在自己的自然位置，不再压住任何东西。focus 用 preventScroll 免得和滚动打架。
+      // 聚焦后软键盘才会弹、v65 的避让逻辑才跑得起来。
       const _tbox=document.getElementById('tplList');
       const _erow=_tbox? _tbox.querySelector('.tpl-row.editing') : null;
-      if(_erow){try{_erow.scrollIntoView({block:'center'});}catch(_){}}
+      if(_erow){try{_erow.scrollIntoView({block:'end'});}catch(_){}}
       const _einp=_tbox? _tbox.querySelector('.tpl-edit-text') : null;
       if(_einp){try{_einp.focus({preventScroll:true});}catch(_){try{_einp.focus();}catch(__){}}}
       // 绑定模板编辑中的时间触发器
