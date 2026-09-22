@@ -769,90 +769,127 @@
   /* 自然高度、不参与伸缩：桌面端与手机端都交给侧栏自身滚动，避免内容被压缩后点不到 */
   .fold-body.open{display:flex;flex:0 0 auto}
 
-  /* 11) 专注：侧栏入口 + 独立专注页（极简克制：细描边、单色强调，全部走主题变量） */
-  .nav-item .count.live{background:var(--accent);color:#fff;font-variant-numeric:tabular-nums}
-  :root[data-theme="dark"] .nav-item .count.live{color:#0E1220}
-
+  /* 11) 专注：侧栏入口 + 独立专注页（记录 / 周 / 月 三档 + 「记一段」+ 导出 .md） */
   .fp-page{position:fixed;inset:0;z-index:70;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg-grad)}
   .fp-page.show{display:block}
   .fp-wrap{max-width:440px;margin:0 auto;min-height:100%;
     padding:calc(18px + env(safe-area-inset-top)) 18px calc(30px + env(safe-area-inset-bottom));
-    display:flex;flex-direction:column;gap:20px}
+    display:flex;flex-direction:column;gap:18px}
+  /* 浏览器里「添加到主屏幕」提示条是 fixed 的，会让最后一条记录压在它下面；
+     只在提示条真的显示时（html.ihint-on）多留出它的高度，装到主屏后一分不多留。 */
+  html.ihint-on .fp-wrap{padding-bottom:calc(94px + env(safe-area-inset-bottom))}
   .fp-head{display:flex;align-items:center;gap:10px}
   .fp-title{font-size:20px;font-weight:700;letter-spacing:.3px}
   .fp-head-r{margin-left:auto;display:flex;align-items:center;gap:8px}
   .fp-icbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card);
     color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
   .fp-icbtn:hover{color:var(--text);border-color:var(--text)}
-  .fp-icbtn.on{color:var(--accent);border-color:var(--accent)}
   .fp-icbtn svg{width:17px;height:17px}
   .fp-sec{display:flex;flex-direction:column;gap:10px}
   .fp-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-  .fp-chips{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-  .fp-chip{padding:12px 0;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);
-    font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s}
-  .fp-chip:hover{border-color:var(--text)}
-  .fp-chip.active{background:var(--btn-primary);border-color:transparent;color:#fff}
-  .fp-lock .fp-chip,.fp-lock .fp-custom,.fp-lock .fp-range{opacity:.45;pointer-events:none}
-  .fp-custom{display:flex;align-items:center;gap:8px}
-  .fp-step{width:38px;height:38px;flex-shrink:0;border-radius:11px;border:1px solid var(--border);background:var(--card);
-    color:var(--text);font-size:18px;line-height:1;cursor:pointer;font-family:inherit;transition:.15s}
-  .fp-step:hover{border-color:var(--accent);color:var(--accent)}
-  .fp-step:active{transform:scale(.95)}
-  .fp-input{flex:1;min-width:0;text-align:center;padding:9px 8px;border-radius:11px;border:1px solid var(--border);
-    background:var(--card);color:var(--text);font-size:16px;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
-  .fp-input:focus{outline:none;border-color:var(--accent)}
-  .fp-unit{font-size:12.5px;color:var(--muted)}
-  .fp-range{width:100%;height:20px;margin:0;-webkit-appearance:none;appearance:none;background:none;cursor:pointer}
-  .fp-range::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--border)}
-  .fp-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;
-    background:var(--accent);border:2px solid var(--card);box-shadow:var(--shadow)}
-  .fp-range::-moz-range-track{height:4px;border-radius:4px;background:var(--border)}
-  .fp-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--card)}
-  .fp-hint{font-size:11.5px;color:var(--muted);line-height:1.6}
-  .fp-diag{display:flex;flex-direction:column;gap:6px;background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
-  .fp-diag-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;line-height:1.5}
-  .fp-diag-row .k{color:var(--muted);white-space:nowrap}
-  .fp-diag-row .v{color:var(--text);font-weight:600;text-align:right}
-  .fp-diag-row.ok .v{color:#2E9E6B}
-  .fp-diag-row.warn .v{color:#E0803A}
-  .fp-timer{display:flex;flex-direction:column;align-items:center;gap:12px;padding:2px 0}
-  .fp-ring{position:relative;width:196px;height:196px}
-  .fp-ring svg{width:196px;height:196px;transform:rotate(-90deg);display:block}
-  .fp-ring circle{fill:none;stroke-width:4;stroke-linecap:round}
-  .fp-ring .bg{stroke:var(--border)}
-  .fp-ring .fg{stroke:var(--accent);transition:stroke-dashoffset .3s linear,stroke .25s}
-  .fp-ring.brk .fg{stroke:var(--muted)}
-  .fp-ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-  .fp-time{font-size:46px;font-weight:700;letter-spacing:1px;line-height:1.05;font-variant-numeric:tabular-nums}
-  .fp-phase{font-size:12px;color:var(--muted);letter-spacing:.1em}
-  .fp-status{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.6}
-  .fp-status b{color:var(--text);font-weight:600}
+  .fp-label-row{display:flex;align-items:baseline;gap:8px}
+  .fp-link{margin-left:auto;border:none;background:none;padding:0;color:var(--accent);font-size:11.5px;
+    font-family:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .fp-view{display:flex;flex-direction:column;gap:16px}
+  /* 三档切换：记录 / 周 / 月 */
+  .fp-seg{display:flex;gap:3px;background:var(--card-2);border:1px solid var(--border);border-radius:11px;padding:3px}
+  .fp-seg b{flex:1;text-align:center;padding:8px 0;border-radius:8px;font-size:13px;font-weight:600;
+    color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
+  .fp-seg b.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+  .fp-sumrow{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted)}
+  .fp-sumrow b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  /* 主按钮 */
   .fp-actions{display:flex;gap:10px}
-  .fp-big{flex:1;padding:14px 0;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);
-    font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s}
+  .fp-big{flex:1;padding:13px 0;border-radius:13px;border:1px solid var(--border);background:var(--card);
+    color:var(--text);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s}
   .fp-big:hover{border-color:var(--text)}
   .fp-big:active{transform:scale(.98)}
   .fp-big.pri{background:var(--btn-primary);border-color:transparent;color:#fff}
   .fp-big.pri:hover{background:var(--btn-primary-hover);color:#fff}
-  .fp-big:disabled{opacity:.4;pointer-events:none}
-  .fp-sumrow{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted);
-    border-top:1px solid var(--border);padding-top:14px}
-  .fp-sumrow b{color:var(--text);font-weight:600}
+  .fp-big.sm{padding:11px 0;font-size:13.5px}
+  .fp-big.danger{color:var(--error);border-color:var(--error)}
+  .fp-big.danger:hover{background:var(--error-soft)}
+  /* 记一段：时间段 */
+  .fp-t2{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+  .fp-ti{width:100%;text-align:center;padding:12px 4px;border:1px solid var(--border);border-radius:12px;
+    background:var(--card);color:var(--text);font-size:17px;font-weight:700;font-family:inherit;
+    font-variant-numeric:tabular-nums;min-width:0}
+  .fp-ti:focus{outline:none;border-color:var(--accent)}
+  .fp-t2 .fp-ar{color:var(--muted);font-size:12px}
+  .fp-tline{display:flex;align-items:baseline;gap:6px;font-size:12px;color:var(--muted);line-height:1.6;flex-wrap:wrap}
+  .fp-tline b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  .fp-qchips{display:flex;gap:8px;flex-wrap:wrap}
+  .fp-qchip{padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);
+    color:var(--muted);font-size:12px;font-family:inherit;cursor:pointer;transition:.15s}
+  .fp-qchip:hover{border-color:var(--accent);color:var(--accent)}
+  .fp-box{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 12px;
+    font-size:14px;line-height:1.6;color:var(--text);font-family:inherit;resize:vertical;min-height:46px;
+    box-sizing:border-box}
+  .fp-box:focus{outline:none;border-color:var(--accent)}
+  .fp-box::placeholder{color:var(--muted)}
+  .fp-cat{display:flex;gap:8px;flex-wrap:wrap}
+  .fp-cat span{padding:8px 15px;border-radius:999px;border:1px solid var(--border);background:var(--card);
+    font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;user-select:none;transition:.15s}
+  .fp-cat span.on{background:var(--btn-primary);border-color:transparent;color:#fff}
+  .fp-rrow{display:flex;align-items:center;gap:11px}
+  .fp-rk{width:52px;flex:none;font-size:12.5px;color:var(--muted)}
+  .fp-dots{display:flex;gap:6px}
+  .fp-dots i{display:block;width:17px;height:17px;border-radius:50%;background:var(--card-2);
+    border:1px solid var(--border);cursor:pointer;transition:.12s}
+  .fp-dots i.f{background:var(--accent);border-color:transparent}
+  /* 记录列表：按日折叠 */
   .fp-hist{display:flex;flex-direction:column}
   .fp-day{display:flex;align-items:baseline;gap:6px;font-size:11.5px;color:var(--muted);letter-spacing:.04em;
-    padding:13px 2px 10px;position:sticky;top:0;background:var(--bg);cursor:pointer;user-select:none}
+    padding:13px 2px 10px;position:sticky;top:0;background:var(--bg);cursor:pointer;user-select:none;z-index:2}
   .fp-day:first-child{padding-top:2px}
+  .fp-day .dl{font-weight:600;color:var(--text);font-size:12.5px}
   .fp-day .n{margin-left:auto;font-variant-numeric:tabular-nums}
   .fp-day .caret{font-size:11px;opacity:.6;margin-left:3px;transition:transform .18s}
   .fp-day.open{color:var(--text)}
   .fp-day.open .caret{transform:rotate(180deg)}
   .fp-daybody{padding-top:2px}
-  .fp-item{display:flex;gap:10px;padding:9px 11px;border-radius:12px;font-size:13px;line-height:1.55;cursor:pointer;
-    background:var(--card);border:1px solid var(--border);margin-bottom:6px;transition:.15s}
-  .fp-item:hover{border-color:var(--text)}
-  .fp-item .t{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
-  .fp-item .x{min-width:0;word-break:break-word}
+  .fp-rec{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 12px;
+    margin-bottom:8px;cursor:pointer;transition:.15s}
+  .fp-rec:hover{border-color:var(--accent)}
+  .fp-rec .rd{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);
+    font-variant-numeric:tabular-nums;min-width:0}
+  .fp-rec .rd .rg{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fp-rec .tag{margin-left:auto;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+    padding:2px 7px;font-size:10.5px;font-weight:600;flex-shrink:0}
+  .fp-rec .did{font-size:13.5px;line-height:1.6;color:var(--text);margin-top:7px;white-space:pre-wrap;
+    word-break:break-word}
+  .fp-rec .feel{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:5px;white-space:pre-wrap;
+    word-break:break-word}
+  .fp-rec .rate{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;
+    border-top:1px dashed var(--border);font-variant-numeric:tabular-nums}
+  .fp-empty{font-size:13px;color:var(--muted);text-align:center;padding:34px 0;line-height:1.9}
+  /* 周 / 月 分析 */
+  .fp-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .fp-mcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 13px;
+    box-shadow:var(--shadow);min-width:0}
+  .fp-mcard .k{font-size:11.5px;color:var(--muted)}
+  .fp-mcard .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;
+    letter-spacing:-.2px;overflow-wrap:anywhere}
+  .fp-mcard .v.up{color:var(--success)}
+  .fp-mcard .v.dn{color:var(--error)}
+  .fp-bars{display:flex;align-items:flex-end;gap:7px;margin-top:2px}
+  .fp-bcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+  .fp-bcol .b{width:100%;border-radius:6px 6px 3px 3px;background:var(--accent)}
+  .fp-bcol .b.z{background:var(--card-2)}
+  .fp-bcol .bl{font-size:10px;color:var(--muted)}
+  .fp-lrow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .fp-lrow:last-child{margin-bottom:0}
+  .fp-lrow .nm{width:54px;flex:none;font-size:12px;color:var(--muted);overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .fp-lrow .tk{flex:1;height:8px;border-radius:5px;background:var(--card-2);overflow:hidden;min-width:0}
+  .fp-lrow .fl{display:block;height:100%;border-radius:5px;background:var(--accent)}
+  .fp-lrow .vv{width:66px;flex:none;text-align:right;font-size:12px;color:var(--text);
+    font-variant-numeric:tabular-nums}
+  .fp-kv{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted);padding:7px 0;
+    border-bottom:1px dashed var(--border);font-variant-numeric:tabular-nums}
+  .fp-kv:last-child{border-bottom:none}
+  .fp-kv b{color:var(--text);font-weight:600;text-align:right}
+
   /* 主题颜色：明/暗切换 + 主色（都在「主题颜色」折叠组内） */
   .theme-seg{display:flex;gap:4px;padding:3px;border-radius:11px;background:var(--bg);border:1px solid var(--border)}
   .theme-opt{flex:1;text-align:center;padding:7px 0;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--muted);
@@ -946,17 +983,19 @@
     .sp-wrap{padding-left:16px;padding-right:16px}
     .sp-inp.w76{flex:0 0 70px}
   }
-  .fp-note textarea:focus{outline:none;border-color:var(--accent)}
-  /* 专注产出弹窗的软键盘避让（与 .edit-modal 同一套机制，见 kbKeepVisible 的 card 分支）
-     —— 装得下只做最小抬升；装不下才限高 + 卡内可滚 + 按钮条吸底。 */
-  .fp-note.kb-lift{position:relative;z-index:85;box-shadow:0 22px 60px -12px rgba(17,30,62,.55)}
-  .fp-note.kb-fit .fp-actions{position:sticky;bottom:0;background:var(--elev);z-index:4;padding-top:10px}
+  /* 记一段：软键盘期（kb-fit）→ 卡内滚动 + 保存条吸底（与 .edit-modal 同一套 kb 机制） */
+  .fp-edcard.kb-lift{position:relative;z-index:85}
+  .fp-edcard.kb-fit .fp-actions{position:sticky;bottom:0;background:var(--bg);z-index:4;padding-top:10px;
+    border-top:1px solid var(--border)}
   @media(max-width:760px){
-    .fp-wrap{padding-left:16px;padding-right:16px;gap:18px}
-    .fp-ring,.fp-ring svg{width:172px;height:172px}
-    .fp-time{font-size:40px}
-    .fp-chip{padding:11px 0;font-size:13.5px}
+    .fp-wrap{padding-left:16px;padding-right:16px;gap:16px}
+    .fp-title{font-size:19px}
+    .fp-bars{gap:5px}
+    .fp-lrow .nm{width:48px}
+    .fp-lrow .vv{width:60px}
+    .fp-mcard .v{font-size:17px}
   }
+
 </style>
 </head>
 <body>
@@ -1181,10 +1220,10 @@
 <div class="fp-page" id="fpPage" role="dialog" aria-modal="true" aria-label="专注">
   <div class="fp-wrap">
     <div class="fp-head">
-      <div class="fp-title">专注</div>
+      <div class="fp-title" id="fpTitle">专注</div>
       <div class="fp-head-r">
-        <button class="fp-icbtn on" id="fpSoundBtn" title="提示音开关（点击试听）" aria-label="提示音开关">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <button class="fp-icbtn" id="fpDlBtn" title="导出 .md" aria-label="导出记录">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>
         </button>
         <button class="fp-icbtn" id="fpCloseBtn" title="返回" aria-label="返回">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
@@ -1192,55 +1231,93 @@
       </div>
     </div>
 
-    <div class="fp-sec" id="fpSetupSec">
-      <div class="fp-label">专注时长</div>
-      <div class="fp-chips" id="fpChips">
-        <button class="fp-chip" data-sec="10">10秒</button>
-        <button class="fp-chip" data-sec="30">30秒</button>
-        <button class="fp-chip" data-min="5">5分钟</button>
-        <button class="fp-chip" data-min="25">25分钟</button>
-        <button class="fp-chip" data-min="45">45分钟</button>
-        <button class="fp-chip" data-min="60">60分钟</button>
-      </div>
-      <div class="fp-custom" id="fpCustom">
-        <button class="fp-step" id="fpMinus" aria-label="减少 5 分钟">−</button>
-        <input class="fp-input" id="fpMinInput" type="number" min="1" max="180" step="1" inputmode="numeric" value="25" aria-label="自定义分钟数">
-        <span class="fp-unit">分钟</span>
-        <button class="fp-step" id="fpPlus" aria-label="增加 5 分钟">+</button>
-      </div>
-      <input class="fp-range" id="fpRange" type="range" min="5" max="180" step="5" value="25" aria-label="拖动调整时长">
-      <div class="fp-hint">默认 25 分钟 · 范围 1–180 分钟 · ± 与滑块步长 5 分钟（输入框可直接填任意整数）；前两个「秒」档用于快速测试倒计时与响铃；开始后需先「结束」才能改</div>
+    <div class="fp-seg" id="fpSeg">
+      <b data-fv="rec" class="on">记录</b><b data-fv="week">周</b><b data-fv="month">月</b>
     </div>
 
-    <div class="fp-timer">
-      <div class="fp-ring" id="fpRing">
-        <svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="34"/><circle class="fg" id="fpRingFg" cx="40" cy="40" r="34"/></svg>
-        <div class="mid"><div class="fp-time" id="fpTime">25:00</div><div class="fp-phase" id="fpPhase">专注</div></div>
-      </div>
-      <div class="fp-status" id="fpStatus"></div>
-    </div>
+    <div class="fp-sumrow" id="fpSumRow"></div>
 
-    <div class="fp-actions">
-      <button class="fp-big pri" id="fpStart">开始</button>
-      <button class="fp-big" id="fpStop" disabled>结束</button>
-    </div>
-
-    <div class="fp-sumrow">
-      <span id="fpToday">今日 <b>0</b> 段 · <b>0</b> 分钟</span>
-      <span id="fpWeek">本周 <b>0</b> 段 · <b>0</b> 分钟</span>
-    </div>
-
-    <div class="fp-sec" id="fpDiagSec">
-      <div class="fp-label">锁屏提醒自检</div>
-      <div class="fp-diag" id="fpDiag"></div>
-      <button class="fp-big" id="fpNotifBtn" style="display:none">开启系统通知</button>
-      <button class="fp-big" id="fpTestBtn">铃声 + 通知测试</button>
-      <div class="fp-hint">要锁屏也能响：① 通知已授权 ② 用「添加到主屏幕」的独立方式打开（浏览器标签页会被系统冻结）③ 系统设置里给本站点关掉「电池优化/后台限制」④ 媒体音量不为 0。测试按钮会同时响铃并发一条通知，可直接在锁屏状态验证。</div>
-    </div>
-
-    <div class="fp-sec" id="fpHistSec">
-      <div class="fp-label">专注记录</div>
+    <div class="fp-view" id="fpViewRec">
+      <div class="fp-actions"><button class="fp-big pri" id="fpAddBtn">＋ 记一段</button></div>
       <div class="fp-hist" id="fpList"></div>
+    </div>
+
+    <div class="fp-view" id="fpViewWeek" style="display:none"></div>
+    <div class="fp-view" id="fpViewMonth" style="display:none"></div>
+  </div>
+</div>
+
+<div class="fp-page" id="fpEditPage" role="dialog" aria-modal="true" aria-label="记一段">
+  <div class="fp-wrap">
+    <div class="fp-head">
+      <div class="fp-title" id="fpEdTitle">记一段</div>
+      <div class="fp-head-r">
+        <button class="fp-icbtn" id="fpEdClose" title="返回" aria-label="返回">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="fp-edcard" id="fpEdCard">
+      <div class="fp-sec" id="fpEdTimeSec">
+        <div class="fp-label-row">
+          <span class="fp-label">时间段</span>
+          <button class="fp-link" id="fpEdNoTime">随手记（不带时间段）</button>
+        </div>
+        <div class="fp-t2">
+          <input class="fp-ti" id="fpEdStart" type="time" step="60" aria-label="开始时间">
+          <span class="fp-ar">→</span>
+          <input class="fp-ti" id="fpEdEnd" type="time" step="60" aria-label="结束时间">
+        </div>
+        <div class="fp-tline" id="fpEdDurTxt"></div>
+        <div class="fp-qchips">
+          <button class="fp-qchip" id="fpQ25">刚才 25 分钟</button>
+          <button class="fp-qchip" id="fpQ60">刚才 1 小时</button>
+          <button class="fp-qchip" id="fpQ5">回到整 5 分</button>
+        </div>
+      </div>
+
+      <div class="fp-sec" style="margin-top:16px">
+        <div class="fp-label">做了什么</div>
+        <textarea class="fp-box" id="fpEdDid" maxlength="500" rows="3" placeholder="这段时间具体做了什么"></textarea>
+      </div>
+
+      <div class="fp-sec" style="margin-top:16px">
+        <div class="fp-label">一句感受</div>
+        <textarea class="fp-box" id="fpEdFeel" maxlength="200" rows="2" placeholder="顺手 / 有点散（可不填）"></textarea>
+      </div>
+
+      <div class="fp-sec" style="margin-top:16px">
+        <div class="fp-label">类别（可不填）</div>
+        <div class="fp-cat" id="fpEdCat"></div>
+      </div>
+
+      <div class="fp-sec" style="margin-top:16px">
+        <div class="fp-label">自评（可不填）</div>
+        <div class="fp-rrow"><span class="fp-rk">专注度</span><span class="fp-dots" id="fpEdRf"></span></div>
+        <div class="fp-rrow" style="margin-top:10px"><span class="fp-rk">能量</span><span class="fp-dots" id="fpEdRe"></span></div>
+      </div>
+
+      <div class="fp-actions" id="fpEdActs" style="margin-top:20px">
+        <button class="fp-big danger" id="fpEdDel" style="display:none">删除</button>
+        <button class="fp-big" id="fpEdCancel">取消</button>
+        <button class="fp-big pri" id="fpEdSave">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 导出专注记录：周 / 月 / 全部 → .md -->
+<div class="modal-overlay" id="fpExportModal">
+  <div class="fp-note">
+    <h3>导出专注记录</h3>
+    <div class="sub">Markdown 格式，含「汇总 + 明细」两块，可直接丢给 AI 做分析。</div>
+    <div class="fp-seg" id="fpExpSeg">
+      <b data-ex="week">本周</b><b data-ex="month" class="on">本月</b><b data-ex="all">全部</b>
+    </div>
+    <div class="fp-actions" style="margin-top:14px">
+      <button class="fp-big" id="fpExpCancel">取消</button>
+      <button class="fp-big pri" id="fpExpGo">下载本月 .md</button>
     </div>
   </div>
 </div>
@@ -1303,30 +1380,6 @@
     <div class="sp-formact">
       <button class="sp-btn" id="spFCancel">取消</button>
       <button class="sp-btn pri" id="spFSave">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- focus note modal：一段专注结束后记录产出 -->
-<div class="modal-overlay" id="fpNoteModal">
-  <div class="fp-note">
-    <h3 id="fpNoteTitle">这 25 分钟做了什么？</h3>
-    <div class="sub" id="fpNoteSub"></div>
-    <textarea id="fpNoteText" maxlength="500" placeholder="一句话记录产出或卡点，方便日/周复盘回看"></textarea>
-    <div class="fp-actions" style="margin-top:12px">
-      <button class="fp-big" id="fpNoteSkip">跳过</button>
-      <button class="fp-big pri" id="fpNoteSave">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- focus alert：阶段结束提示（休息结束等） -->
-<div class="modal-overlay" id="fpAlertModal">
-  <div class="fp-note">
-    <h3 id="fpAlertTitle">休息结束</h3>
-    <div class="sub" id="fpAlertSub" style="margin-bottom:16px"></div>
-    <div class="fp-actions">
-      <button class="fp-big pri" id="fpAlertOk">知道了</button>
     </div>
   </div>
 </div>
@@ -3011,8 +3064,10 @@ function showInstallHint(){
   if(m||ios)return;
   const el=document.getElementById('installHint');
   if(el)el.style.display='flex';
+  try{document.documentElement.classList.add('ihint-on');}catch(e){}
 }
-function hideInstallHint(){const el=document.getElementById('installHint');if(el)el.style.display='none';}
+function hideInstallHint(){const el=document.getElementById('installHint');if(el)el.style.display='none';
+  try{document.documentElement.classList.remove('ihint-on');}catch(e){}}
 
 /* ---------- init ---------- */
 function applyTheme(){
@@ -3134,7 +3189,7 @@ function init(){
   buildAccentUI(); // 渲染主题颜色选择器（预设 + 自定义）
   buildThemeSeg(); // 「主题颜色」里的 浅色/深色 切换
   initSideFold();  // 侧栏折叠组（主题颜色 / 分析与数据）
-  initFocusPage(); // 专注：独立页面 + 番茄钟 + 专注记录
+  initFocusPage(); // 专注：独立页面 + 按日记录 + 周月复盘
   initStudyPage(); // 学习计划：独立页面 + 计划/打卡/今日建议
   restoreOpenPage(); // 刷新后停留在上次打开的独立页（专注/学习计划），不跳回主页
   genRoutine(); // 打开即生成今天的例行任务
@@ -3304,7 +3359,7 @@ function init(){
     const whole=(kbBox&&kbBox.isConnected)?kbBox:kbEl;   // 容器（页面=添加框；弹窗=遮罩）
     if(!whole)return;
     // 弹窗场景：真正要抬的是内层卡片（遮罩是全屏的，抬它没有意义）
-    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card,.fp-note'):null;
+    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card,.fp-note,.fp-edcard'):null;
     const liftEl=card||whole;
     // ⚠️ 这里绝不能无条件复位再重算：每次校正都会把卡片"变回原高度、居中、滚回顶部"再重新限高抬起，
     //    7 次调度就是 7 次抖动（用户报的"屏幕晃动"），且抖动期间点击会丢（"要长按才能编辑"）。
@@ -3395,7 +3450,7 @@ function init(){
   }
   function kbRelease(){
     kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
-    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['fpNoteModal','.fp-note'],['tplModal','.edit-modal']].forEach(pair=>{
+    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['fpEditPage','.fp-edcard'],['tplModal','.edit-modal']].forEach(pair=>{
       const el=document.getElementById(pair[0]);
       kbResetKb(el);
       try{const p=el&&el.querySelector(pair[1]);if(p)kbResetKb(p);}catch(_){}
@@ -3422,16 +3477,16 @@ function init(){
     }
   }
   kbAttach(document.getElementById('taskAddBox'),['ringCard','impCard','taskAddBox','listArea']);
-  kbAttach(document.getElementById('fpNoteModal'),[]); // 专注产出弹窗：同一套避让，别再抄一份
+  kbAttach(document.getElementById('fpEditPage'),[]); // 记一段：与编辑任务同一套软键盘避让（页面版：卡片限高 + 保存条吸底）
   kbAttach(document.getElementById('tplModal'),[],true); // 例行任务弹窗：行内编辑落在最下面那条时，键盘会盖住输入框与「保存」
   // 专注弹窗专用的"清残留"入口。注意**不能**顺手把 kbRelease 挂到 window 上：
   // openEdit/closeEdit 里那句 `if(typeof kbRelease==='function')kbRelease()` 一直够不到局部函数所以是空转，
   // 一旦挂上去就会连 window.scrollTo(0,0) 一起生效 —— 每次编辑任务都把列表滚回顶部。只清这一个弹窗更安全。
   window.fpKbRelease=function(){
     kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
-    const el=document.getElementById('fpNoteModal');
+    const el=document.getElementById('fpEditPage');
     kbResetKb(el);
-    try{const c=el&&el.querySelector('.fp-note');if(c)kbResetKb(c);}catch(_){}
+    try{const c=el&&el.querySelector('.fp-edcard');if(c)kbResetKb(c);}catch(_){}
     document.documentElement.style.paddingBottom='';
   };
   // 例行任务弹窗：关闭时清掉键盘期的限高/位移，否则下次打开卡片还是被压扁的、还带着位移
@@ -3628,607 +3683,218 @@ window.addEventListener('load',()=>setTimeout(hideBoot,1300));
 // 等 DOM 完全解析后再初始化（kbdOverlay 等元素在脚本之后，需确保已存在）
 if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
 
-/* ==================== 专注：独立页面 + 番茄钟 + 专注记录 ====================
-   入口：侧栏「专注」→ 打开独立页面（fixed 覆盖整屏，不与主页面内容混排）。
-   时长：预设 5/15/25/45/60 分钟，默认 25；自定义 1–180 分钟，步长 5（± 按钮 / 滑块 / 直接输入）。
-   流程：专注倒计时 → 到点响铃 + 弹「这 N 分钟做了什么」→ 记一条并回到待机（v63 起不再自动进入休息）。
-   休息 5 分钟改为待机时手动点「休息 5 分钟」触发；休息结束响铃回到待机，不会自动开启下一轮。
-   计时基于绝对结束时间戳 endAt，标签节流/休眠后回前台不走偏；运行状态与所选时长持久化，刷新可续。
-   记录字段：id / start(开始时间戳) / durMs(实际专注时长) / text(用户填写的产出)。 */
-var FP_KEY='workbench_focus_v1', FP_STATE='workbench_focus_state_v1',
-    FP_DURKEY='workbench_focus_dur', FP_SNDKEY='workbench_focus_sound',
-    FP_SECKEY='workbench_focus_sec', FP_PAGEKEY='workbench_page_v1';
-var FP_DEF_MIN=25, FP_MIN_MIN=1, FP_MIN_MAX=180, FP_MIN_STEP=5, FP_SEC_MAX=1800;
-var BREAK_MS=5*60000, FP_MAX=300;
-var focusList=[], fpDurMin=FP_DEF_MIN, fpDurSec=0, fpSound=true;
-var fpOpenDays={}, _fpHsDirty=true; // 记录按日折叠的展开状态 / 列表是否需要重建
-var fp={phase:'focus',total:FP_DEF_MIN*60000,remain:FP_DEF_MIN*60000,endAt:0,running:false,startedAt:0,_t:null};
+/* ==================== 专注：记录 + 周/月分析（v72 重写） ====================
+   入口：侧栏「专注」→ 独立页面。结构：记录（按日折叠）/ 周 / 月 三档 + 「＋ 记一段」+ 导出 .md。
+   背景（用户 2026-09-22 决定）：倒计时与响铃全部砍掉 —— 计时改用其他 app，专注页只负责
+   「记录我专注的这段时间具体做了什么」，在 25 分钟后的 5 分钟休息里顺手补记。
+   分析只做【行为统计 + 自评刻度】：前者是纯算术（本地算、离线可用、结果稳定），
+   后者把「心理状态」变成一个可统计的数字（自评选填，不填就跳过这条）。
+   数据模型（沿用 workbench_focus_v1，向后兼容旧数据）：
+     id / start(开始 ms) / end(结束 ms) / durMs(时长 ms) / did(做了什么) / feel(一句感受)
+     / cat(类别，选填) / rf(专注度 0-5，选填) / re(能量 0-5，选填) / created / updated
+   兼容：旧字段 text→did；无 end 由 start+durMs 补；无 durMs 由 end-start 算。
+   归日：按 start 归日（跨午夜那条算前一天）。随手记（无时间段）只有 at，不进任何数值统计。 */
+var FP_KEY='workbench_focus_v1', FP_PAGEKEY='workbench_page_v1';
+var FP_CATS=['工作','学习','生活','交易','其他'];
+var FP_MAX=2000;
+var focusList=[];
+var fpOpenDays={};                 // 记录按日折叠的展开态
+var fpView='rec';                  // rec | week | month
+var fpExpScope='week';             // week | month | all
+var _fpEdId=null,_fpEdNoTime=false,_fpEdCat='',_fpEdRf=0,_fpEdRe=0,_fpEdAt=0;
 try{focusList=JSON.parse(lsGet(FP_KEY)||'[]');if(!Array.isArray(focusList))focusList=[];}catch(e){focusList=[];}
-try{var _fd=parseInt(lsGet(FP_DURKEY)||'',10);if(_fd>=FP_MIN_MIN&&_fd<=FP_MIN_MAX)fpDurMin=_fd;}catch(e){}
-try{var _sd=parseInt(lsGet(FP_SECKEY)||'',10);if(_sd>=1&&_sd<=FP_SEC_MAX)fpDurSec=_sd;}catch(e){}
-fp.total=fpBaseMs();fp.remain=fp.total;
-try{if(lsGet(FP_SNDKEY)==='0')fpSound=false;}catch(e){}
-try{var _fs=JSON.parse(lsGet(FP_STATE)||'{}');
-  if(_fs&&typeof _fs==='object'&&(_fs.running||+_fs.remain>0)){
-    fp.phase=_fs.phase==='break'?'break':'focus';
-    var _ft=parseInt(_fs.total,10);
-    if(_ft>=1000&&_ft<FP_MIN_MIN*60000){fpDurSec=Math.round(_ft/1000);fp.total=_ft;}
-    else if(_ft>=FP_MIN_MIN*60000&&_ft<=FP_MIN_MAX*60000){fp.total=_ft;fpDurMin=Math.round(_ft/60000);}
-    fp.remain=Math.max(0,+_fs.remain||0);
-    fp.running=!!_fs.running;fp.endAt=+_fs.endAt||0;fp.startedAt=+_fs.startedAt||0;
-  }}catch(e){}
+
+/* ---------- 归一化 / 存取 ---------- */
+function fpNorm(r){
+  if(!r||typeof r!=='object')return null;
+  var s=+r.start||0,e=+r.end||0,d=+r.durMs||0;
+  if(!r.id)r.id='f'+(s||+r.at||Date.now())+Math.random().toString(36).slice(2,6);
+  if(r.did==null)r.did=(r.text==null?'':''+r.text);
+  if(r.feel==null)r.feel='';
+  if(r.cat==null)r.cat='';
+  r.rf=Math.max(0,Math.min(5,Math.round(+r.rf||0)));
+  r.re=Math.max(0,Math.min(5,Math.round(+r.re||0)));
+  if(s>0){
+    if(!d&&e>s)d=e-s;
+    if(!e&&d>0)e=s+d;
+    r.start=s;r.end=e;r.durMs=d;
+  }else{
+    r.at=+r.at||+r.created||Date.now();
+  }
+  r.created=+r.created||s||(+r.at)||Date.now();
+  r.updated=+r.updated||r.created;
+  return r;
+}
+focusList=focusList.map(fpNorm).filter(Boolean);
 function saveFocus(){lsSet(FP_KEY,JSON.stringify(focusList));schedulePush();}
-function saveFpState(){lsSet(FP_STATE,JSON.stringify({phase:fp.phase,total:fp.total,remain:fp.remain,endAt:fp.endAt,running:fp.running,startedAt:fp.startedAt}));}
-function fpTotal(){return fp.phase==='break'?BREAK_MS:fp.total;}
-function fpIdle(){return !fp.running&&fp.phase==='focus'&&fp.remain===fp.total&&!fp.startedAt;}
-function fpSec2(ms){var s=Math.max(0,Math.ceil((ms||0)/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
-function fpMin(ms){var m=Math.round((ms||0)/60000);return m<1?1:m;}
-function fpBaseMs(){return fpDurSec>0?fpDurSec*1000:fpDurMin*60000;}
-function fpDurTxt(){return fpDurSec>0?(fpDurSec+' 秒'):(fpDurMin+' 分钟');}
-function fpDurLabel(ms){ms=ms||0;return ms<60000?(Math.round(ms/1000)+' 秒'):(fpMin(ms)+' 分钟');}
-function fpDayKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function fpClock(ts){var d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
-function fpWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime();}
-function fpStat(from){var a=focusList.filter(function(r){return (r.start||0)>=from;});
-  return {n:a.length,m:Math.round(a.reduce(function(s,r){return s+(r.durMs||0);},0)/60000)};}
 
-/* ---------- 到点响铃：优先播 happy-stroll.mp3（Web Audio 预解码，随 SW 离线缓存）----------
-   「有时候响、有时候没声音」的三个根因，逐条修掉：
-   ① 自动播放策略：铃声由定时器触发，没有任何用户手势 —— 上下文若从未被手势创建/唤醒，浏览器直接静音。
-      → 首次点击页面任意处就 fpPrimeAudio()：建上下文 + 播一帧静音 buffer 解锁（iOS 必做）。
-   ② 上下文挂着 'suspended'：旧写法按 currentTime 排 10 个振荡器，而 suspended 时 currentTime 是冻结的，
-      resume 之后它们同时炸响或被丢弃 → 听感就是"响一下没了 / 干脆没声"。
-      → 现在先等 resume() 落地，确认 state==='running' 才排声音，且**先播 mp3、播不了才合成**。
-   ③ 后台/锁屏期间定时器被冻结：到点补算发生在 fpResync / 重启恢复分支里，而旧代码**那两个分支根本不响铃**。
-      → 两处都补上 fpRingPlay()。
-   手机静音：网页没法像系统闹钟那样强行出声，但把能做的都做了 ——
-     · navigator.audioSession.type='playback'（iOS 16.4+）：按"媒体播放"归类，iOS 静音开关不再压掉；
-     · 全程振动（安卓静音下依然有效，节奏铺满整个响铃时长，iOS 无此 API 静默跳过）；
-     · 铃声走 Web Audio 而不是 <audio>，且**提前解码成 AudioBuffer**，到点只做一次 start()。
-   兜底顺序：AudioBuffer 播 mp3 → 合成双音（784/1046Hz 交替）→ <audio> 元素 → 只剩振动。 */
-var _fpAC=null,_fpBuf=null,_fpLoad=null,_fpRingSrc=null,_fpElem=null,_fpRingWant=false,_fpUnlockArmed=false,_fpWantAt=0;
-var FP_RING_SRC='./happy-stroll.mp3';
-var FP_RING_MS=9000;    // 到点响铃总时长：9 秒（用户 2026-09-20 要求 8~10 秒）
-var FP_SNOOZE_MS=5*60000; // 通知上「稍后」的默认延时
-var _fpWakeLock=null,_fpKASrc=null,_fpKAGain=null,_fpSnzT=null,_fpSnzAt=0;
-var _fpKAElem=null,_fpNoiseUrl=null,_fpWatchT=null; // v69：媒体元素保活（_elem）、噪声 blob（_noiseUrl）、自愈狗（_watchT）
-var _fpKAErr='',_fpLastTickAt=0,_fpTickLag=0,_fpAmbStopT=null; // v70：保活失败原因 / 相邻 tick 真实间隔（判断后台是否被节流）/ 延后收保活 timer
-var FP_PREVIEW_MS=3000; // 「试听」播放时长
-var FP_RING_GAIN=1;     // 实测 mp3 峰值 0.86 / RMS 0.147，属正常母带响度，不再加增益
-/* ---------- v71：并发响铃（照搬 rockfocus v18-v20 已验证架构）----------
-   根因修复：「开始后随机响 / 关了还响 / 试听异常」三件套来自旧版的三套 hack —— 保活粉噪 loop、
-   唤醒锁、以及「下一拍 tap 补响」。它们互相踩，且粉噪 loop 关不掉就一直响。
-   v71 全删：到点只靠下面这套【<audio> 元素 + Web Audio 解码 mp3 两路并发】，两路都失败才合成音。
-   后台/锁屏时元素 play() 是【异步 reject】，故不能只看 play() 返回值；前台 600ms 回看 currentTime 补一路。
-   play() 返回值不可信 —— 这一条与 rockfocus v18 同一教训。 */
-var RING_SEC=10;        // happy-stroll.mp3 实际长度（秒），loopEnd 用它避免超出缓冲
-function getRingEl(){
-  try{
-    if(!_fpElem){
-      _fpElem=document.createElement('audio');
-      _fpElem.src=FP_RING_SRC;_fpElem.preload='auto';_fpElem.loop=true;_fpElem.volume=1;
-      _fpElem.setAttribute('playsinline','');_fpElem.setAttribute('webkit-playsinline','');
-      fpAttachMedia(_fpElem);   // 必须挂进 DOM：部分安卓内核 / iOS 只给文档内媒体元素后台播放名额
-    }
-  }catch(e){}
-  return _fpElem;
+/* ---------- 基础取值 / 格式化 ---------- */
+function fpDid(r){return (''+((r&&(r.did!=null?r.did:r.text))||'')).trim();}
+function fpFeel(r){return (''+((r&&r.feel)||'')).trim();}
+function fpStart(r){return +(r&&r.start)||0;}
+function fpEnd(r){return +(r&&r.end)||0;}
+function fpAt(r){return +(r&&(r.at||r.start))||0;}
+function fpDur(r){var d=+(r&&r.durMs)||0;if(!d&&fpStart(r)&&fpEnd(r))d=fpEnd(r)-fpStart(r);return d>0?d:0;}
+function fpHasTime(r){return fpStart(r)>0&&fpDur(r)>0;}
+function fpPad(n){return (n<10?'0':'')+n;}
+function fpDayKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+fpPad(d.getMonth()+1)+'-'+fpPad(d.getDate());}
+function fpClock(ts){var d=new Date(ts);return fpPad(d.getHours())+':'+fpPad(d.getMinutes());}
+function fpD(ts){var d=new Date(ts);return (d.getMonth()+1)+'月'+d.getDate()+'日';}
+function fpDayShort(k){var d=new Date(k+'T00:00:00');return (d.getMonth()+1)+'月'+d.getDate()+'日';}
+function fpDayLabel(k){
+  var t=new Date(k+'T00:00:00'),n=new Date();n.setHours(0,0,0,0);
+  var base=fpDayShort(k)+' 周'+'日一二三四五六'.charAt(t.getDay());
+  var diff=Math.round((n.getTime()-t.getTime())/86400000);
+  if(diff===0)return '今天 · '+base;
+  if(diff===1)return '昨天 · '+base;
+  if(diff===2)return '前天 · '+base;
+  return base;
 }
-function preloadRingBuf(){ fpLoadRing(); }                 // 解码 mp3 → _fpBuf（FP_RING_SRC 随 SW 离线缓存）
-function stopRingBuf(){ try{if(_fpRingSrc){_fpRingSrc.stop(0);}}catch(e){} _fpRingSrc=null; }
-function playRingBuf(ms){                                   // 第二通道：Web Audio 播解码好的 mp3 缓冲
-  if(!_fpBuf)return false;
-  var ctx=fpAudio();if(!ctx)return false;
-  try{
-    if(ctx.state==='suspended'){try{ctx.resume();}catch(e){}}
-    stopRingBuf();
-    var g=ctx.createGain();g.gain.value=1;g.connect(ctx.destination);
-    var s=ctx.createBufferSource();s.buffer=_fpBuf;s.loop=true;
-    try{if(_fpBuf.duration)s.loopEnd=Math.min(_fpBuf.duration,RING_SEC);}catch(e){}
-    s.connect(g);s.start(0);
-    try{s.stop(ctx.currentTime+ms/1000);}catch(e){}
-    _fpRingSrc=s;
-    setTimeout(function(){if(_fpRingSrc===s)stopRingBuf();},ms+400);  // 墙钟兜底：音频时钟被冻也别无限 loop
-    return true;
-  }catch(e){return false;}
+function fpSlot(r){var h=new Date(fpStart(r)).getHours();return (h>=5&&h<12)?'上午':((h>=12&&h<18)?'下午':'晚上');}
+function fpDurTxt(ms){
+  ms=Math.max(0,Math.round(+ms||0));
+  var s=Math.round(ms/1000);
+  if(s<60)return s+' 秒';
+  var m=Math.floor(s/60),ss=s%60;
+  if(ss)return m+' 分 '+ss+' 秒';
+  if(m<60)return m+' 分钟';
+  var h=Math.floor(m/60),mm=m%60;
+  return h+' 小时'+(mm?' '+mm+' 分':'');
 }
-function stopRing(){                                        // 统一停：元素 + 缓冲 + 振动
-  try{if(_fpElem){clearTimeout(_fpElem._t);_fpElem.pause();_fpElem.currentTime=0;}}catch(e){}
-  stopRingBuf();
-  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+function fpSpanTxt(ms){
+  ms=Math.max(0,Math.round(+ms||0));
+  if(ms<60000)return ms>0?(Math.round(ms/1000)+' 秒'):'0 分钟';
+  var m=Math.round(ms/60000);
+  if(m<60)return m+' 分钟';
+  var h=Math.floor(m/60),mm=m%60;
+  return h+' 小时'+(mm?' '+mm+' 分':'');
 }
-function playAlert(ms){                                     // 并发发射：元素 + Web Audio 缓冲；仅两路都失败才合成音
-  if(!fpSound)return;
-  ms=ms||FP_RING_MS;
-  stopRing();
-  fpAudioSession();
-  fpVibrate();
-  var el=getRingEl(), ok=false, webOn=false;
-  var webOrSynth=function(){ if(webOn)return; webOn=playRingBuf(ms); if(!webOn)fpSynth(fpAudio(),ms,0.3,false); };
-  if(el){
-    try{
-      el.currentTime=0; el.volume=1;
-      var pr=el.play();
-      if(pr&&pr.catch)pr.catch(function(){clearTimeout(el._t);webOrSynth();});   // 异步被拒（后台/锁屏）→ Web Audio 播 mp3
-      clearTimeout(el._t);
-      el._t=setTimeout(function(){try{el.pause();el.currentTime=0;}catch(e){}},ms);
-      ok=true;
-    }catch(e){}
-  }
-  if(!ok){webOrSynth();return;}                             // 同步异常（元素都建不出）→ 降级链
-  try{                                                      // 前台复查：素材排上了却没真出声 → 补一路
-    clearTimeout(el._chk);
-    el._chk=setTimeout(function(){
-      try{var alive=el&&!el.paused&&el.currentTime>0.05; if(!alive)webOrSynth();}catch(e){}
-    },600);
-  }catch(e){}
+function fpSpanShort(ms){
+  var m=Math.round(Math.max(0,+ms||0)/60000);
+  if(m<60)return m+' 分';
+  var h=Math.floor(m/60),mm=m%60;
+  return h+' 时'+(mm?' '+mm+' 分':'');
 }
-function fpAudio(){
-  try{if(!_fpAC)_fpAC=new (window.AudioContext||window.webkitAudioContext)();return _fpAC;}catch(e){return null;}
-}
-/* iOS 16.4+ 音频会话：声明为「媒体播放」，这是网页唯一有可能绕开静音开关的手段。不支持则跳过。 */
-function fpAudioSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}}
-/* 在用户手势里一次性完成解锁 + 预解码 + 创建已由手势初始化的 audio 元素并播放暂停一次。
-   v64：这一步是响铃可靠的关键 —— 只有由用户手势创建或播放过的媒体，在之后无手势的到点时刻才被浏览器放行播放。
-   否则到点靠代码 new Audio() 去 play() 会被自动播放策略静默拒绝（尤其 iOS Safari），即有时候没响。 */
-/* v70：媒体元素必须挂进 DOM。detached 的 <audio> 在部分安卓内核（X5 / WebView / 小米浏览器）里
-   后台会被直接掐掉；iOS 也只在文档内的媒体元素上才给后台播放名额。
-   v69 只给保活音挂了 DOM，响铃元素没挂 —— 这是「前台有声音、后台完全没声音」的第二个根因。 */
-function fpAttachMedia(el){
-  try{
-    if(!el||el.parentNode)return el;
-    el.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:0;';
-    el.setAttribute('playsinline','');el.setAttribute('webkit-playsinline','');
-    (document.body||document.documentElement).appendChild(el);
-  }catch(e){}
-  return el;
-}
-function fpInitRing(){
-  getRingEl();   // v71：只创建并挂 DOM + 预解码，绝不 play —— 开始必须静音
-  fpLoadRing();
-}
-/* 在用户手势里唤醒上下文 + 播一帧静音 buffer（经典 unlock），同时尝试拉起被系统挂起的 AC。返回上下文或 null。 */
-function fpPrimeAudio(){
-  fpAudioSession();
-  var ac=fpAudio();if(!ac)return null;
-  try{var b=ac.createBuffer(1,1,ac.sampleRate||22050),s=ac.createBufferSource();
-    s.buffer=b;s.connect(ac.destination);s.start(0);}catch(e){}
-  try{if(ac.state==='suspended')ac.resume();}catch(e){}
-  return ac;
-}
-/* 预解码 mp3 → AudioBuffer（失败允许下次重试）。 */
-function fpLoadRing(cb){
-  if(_fpBuf){if(cb)cb(true);return;}
-  if(_fpLoad){_fpLoad.then(function(b){if(cb)cb(b);});return;}
-  var ac=fpAudio();
-  if(!ac||typeof fetch!=='function'){if(cb)cb(false);return;}
-  var p;
-  try{
-    p=fetch(FP_RING_SRC,{cache:'force-cache'})
-      .then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer();})
-      .then(function(ab){return new Promise(function(res,rej){
-        var ok=function(buf){res(buf);};
-        try{var r2=ac.decodeAudioData(ab,ok,rej);if(r2&&r2.then)r2.then(ok,rej);}catch(e){rej(e);}
-      });})
-      .then(function(buf){_fpBuf=buf;_fpLoad=null;return true;})
-      .catch(function(){_fpLoad=null;return false;});
-  }catch(e){if(cb)cb(false);return;}
-  _fpLoad=p;
-  p.then(function(b){if(cb)cb(b);});
-}
-/* 合成音兜底：mp3 还没解码好 / 解码失败 / 首次离线 时顶上（不能因为没缓冲就吞掉这一声铃） */
-function fpSynth(ac,ms,vol,oneShot){
-  try{
-    var t0=ac.currentTime+0.03;
-    if(oneShot){
-      var o=ac.createOscillator(),g=ac.createGain();
-      o.type='sine';o.frequency.setValueAtTime(880,t0);
-      g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,t0+Math.min(0.3,ms/1000));
-      o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+0.34);return;
-    }
-    var tick=0.5,n=Math.max(1,Math.round((ms/1000)/tick));
-    for(var i=0;i<n;i++){
-      var ts=t0+i*tick,o2=ac.createOscillator(),g2=ac.createGain();
-      o2.type='sine';o2.frequency.setValueAtTime(i%2?1046:784,ts);
-      g2.gain.setValueAtTime(0.0001,ts);
-      g2.gain.exponentialRampToValueAtTime(vol,ts+0.02);
-      g2.gain.exponentialRampToValueAtTime(0.0001,ts+0.32);
-      o2.connect(g2);g2.connect(ac.destination);o2.start(ts);o2.stop(ts+0.34);
-    }
-  }catch(e){}
-}
-/* <audio> 元素兜底（没有 Web Audio 的环境） */
-function fpElemRing(ms){
-  try{
-    if(!_fpElem){_fpElem=new Audio(FP_RING_SRC);_fpElem.loop=true;_fpElem.preload='auto';}
-    fpAttachMedia(_fpElem); // v70：补挂。后台补算等路径没走过 fpInitRing，元素仍是 detached
-    _fpElem.currentTime=0;_fpElem.volume=1;
-    var pr=_fpElem.play();if(pr&&pr.catch)pr.catch(function(){});
-    clearTimeout(_fpElem._t);
-    _fpElem._t=setTimeout(function(){try{_fpElem.pause();}catch(e){}},ms);
-    return true;
-  }catch(e){return false;}
-}
-/* 播 mp3：循环铺满时长，末尾 0.8s 淡出（避免硬切）。返回是否真的排上了声音。 */
-function fpPlayBuf(ac,ms){
-  if(!_fpBuf)return false;
-  try{
-    var src=ac.createBufferSource();src.buffer=_fpBuf;src.loop=true;
-    var g=ac.createGain();g.gain.value=FP_RING_GAIN;
-    src.connect(g);g.connect(ac.destination);
-    var t0=ac.currentTime+0.05,dur=Math.max(0.3,ms/1000);
-    src.start(t0);src.stop(t0+dur+0.05);
-    g.gain.setValueAtTime(FP_RING_GAIN,t0);
-    g.gain.setValueAtTime(FP_RING_GAIN,t0+Math.max(0.1,dur-0.8));
-    g.gain.linearRampToValueAtTime(0.0001,t0+dur);
-    _fpRingSrc=src;return true;
-  }catch(e){return false;}
-}
-/* 振动：安卓（含静音）有效，iOS Safari 无此 API → 静默跳过。节奏铺满整个响铃时长。 */
-function fpVibrate(){
-  try{
-    if(!navigator.vibrate)return;
-    var on=450,off=180,t=0,p=[];
-    while(t<FP_RING_MS){p.push(on);t+=on;if(t>=FP_RING_MS)break;p.push(off);t+=off;}
-    navigator.vibrate(p);
-  }catch(e){}
-}
-function fpRingStop(){ stopRing(); }   // v71：统一停（元素 + 缓冲 + 振动）
-/* 万一声音被策略拦下：留一个"下一拍补响"，用户第一次点屏幕就把这声铃补上（60 秒内有效） */
-function fpArmUnlock(){}   // v71：去掉「下一拍 tap 补响」—— 它是「点一下随机响」的元凶
-function fpRingPlay(){ playAlert(FP_RING_MS); }   // v71：并发响铃（元素 + Web Audio 缓冲，两路都失败才合成音）
-/* 「试听」：在用户手势里播 3 秒，同时完成解锁与预解码 */
-function fpPreview(){ if(!fpSound)return; fpPrimeAudio(); fpLoadRing(function(){ playAlert(FP_PREVIEW_MS); }); }   // v71：试听走同一套并发响铃
-var _fpAlertCb=null;
-function fpAlert(title,sub,cb){
-  var t=document.getElementById('fpAlertTitle');if(t)t.textContent=title;
-  var s=document.getElementById('fpAlertSub');if(s)s.textContent=sub||'';
-  _fpAlertCb=(typeof cb==='function')?cb:null;
-  var m=document.getElementById('fpAlertModal');if(m)m.classList.add('show');
-}
-function fpAlertClose(){
-  fpRingStop(); // 用户已经知道了，不必再响满 9 秒
-  var m=document.getElementById('fpAlertModal');if(m)m.classList.remove('show');
-  var cb=_fpAlertCb;_fpAlertCb=null;
-  if(cb){try{cb();}catch(e){}}
-}
-function fpSoundUI(){var b=document.getElementById('fpSoundBtn');if(b)b.classList.toggle('on',fpSound);}
-/* ---------- v68 锁屏也要响铃：系统通知 + 后台保活 + 唤醒锁 ----------
-   为什么旧实现锁屏必哑：浏览器把"看不见的页面"当成可以随便停的东西 ——
-     · 桌面 Chrome：后台标签的定时器被节流到最快一分钟一次；
-     · Android Chrome：切后台几分钟后渲染进程可能被冻结，定时器彻底停摆；
-     · iOS Safari / 独立 PWA：切后台或锁屏那一刻 JS 基本立刻停摆。
-   旧代码只有一个页面内 setInterval + 一个页面内 DOM 弹窗 → 到点那一刻 fpComplete() 压根没被调用，
-   就算被调用，弹窗也只是页面里的 div，锁屏时看不见。于是只能等回到前台才结算 —— 也就是"解锁才响"。
-   三层递进修：
-   ① 系统通知（Notification / SW showNotification）：能盖在锁屏之上，带「稍后 5 分钟 / 知道了」按钮；
-   ② 后台音频保活：起一条 -56dB 白噪音 loop，让系统把本 App 归类成"正在播放媒体" ——
-      进程不冻结、AudioContext 不挂起，这是锁屏期间仍能出声的唯一可靠通道；
-   ③ 唤醒锁：阻止自动熄屏（用户手动按电源键锁屏则失效）。 */
-function fpNotifyPerm(){
-  if(typeof Notification==='undefined')return 'unsupported';
-  try{return Notification.permission||'default';}catch(e){return 'unsupported';}
-}
-/* 只读状态快照：自检面板用，控制台输入 fpState() 也能查 */
-function fpState(){
-  var ac=null;try{ac=_fpAC;}catch(e){}
-  return {running:fp.running,phase:fp.phase,remain:fp.remain,endAt:fp.endAt,
-    keepAlive:!!_fpKASrc,wakeLock:!!_fpWakeLock,ac:ac?ac.state:'none',
-    perm:fpNotifyPerm(),standalone:fpIsStandalone(),snooze:_fpSnzAt,
-    kaElem:_fpKAElem?(_fpKAElem.paused?'paused':'playing'):'none',
-    ms:('mediaSession' in navigator)?'yes':'no',
-    kaErr:_fpKAErr||'',tickLag:_fpTickLag||0,ver:'v70'};
-}
-function fpIsStandalone(){
-  try{if(navigator.standalone)return true;
-    if(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)return true;}catch(e){}
-  return false;
-}
-/* 请求通知权限：必须放在用户手势里第一次调用才最可能通过（点「开始」或「开启系统通知」） */
-function fpNotifyAsk(cb){
-  if(typeof Notification==='undefined'||!Notification.requestPermission){if(cb)cb('unsupported');return;}
-  try{
-    if(Notification.permission!=='default'){if(cb)cb(Notification.permission);return;}
-    var once=false,done=function(p){if(once)return;once=true;if(cb)cb(p||'default');};
-    var r=Notification.requestPermission(done);
-    if(r&&r.then)r.then(done,function(){done('default');});
-  }catch(e){if(cb)cb('default');}
-}
-/* 到点通知：优先走 Service Worker（支持按钮 action，iOS 已安装 PWA 也可用），退化到普通 Notification。
-   at 传毫秒时间戳：仅当浏览器支持 Notification Triggers 时由系统到点拉起（页面全冻结也管用），不支持就忽略。 */
-function fpNotify(title,body,at){
-  if(typeof Notification==='undefined')return false;
-  if(fpNotifyPerm()!=='granted')return false;
-  var full={body:body||'',tag:'wb-focus-alarm',renotify:true,requireInteraction:true,silent:false,lang:'zh-CN',
-    icon:'./icon-192.png',badge:'./icon-192.png',vibrate:[500,220,500,220,500],
-    actions:[{action:'snooze',title:'稍后 5 分钟'},{action:'stop',title:'知道了'}]};
-  try{if(at&&at>Date.now()&&typeof TimestampTrigger!=='undefined')full.showTrigger=new TimestampTrigger(at);}catch(e){}
-  try{
-    var plain={body:full.body,tag:full.tag,icon:full.icon,badge:full.badge,renotify:true,silent:false}; // v70：极简兜底，与 rockfocus 实测能弹的那套一致
-    if(navigator.serviceWorker&&typeof navigator.serviceWorker.getRegistration==='function'){
-      navigator.serviceWorker.getRegistration().then(function(reg){
-        if(!reg||!reg.showNotification){try{new Notification(title,plain);}catch(e){}return;}
-        /* v70：showNotification 可能是「同步不抛错、异步 reject」（安卓上带 actions / vibrate 的 opts
-           不被支持时就是这个形）。原来的 try/catch 完全拦不住异步 reject，而且上一版在调用后直接
-           return，连 new Notification 兜底都不会走到 —— 结果通知静默消失。
-           改成 Promise 级降级链：完整 opts（带按钮）→ 极简 opts → new Notification。 */
-        var _p1=reg.showNotification(title,full);
-        if(_p1&&_p1.catch)_p1.catch(function(){
-          try{
-            var _p2=reg.showNotification(title,plain);
-            if(_p2&&_p2.catch)_p2.catch(function(){try{new Notification(title,plain);}catch(e){}});
-          }catch(e){try{new Notification(title,plain);}catch(e2){}}
-        });
-      },function(){try{new Notification(title,plain);}catch(e){}});
-      return true;
-    }
-    new Notification(title,plain);return true;
-  }catch(e){return false;}
-}
-/* 预约通知：在「开始」那一刻就把到点这一下托付给系统闹钟。只有支持 TimestampTrigger 才排，
-   不支持则完全不排（否则那条通知会立刻弹出来，变成误报）。 */
-function fpNotifySchedule(at,title,body){
-  if(typeof TimestampTrigger==='undefined')return false;
-  return fpNotify(title,body,at);
-}
-/* 唤醒锁：阻止自动熄屏（用户主动按电源键锁屏它管不了，那时靠②保活） */
-/* ---- v69：后台保活改走「媒体元素」通道 ----
-   v68 的 Web Audio loop 在移动端后台不成立：iOS 只认 <audio>/<video> 的媒体播放允许后台继续，
-   Android Chrome 判定页面"正在播放音频"从而豁免节流/冻结的依据同样只是媒体元素。
-   这里改成用一条 <audio loop> 播一段低电平背景音 —— 它是真实的媒体会话，系统会把本 App 当"正在放音乐"，
-   渲染进程不被冻结、定时器照走、音频通道保持打开；电平约 -36dBFS，正常环境基本听不到，代价只是略微耗电。
-   再配 MediaSession 向系统登记一次会话：Android 会在通知栏挂常驻媒体控件，进一步防止被省电策略杀掉。 */
-function fpNoiseUrl(){
-  if(_fpNoiseUrl)return _fpNoiseUrl;
-  try{
-    var sr=22050,sec=10,n=sr*sec; // v70：3 秒 loop 太密，部分内核在 boundary 处判定播放已结束而停掉；10 秒更稳
-    var ab=new ArrayBuffer(44+n*2),v=new DataView(ab);
-    var put=function(o,str){for(var i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i));};
-    put(0,'RIFF');v.setUint32(4,36+n*2,true);put(8,'WAVE');
-    put(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
-    v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
-    put(36,'data');v.setUint32(40,n*2,true);
-    // 低频为主的粉噪：比白噪更"有内容"，也更容易被系统判定成有效音频流（全静音会被当作 non-audible 照冻不误）
-    var raw=new Float32Array(n),last=0,mx=0,i,a;
-    for(i=0;i<n;i++){var w=Math.random()*2-1;last=(last+0.02*w)/1.02;raw[i]=last;a=Math.abs(last);if(a>mx)mx=a;}
-    var scale=mx>0?(1000/mx):0; // v70：目标峰值 ≈ 1000/32767 ≈ -30dBFS。太贴近静音时部分内核的 audible 判定不买账，照冻不误
-    for(i=0;i<n;i++){var q=Math.round(raw[i]*scale);if(q>32767)q=32767;else if(q<-32768)q=-32768;v.setInt16(44+i*2,q,true);}
-    _fpNoiseUrl=URL.createObjectURL(new Blob([ab],{type:'audio/wav'}));
-    return _fpNoiseUrl;
-  }catch(e){return null;}
-}
-/* 媒体会话：给系统一个"这里在放东西"的名分。缺了它，Android 不会给出常驻媒体控件，
-   省电策略（MIUI / 神隐 / Doze）会把后台热度最低的进程优先收走。 */
-function fpMediaSession(on){
-  try{
-    if(!navigator.mediaSession)return;
-    if(on){
-      try{
-        navigator.mediaSession.metadata=new (window.MediaMetadata||Object)({
-          title:'专注计时进行中',artist:'Workbench',album:'到点会响铃提醒'});
-      }catch(e){}
-      try{navigator.mediaSession.playbackState='playing';}catch(e){}
-      // 注册空 handler：让系统认为这是可控媒体会话（有 handler 才会按"媒体"对待），点暂停不影响计时。
-      var noop=function(){};
-      try{
-        navigator.mediaSession.setActionHandler('play',noop);
-        navigator.mediaSession.setActionHandler('pause',noop);
-        navigator.mediaSession.setActionHandler('stop',noop);
-      }catch(e){}
-    }else{
-      try{navigator.mediaSession.playbackState='none';}catch(e){}
-      try{navigator.mediaSession.metadata=null;}catch(e){}
-    }
-  }catch(e){}
-}
-/* 自愈看门狗：后台播放被系统短暂掐掉时，只要有机会跑一拍就立刻续上。跑不到也没损失 ——
-   到点仍有 fpResync 兜底补算，这里只是尽量让"后台这条链路"维持不断。 */
-function fpWatchdog(){
-  if(_fpWatchT)return;
-  _fpWatchT=setInterval(function(){
-    try{
-      if(!_fpKAElem||!fp.running)return;
-      if(_fpKAElem.paused){var p=_fpKAElem.play();if(p&&p.catch)p.catch(function(err){_fpKAErr=(err&&err.name)||'play rejected';});if(p&&p.then)p.then(function(){_fpKAErr='';});}
-    }catch(e){}
-  },8000);
-}
-function fpWakeLockGet(){}     // v71：唤醒锁对锁屏无效（用户按电源键即失效），移除避免副作用
-function fpWakeLockRelease(){}
-/* 后台保活（v69 重写）：媒体元素为主 + Web Audio 为辅。
-   ① <audio loop> 播低电平噪声 —— 移动端后台唯一认的"正在播放媒体"通道，冰冻结/掐音频这两件事都靠它挡；
-   ② Web Audio loop —— 桌面环境或某些内核里它是唯一能跑的，留作第二层，两层互不冲突。 */
-function fpKeepAliveStart(){}   // v71：保活粉噪 loop 是「关了还响」的元凶，彻底移除；锁屏靠系统通知 + 绝对 endTime 补算（同 rockfocus）
-/* 原 v68 的 Web Audio 保活，降级为辅助层 */
-function fpKAWebStart(){
-  if(_fpKASrc)return;
-  var ac=fpAudio();if(!ac)return;
-  try{
-    if(ac.state==='suspended')ac.resume();
-    var sr=ac.sampleRate||44100,n=Math.floor(sr*2);
-    var b=ac.createBuffer(1,n,sr),d=b.getChannelData(0),last=0,mx=0;
-    for(var i=0;i<n;i++){var w=Math.random()*2-1;last=(last+0.02*w)/1.02;d[i]=last;if(Math.abs(last)>mx)mx=Math.abs(last);}
-    if(mx>0){for(var j=0;j<n;j++)d[j]=d[j]/mx*0.5;}
-    var s=ac.createBufferSource();s.buffer=b;s.loop=true;
-    var g=ac.createGain();g.gain.value=0.0015;
-    s.connect(g);g.connect(ac.destination);s.start(0);
-    _fpKASrc=s;_fpKAGain=g;
-  }catch(e){}
-}
-function fpKeepAliveStop(){
-  try{if(_fpKASrc){_fpKASrc.stop();_fpKASrc.disconnect();}}catch(e){}
-  try{if(_fpKAGain)_fpKAGain.disconnect();}catch(e){}
-  _fpKASrc=null;_fpKAGain=null;
-  try{if(_fpKAElem)_fpKAElem.pause();}catch(e){} // 元素保留复用（下次 start 更快），只停播放
-  try{clearInterval(_fpWatchT);}catch(e){}
-  _fpWatchT=null;
-  fpMediaSession(false);
-}
-/* 统一开关：开始/恢复计时时把三条同时拉起；结束/暂停时一起收掉 */
-function fpAmbientStart(){
-  fpAudioSession();
-  fpNotifyAsk(function(p){
-    if(p==='granted'&&fp.running&&fp.endAt)fpNotifySchedule(fp.endAt,'专注时间到','本轮专注已结束，点击查看。');
-  });
-}
-/* 到点先看这一声铃播完，再撤保活与媒体会话 —— 提前撤会把后台音频通道一起撤掉，铃声就成了哑的 */
-function fpAmbientStopLater(){
-  try{clearTimeout(_fpAmbStopT);}catch(e){}
-  _fpAmbStopT=setTimeout(function(){_fpAmbStopT=null;if(fp.running)return;stopRing();},FP_RING_MS+2500);
-}
-function fpAmbientStop(){try{clearTimeout(_fpAmbStopT);}catch(e){}_fpAmbStopT=null;stopRing();}
-/* 通知上点「稍后 5 分钟」→ SW 打开 ./?fp=snooze → 这里起一个延后再提醒（同样带保活） */
-function fpSnoozeStart(min){
-  min=min||Math.round(FP_SNOOZE_MS/60000);
-  _fpSnzAt=Date.now()+min*60000;
-  clearInterval(_fpSnzT);_fpSnzT=setInterval(fpSnoozeTick,1000);
-  fpKeepAliveStart();fpWakeLockGet();
-  try{fpDiagRender();}catch(e){}
-  try{if(typeof toast==='function')toast('已延后 '+min+' 分钟再提醒');}catch(e){}
-}
-function fpSnoozeTick(){
-  if(!_fpSnzAt||Date.now()<_fpSnzAt)return;
-  fpSnoozeStop();
-  fpRingPlay();
-  fpNotify('专注提醒','延后时间已到，接着做吧。');
-  fpAlert('时间到','延后的提醒已经到了。',null);
-}
-function fpSnoozeStop(){
-  clearInterval(_fpSnzT);_fpSnzT=null;_fpSnzAt=0;
-  fpKeepAliveStop();fpWakeLockRelease();
-}
-/* 从系统通知点回来时带的指令参数（处理完立刻从地址栏抹掉，避免下次 Enter 又被触发一次） */
-function fpHandleUrlCmd(){
-  try{
-    var m=/[?&]fp=([a-z0-9]+)/i.exec(location.search||'');if(!m)return;
-    var cmd=m[1];
-    try{history.replaceState(null,'',location.pathname);}catch(e){}
-    if(cmd==='snooze')fpSnoozeStart(5);
-    else if(cmd==='ack'){fpRingStop();fpSnoozeStop();}
-  }catch(e){}
-}
-/* 自检面板：把"为什么锁屏不响"拆成几条能自己核对的项 */
-function fpDiagRender(){
-  var box=document.getElementById('fpDiag');if(!box)return;
-  var s=fpState();
-  var PM={granted:'已授权',denied:'被拒绝',default:'未授权',unsupported:'本浏览器不支持'};
-  var rows=[
-    ['当前版本', s.ver+'（先看这行，确认手机跑的是不是这一版）', true],
-    ['系统通知', PM[s.perm]||s.perm, s.perm==='granted'],
-    ['运行方式', s.standalone?'独立模式（推荐）':'浏览器标签页（易被冻结）', s.standalone],
-    ['后台保活音', s.kaElem==='playing'?'运行中（媒体通道，可被后台豁免）':(s.kaElem==='paused'?'已暂停（回前台会自动续上）':'未运行'), s.kaElem==='playing'],
-    ['媒体会话', s.ms==='yes'?'已登记（通知栏会挂媒体控件）':'本浏览器不支持', s.ms==='yes'],
-    ['屏幕唤醒锁', s.wakeLock?'已持有（不会自动熄屏）':'未持有（仅防自动息屏，手动锁屏无效）', s.wakeLock],
-    ['音频通道', s.ac==='running'?'running（可出声）':s.ac+'（点击任意处解锁）', s.ac==='running'],
-    ['后台心跳', !s.running?'（未在计时，此行无意义）':(s.tickLag>3000?('最近一拍间隔 '+Math.round(s.tickLag/1000)+' 秒 · 已被节流'):('最近一拍间隔 '+s.tickLag+' ms · 正常')), !s.running||s.tickLag<=3000],
-    ['保活失败原因', s.kaErr?('play() 被拒：'+s.kaErr):'无', !s.kaErr]
-  ];
-  box.innerHTML=rows.map(function(r){
-    return '<div class="fp-diag-row '+(r[2]?'ok':'warn')+'"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>';
-  }).join('');
-  var nb=document.getElementById('fpNotifBtn');
-  if(nb)nb.style.display=(s.perm==='granted'||s.perm==='unsupported')?'none':'';
-}
-window.fpState=fpState;
+function fpDotTxt(n){var a='',b='';for(var i=1;i<=5;i++){if(i<=n)a+='●';else b+='○';}return a+b;}
 
-/* ---------- 时长选择：预设 / ± 微调 / 滑块 / 直接输入 ---------- */
-function fpSetDuration(min,syncInput){
-  min=Math.round(+min||0);
-  if(!(min>=FP_MIN_MIN))return false; // 非法输入（空/0/非数字）：交调用方回填原值
-  min=Math.min(FP_MIN_MAX,min);
-  fpDurMin=min;fpDurSec=0;lsSet(FP_DURKEY,String(min));try{localStorage.removeItem(FP_SECKEY);}catch(e){}
-  if(fpIdle()){fp.total=min*60000;fp.remain=fp.total;saveFpState();}
-  if(syncInput!==true){
-    var inp=document.getElementById('fpMinInput'),rg=document.getElementById('fpRange');
-    if(inp)inp.value=min;if(rg)rg.value=min;
-  }
-  fpRender();
-  return true;
+/* ---------- 区间 / 聚合（全部本地算） ---------- */
+function fpDayStart(ts){var d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();}
+function fpTodayRange(){var f=fpDayStart(Date.now());return {from:f,to:f+86400000};}
+function fpWeekRange(off){
+  off=off||0;
+  var d=new Date();d.setHours(0,0,0,0);
+  d.setDate(d.getDate()-((d.getDay()+6)%7)+off*7);
+  var from=d.getTime(),e=new Date(from);e.setDate(e.getDate()+7);
+  return {from:from,to:e.getTime()};
 }
-function fpSetDurSec(sec){
-  sec=Math.round(+sec||0);
-  if(!(sec>=1))return false;
-  sec=Math.min(FP_SEC_MAX,sec);
-  fpDurSec=sec;lsSet(FP_SECKEY,String(sec));
-  if(fpIdle()){fp.total=sec*1000;fp.remain=fp.total;saveFpState();}
-  fpRender();
-  return true;
+function fpMonthRange(off){
+  off=off||0;
+  var d=new Date();d.setHours(0,0,0,0);d.setDate(1);d.setMonth(d.getMonth()+off);
+  var from=d.getTime(),e=new Date(from);e.setMonth(e.getMonth()+1);
+  return {from:from,to:e.getTime()};
 }
-function fpSyncDurUI(){
-  if(document.activeElement!==document.getElementById('fpMinInput')){
-    var inp=document.getElementById('fpMinInput');if(inp&&+inp.value!==fpDurMin)inp.value=fpDurMin;
-  }
-  var rg=document.getElementById('fpRange');if(rg&&+rg.value!==fpDurMin)rg.value=fpDurMin;
-  var box=document.getElementById('fpChips');
-  if(box)Array.prototype.forEach.call(box.querySelectorAll('.fp-chip'),function(c){
-    var _s=c.getAttribute('data-sec'),_m=c.getAttribute('data-min');
-    if(_s!=null)c.classList.toggle('active',fpDurSec>0&&+_s===fpDurSec);
-    else if(_m!=null)c.classList.toggle('active',fpDurSec===0&&+_m===fpDurMin);
-  });
+function fpIn(recs,r){return recs.filter(function(x){var t=fpAt(x);return t>=r.from&&t<r.to;});}
+function fpAgg(recs){
+  var n=0,ms=0,notes=0;
+  recs.forEach(function(x){if(fpHasTime(x)){n++;ms+=fpDur(x);}else notes++;});
+  return {n:n,ms:ms,notes:notes};
+}
+function fpCatAgg(recs){
+  var m={};
+  recs.forEach(function(x){if(fpHasTime(x)){var c=(x.cat||'未分类');m[c]=(m[c]||0)+1;}});
+  return Object.keys(m).map(function(k){return {k:k,n:m[k]};}).sort(function(a,b){return b.n-a.n;});
+}
+function fpAvgV(recs,key){
+  var a=recs.filter(function(x){return (+x[key]||0)>0;});
+  if(!a.length)return 0;
+  return a.reduce(function(s,x){return s+(+x[key]||0);},0)/a.length;
+}
+function fpLowDay(recs){
+  var m={};
+  recs.forEach(function(x){var v=+x.rf||0;if(v>0){var k=fpDayKey(fpAt(x));if(!m[k])m[k]={s:0,n:0};m[k].s+=v;m[k].n++;}});
+  var ks=Object.keys(m);
+  if(!ks.length)return '';
+  ks.sort(function(a,b){return (m[a].s/m[a].n)-(m[b].s/m[b].n);});
+  var k=ks[0];
+  return fpDayShort(k)+' · 专注度 '+(m[k].s/m[k].n).toFixed(1);
+}
+function fpElapsed(r){   // 区间内「到今天为止」的天数（分母用，避免把未来几天算成没记录）
+  var todayEnd=fpDayStart(Date.now())+86400000;
+  return Math.max(1,Math.round((Math.min(r.to,todayEnd)-r.from)/86400000));
+}
+function fpCoverDays(r){
+  var set={};
+  fpIn(focusList,r).forEach(function(x){set[fpDayKey(fpAt(x))]=1;});
+  return Object.keys(set).length+'/'+fpElapsed(r);
 }
 
-/* ---------- 渲染：进度环 / 倒计时 / 阶段 / 状态 / 按钮 / 汇总 / 记录 ---------- */
+/* ---------- 渲染：三档切换 / 汇总 / 列表 / 周 / 月 ---------- */
+function fpCard(k,v,cls){return '<div class="fp-mcard"><div class="k">'+k+'</div><div class="v'+(cls?' '+cls:'')+'">'+v+'</div></div>';}
 function fpRender(){
-  var tot=fpTotal(), r=Math.max(0,fp.remain), C=2*Math.PI*34;
-  var ring=document.getElementById('fpRing'), fg=document.getElementById('fpRingFg');
-  if(fg){fg.style.strokeDasharray=C;fg.style.strokeDashoffset=C*(1-Math.min(1,r/tot));}
-  if(ring)ring.classList.toggle('brk',fp.phase==='break');
-  var t=document.getElementById('fpTime');if(t)t.textContent=fpSec2(r);
-  var p=document.getElementById('fpPhase');if(p)p.textContent=fp.phase==='break'?'休息':'专注';
-  var st=document.getElementById('fpStatus');
-  if(st){
-    if(fp.phase==='break')st.innerHTML=fp.running?'休息中 · 剩余 <b>'+fpSec2(r)+'</b>':'休息已暂停 · 剩余 <b>'+fpSec2(r)+'</b>';
-    else if(fp.running)st.innerHTML='专注中 · 已专注 <b>'+fpSec2(tot-r)+'</b> / '+fpDurTxt();
-    else if(!fpIdle())st.innerHTML='已暂停 · 剩余 <b>'+fpSec2(r)+'</b>';
-    else st.innerHTML='待机 · 本轮 <b>'+fpDurTxt()+'</b>';
+  var seg=document.getElementById('fpSeg');
+  if(seg)Array.prototype.forEach.call(seg.querySelectorAll('b'),function(b){b.classList.toggle('on',b.getAttribute('data-fv')===fpView);});
+  var vr=document.getElementById('fpViewRec'),vw=document.getElementById('fpViewWeek'),vm=document.getElementById('fpViewMonth');
+  if(vr)vr.style.display=fpView==='rec'?'':'none';
+  if(vw)vw.style.display=fpView==='week'?'':'none';
+  if(vm)vm.style.display=fpView==='month'?'':'none';
+  var ti=document.getElementById('fpTitle');
+  if(ti)ti.textContent=fpView==='week'?'专注 · 本周':(fpView==='month'?'专注 · 本月':'专注');
+  var sum=document.getElementById('fpSumRow');
+  if(sum){
+    if(fpView==='rec'){
+      var ta=fpAgg(fpIn(focusList,fpTodayRange())),wa=fpAgg(fpIn(focusList,fpWeekRange(0)));
+      sum.innerHTML='<span>今日 <b>'+ta.n+'</b> 段 · <b>'+fpSpanTxt(ta.ms)+'</b></span>'+
+        '<span>本周 <b>'+wa.n+'</b> 段 · <b>'+fpSpanTxt(wa.ms)+'</b></span>';
+    }else{
+      var r=fpView==='week'?fpWeekRange(0):fpMonthRange(0);
+      sum.innerHTML='<span>'+fpD(r.from)+' – '+fpD(Math.min(r.to-86400000,fpDayStart(Date.now())))+'</span>'+
+        '<span>有记录 <b>'+fpCoverDays(r)+'</b> 天</span>';
+    }
   }
-  var b=document.getElementById('fpStart');
-  if(b)b.textContent=fp.running?'暂停':(fp.phase==='break'?'暂停休息':(fpIdle()?'开始':'继续'));
-  // v63：待机时「结束」无意义 → 换成「休息 5 分钟」（休息改为手动触发，专注到点不再自动进入）
-  var sb=document.getElementById('fpStop');
-  if(sb){var _idle=fpIdle();sb.disabled=false;sb.textContent=_idle?'休息 5 分钟':'结束';sb.dataset.mode=_idle?'break':'end';}
-  var sec=document.getElementById('fpSetupSec');if(sec)sec.classList.toggle('fp-lock',!fpIdle());
-  fpSyncDurUI();
-  var today=focusList.filter(function(x){return fpDayKey(x.start||0)===fpDayKey(Date.now());});
-  var tm=Math.round(today.reduce(function(s,x){return s+(x.durMs||0);},0)/60000);
-  var td=document.getElementById('fpToday');if(td)td.innerHTML='今日 <b>'+today.length+'</b> 段 · <b>'+tm+'</b> 分钟';
-  var wk=fpStat(fpWeekStart());
-  var we=document.getElementById('fpWeek');if(we)we.innerHTML='本周 <b>'+wk.n+'</b> 段 · <b>'+wk.m+'</b> 分钟';
+  if(fpView==='rec')fpListRender();
+  else if(fpView==='week')fpWeekRender();
+  else fpMonthRender();
   var cb=document.getElementById('c-focus');
-  if(cb){var live=fp.running||!fpIdle();cb.textContent=live?fpSec2(r):String(tm);cb.classList.toggle('live',live);}
-  // 记录列表只在专注页可见或内容有变更时重建，避免后台每 250ms 重排 DOM
-  var hp=document.getElementById('fpPage');
-  if(_fpHsDirty||(hp&&hp.classList.contains('show'))){fpHistRender();_fpHsDirty=false;}
+  if(cb)cb.textContent=String(fpAgg(fpIn(focusList,fpTodayRange())).n);
 }
-/* 记录列表：按自然日倒序分组、按日折叠（默认只展开最近一天），无记录时整块隐藏；点条目可补写文字 */
-function fpHistRender(){
+/* 记录列表：按日倒序分组、按日折叠（最近一天默认展开）；点条目进编辑页 */
+function fpRecHtml(r){
+  var hasT=fpHasTime(r),did=fpDid(r),feel=fpFeel(r);
+  var time=hasT?(fpClock(r.start)+'–'+fpClock(r.end||(r.start+r.durMs))+' · '+fpDurTxt(r.durMs))
+              :('随手记 · '+fpClock(fpAt(r)));
+  var rate='';
+  if((+r.rf||0)>0||(+r.re||0)>0){
+    rate='<div class="rate">'+((+r.rf||0)>0?('<span>专注度 '+fpDotTxt(+r.rf)+'</span>'):'')+
+      ((+r.re||0)>0?('<span>能量 '+fpDotTxt(+r.re)+'</span>'):'')+'</div>';
+  }
+  return '<div class="fp-rec" data-fid="'+r.id+'" role="button" tabindex="0">'+
+    '<div class="rd"><span class="rg">'+time+'</span>'+(r.cat?('<span class="tag">'+escapeHtml(r.cat)+'</span>'):'')+'</div>'+
+    (did?('<div class="did">'+escapeHtml(did)+'</div>'):'')+
+    (feel?('<div class="feel">'+escapeHtml(feel)+'</div>'):'')+
+    rate+'</div>';
+}
+function fpListRender(){
   var box=document.getElementById('fpList');if(!box)return;
-  var sec=document.getElementById('fpHistSec');
-  // 只保留写了文字的记录：没写内容的那几轮不进列表，列表/按日分组口径一致
-  var list=focusList.filter(function(r){return !!(''+(r&&r.text||'')).trim();}).sort(function(a,b){return (b.start||0)-(a.start||0);});
-  if(!list.length){if(sec)sec.style.display='none';box.innerHTML='';return;} // 无文字记录则不显示内容
-  if(sec)sec.style.display='';
+  var list=focusList.slice().sort(function(a,b){return fpAt(b)-fpAt(a);});
+  if(!list.length){
+    box.innerHTML='<div class="fp-empty">还没有记录。<br>点上面的「＋ 记一段」，<br>把这些分钟里做的事写下来。</div>';
+    return;
+  }
   var byK={},keys=[];
-  list.slice(0,FP_MAX).forEach(function(r){
-    var k=fpDayKey(r.start||0);
-    if(!byK[k]){byK[k]=[];keys.push(k);}
-    byK[k].push(r);
-  });
+  list.forEach(function(r){var k=fpDayKey(fpAt(r));if(!byK[k]){byK[k]=[];keys.push(k);}byK[k].push(r);});
   var html='';
   keys.forEach(function(k,i){
-    var rs=byK[k],d=new Date(rs[0].start);
-    var mins=Math.round(rs.reduce(function(s,x){return s+(x.durMs||0);},0)/60000);
-    var open=fpOpenDays.hasOwnProperty(k)?!!fpOpenDays[k]:(i===0); // 未手动切换过：最近一天默认展开
+    var rs=byK[k],agg=fpAgg(rs);
+    var open=fpOpenDays.hasOwnProperty(k)?!!fpOpenDays[k]:(i===0);
+    var parts=[];
+    if(agg.n)parts.push(agg.n+' 段 · '+fpSpanTxt(agg.ms));
+    if(agg.notes)parts.push(agg.notes+' 条随手记');
     html+='<div class="fp-day'+(open?' open':'')+'" data-day="'+k+'" role="button" tabindex="0">'+
-      '<span class="d">'+(d.getMonth()+1)+'月'+d.getDate()+'日</span>'+
-      '<span class="w">周'+'日一二三四五六'.charAt(d.getDay())+'</span>'+
-      '<span class="n">'+rs.length+' 段 · '+mins+' 分钟</span>'+
+      '<span class="dl">'+fpDayLabel(k)+'</span>'+
+      '<span class="n">'+(parts.join(' · ')||'0 条')+'</span>'+
       '<span class="caret">▾</span></div>';
     html+='<div class="fp-daybody"'+(open?'':' style="display:none"')+'>'+
-      rs.map(function(r){
-        var txt=(''+(r&&r.text||'')).trim();
-        return '<div class="fp-item" data-fid="'+r.id+'"><span class="t">'+fpClock(r.start)+' · '+fpMin(r.durMs)+'分</span>'+
-          '<span class="x">'+escapeHtml(txt)+'</span></div>';
-      }).join('')+'</div>';
+      rs.slice().reverse().map(fpRecHtml).join('')+'</div>';
   });
   box.innerHTML=html;
   Array.prototype.forEach.call(box.querySelectorAll('.fp-day'),function(el){
@@ -4240,141 +3906,352 @@ function fpHistRender(){
       if(body&&body.classList.contains('fp-daybody'))body.style.display=fpOpenDays[k]?'':'none';
     };
   });
-  Array.prototype.forEach.call(box.querySelectorAll('.fp-item'),function(el){
-    el.onclick=function(){fpOpenNote(el.getAttribute('data-fid'));};
+  Array.prototype.forEach.call(box.querySelectorAll('.fp-rec'),function(el){
+    el.onclick=function(){fpEdOpen(el.getAttribute('data-fid'));};
   });
 }
-
-/* ---------- 计时控制 ---------- */
-function fpToggle(){
-  if(fp.running){
-    fp.remain=Math.max(0,fp.endAt-Date.now());fp.running=false;clearInterval(fp._t);fp._t=null;
-    fpAmbientStop(); // v68：暂停了就没必要继续占着保活音和唤醒锁
-    fpRingStop(); // 手动取消：铃声/振动立即停
-  }else{
-    if(fpIdle()){fp.total=fpBaseMs();fp.remain=fp.total;}
-    if(!fp.startedAt)fp.startedAt=Date.now();
-    fpInitRing(); // v64：用户手势里解锁音频+预解码+初始化可由无手势播放的 audio 元素，保证长时间后到点也能响
-    fp.endAt=Date.now()+fp.remain;fp.running=true;
-    clearInterval(fp._t);fp._t=setInterval(fpTick,250);
-    fpAmbientStart(); // v68：解锁后立即起保活音+唤醒锁+申请通知，到点才能在锁屏之下也响
+/* 周：总时长 / 段数 / 日均 / 平均每段 + 每天柱状 + 时段分布 + 类别占比 + 自评趋势 */
+function fpWeekRender(){
+  var box=document.getElementById('fpViewWeek');if(!box)return;
+  var r=fpWeekRange(0),recs=fpIn(focusList,r),agg=fpAgg(recs);
+  var days=[],maxMs=1,i;
+  for(i=0;i<7;i++){
+    var d0=r.from+i*86400000,d1=d0+86400000,ms=0;
+    recs.forEach(function(x){var t=fpAt(x);if(fpHasTime(x)&&t>=d0&&t<d1)ms+=fpDur(x);});
+    if(ms>maxMs)maxMs=ms;
+    days.push({ms:ms,lbl:'日一二三四五六'.charAt(new Date(d0).getDay())});
   }
-  saveFpState();fpRender();
+  var bars=days.map(function(x){
+    var h=x.ms?Math.max(6,Math.round(x.ms/maxMs*78)):4;
+    return '<div class="fp-bcol"><div class="b'+(x.ms?'':' z')+'" style="height:'+h+'px"></div>'+
+      '<div class="bl">'+x.lbl+'</div></div>';
+  }).join('');
+  var slots={'上午':0,'下午':0,'晚上':0};
+  recs.forEach(function(x){if(fpHasTime(x))slots[fpSlot(x)]++;});
+  var sMax=Math.max(1,slots['上午'],slots['下午'],slots['晚上']);
+  var slotRows=['上午','下午','晚上'].map(function(nm){
+    return '<div class="fp-lrow"><span class="nm">'+nm+'</span><span class="tk">'+
+      '<span class="fl" style="width:'+Math.round(slots[nm]/sMax*100)+'%"></span></span>'+
+      '<span class="vv">'+slots[nm]+' 段</span></div>';
+  }).join('');
+  var cats=fpCatAgg(recs);
+  var catRows=cats.length?cats.map(function(c){
+    return '<div class="fp-lrow"><span class="nm">'+escapeHtml(c.k)+'</span><span class="tk">'+
+      '<span class="fl" style="width:'+Math.round(c.n/cats[0].n*100)+'%"></span></span>'+
+      '<span class="vv">'+c.n+' 段</span></div>';
+  }).join(''):'<div class="fp-empty" style="padding:14px 0">本周还没有带类别的记录</div>';
+  var rf=fpAvgV(recs,'rf'),re=fpAvgV(recs,'re'),low=fpLowDay(recs);
+  box.innerHTML=
+    '<div class="fp-sec"><div class="fp-grid2">'+
+      fpCard('总时长',fpSpanTxt(agg.ms))+
+      fpCard('段数',agg.n+' 段')+
+      fpCard('日均',fpSpanTxt(Math.round(agg.ms/fpElapsed(r))))+
+      fpCard('平均每段',agg.n?fpDurTxt(Math.round(agg.ms/agg.n)):'—')+
+    '</div></div>'+
+    '<div class="fp-sec"><div class="fp-label">每天</div><div class="fp-bars">'+bars+'</div></div>'+
+    '<div class="fp-sec"><div class="fp-label">时段分布</div>'+slotRows+'</div>'+
+    '<div class="fp-sec"><div class="fp-label">类别占比</div>'+catRows+'</div>'+
+    '<div class="fp-sec"><div class="fp-label">自评趋势</div>'+
+      '<div class="fp-kv"><span>专注度均值</span><b>'+(rf?rf.toFixed(1):'—')+'</b></div>'+
+      '<div class="fp-kv"><span>能量均值</span><b>'+(re?re.toFixed(1):'—')+'</b></div>'+
+      '<div class="fp-kv"><span>最低那天</span><b>'+(low||'—')+'</b></div>'+
+    '</div>'+
+    '<div class="fp-actions"><button class="fp-big sm" id="fpDlWeek">下载本周 .md</button></div>';
+  var b=document.getElementById('fpDlWeek');
+  if(b)b.onclick=function(){fpOpenExport('week');};
 }
-/* 结束：本轮作废回待机；已专注 ≥1 分钟则记一条并请用户补写产出 */
-function fpEnd(){
-  if(fpIdle())return;
-  clearInterval(fp._t);fp._t=null;
-  fpAmbientStop();
-  var wasFocus=fp.phase==='focus';
-  var elapsed=wasFocus?Math.max(0,fp.total-fp.remain):0;
-  fp.running=false;fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
-  saveFpState();fpRender();
-  if(wasFocus&&elapsed>=60000){fpAddRecord(Date.now()-elapsed,elapsed);fpOpenNote();}
-}
-function fpTick(){
-  if(!fp.running)return;
-  // v70：相邻两拍的真实间隔 —— 这是「后台到底有没有被节流」最直接的证据（正常 250ms，被节流会飙到几秒甚至几十秒）
-  {var _n=Date.now();if(_fpLastTickAt)_fpTickLag=_n-_fpLastTickAt;_fpLastTickAt=_n;}
-  fp.remain=Math.max(0,fp.endAt-Date.now());
-  if(fp.remain<=0){fpComplete();return;}
-  fpRender();
-}
-/* 阶段结束：专注 → 响铃 + 生成记录 + 弹填写 + 回到待机（不自动进休息）；休息结束 → 响铃 + 回到待机 */
-/* 回前台/切回页面时按绝对时间立刻结算一次：手机后台定时器被冻结也不丢计时、到点必定弹窗 */
-function fpResync(){
-  if(!fp.running)return;
-  var left=fp.endAt-Date.now();
-  if(left<=0){fpComplete();return;}
-  fp.remain=left;
-  clearInterval(fp._t);fp._t=setInterval(fpTick,250);
-  fpRender();
-}
-/* 手动开始 5 分钟休息（仅待机可用）：结束响铃后回到待机，不会自动开启下一轮专注 */
-function fpStartBreak(){
-  if(!fpIdle())return;
-  clearInterval(fp._t);fp._t=null;
-  fp.phase='break';fp.remain=BREAK_MS;fp.endAt=Date.now()+BREAK_MS;fp.startedAt=Date.now();fp.running=true;
-  fp._t=setInterval(fpTick,250);
-  fpInitRing(); // v64：休息由用户手势开，同样初始化 ring，让 5 分钟后结束也能响
-  fpAmbientStart(); // v68：休息计时同样要能在锁屏时到点
-  saveFpState();fpRender();
-}
-function fpComplete(){
-  // 防止 tick 与回前台补算同时触发，导致同一轮重复记账
-  if(Date.now()-(fp._cplAt||0)<800)return;
-  fp._cplAt=Date.now();
-  clearInterval(fp._t);fp._t=null;fp.running=false;
-  if(fp.phase==='focus'){
-    fpAddRecord(fp.startedAt||(Date.now()-fp.total),fp.total);
-    fpRingPlay();            // v70：到点这一声必须走在收保活之前（理由见下）
-    fpNotify('专注时间到','本轮 '+fpDurLabel(fp.total)+' 专注已完成。'); // v68：锁屏之上也要看得见
-    /* v70 关键修复（后台不响的首因）：原来这里是「先 fpAmbientStop() 再 fpRingPlay()」。
-       顺序一对调，到点那一刻保活音 + 媒体会话先被撤掉 → 系统立刻把这个 App 从"正在播放媒体"降级 →
-       后台渲染进程随即被冻结、音频会话被收走；下一句才让一个 1.5MB 的 mp3 元素 play()，没人给它撑腰，
-       自然被拒。前台不受影响是因为前台有 autoplay 宽限 —— 于是表现成「前台响、后台不响」。
-       改法：先出声 + 先通知，等这一声铃真正播完再来收保活。 */
-    fpAmbientStopLater();
-    // v63：到点只响铃 + 记账 + 回到待机，不再自动进入休息（休息由待机页「休息 5 分钟」手动开始）
-    fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
-    saveFpState();fpRender();
-    // 到点先给一个明确的「时间到」弹窗，点「知道了」再进入产出填写
-    fpAlert('时间到','本轮专注 '+fpDurLabel(fp.total)+' 已完成。写一句这轮做了什么吧。',function(){fpOpenNote();});
-  }else{
-    fpRingPlay();            // v70：同样先响再收保活
-    fpNotify('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
-    fpAmbientStopLater();
-    fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
-    saveFpState();fpRender();
-    fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
+/* 月：按周汇总 + 环比上月 + 两极 */
+function fpMonthRender(){
+  var box=document.getElementById('fpViewMonth');if(!box)return;
+  var r=fpMonthRange(0),recs=fpIn(focusList,r),agg=fpAgg(recs);
+  var pag=fpAgg(fpIn(focusList,fpMonthRange(-1)));
+  var mom='—',momCls='';
+  if(pag.ms>0){var pct=Math.round((agg.ms-pag.ms)/pag.ms*100);mom=(pct>=0?'↑ ':'↓ ')+Math.abs(pct)+'%';momCls=pct>=0?'up':'dn';}
+  else if(agg.ms>0){mom='↑ 新增';momCls='up';}
+  var weeks=[],cur=null,i;
+  for(i=0;i<40;i++){
+    var t0=r.from+i*86400000;
+    if(t0>=r.to)break;
+    if(((new Date(t0).getDay()+6)%7)===0||!cur){cur={i:weeks.length+1,ms:0};weeks.push(cur);}
+    var d1=t0+86400000;
+    recs.forEach(function(x){var ts=fpAt(x);if(fpHasTime(x)&&ts>=t0&&ts<d1)cur.ms+=fpDur(x);});
   }
-}
-function fpAddRecord(start,dur){
-  var rec={id:'f'+(start||Date.now())+Math.random().toString(36).slice(2,6),start:start,ts:start,durMs:dur,text:'',created:Date.now(),updated:Date.now()};
-  focusList.push(rec);
-  if(focusList.length>FP_MAX*2)focusList=focusList.slice(-FP_MAX*2);
-  _fpHsDirty=true;saveFocus();return rec;
+  var wMax=Math.max(1,Math.max.apply(null,weeks.map(function(w){return w.ms;}).concat([1])));
+  var wRows=weeks.length?weeks.map(function(w){
+    return '<div class="fp-lrow"><span class="nm">第 '+w.i+' 周</span><span class="tk">'+
+      '<span class="fl" style="width:'+Math.round(w.ms/wMax*100)+'%"></span></span>'+
+      '<span class="vv">'+fpSpanShort(w.ms)+'</span></div>';
+  }).join(''):'<div class="fp-empty" style="padding:14px 0">本月还没有记录</div>';
+  var byDay={};
+  recs.forEach(function(x){if(fpHasTime(x)){var k=fpDayKey(fpStart(x));byDay[k]=(byDay[k]||0)+fpDur(x);}});
+  var ks=Object.keys(byDay).sort(function(a,b){return byDay[b]-byDay[a];});
+  var longest=ks.length?(fpDayShort(ks[0])+' · '+fpSpanTxt(byDay[ks[0]])):'—';
+  var shortest=ks.length?(fpDayShort(ks[ks.length-1])+' · '+fpSpanTxt(byDay[ks[ks.length-1]])):'—';
+  var cats=fpCatAgg(recs);
+  var topCat=cats.length?(escapeHtml(cats[0].k)+' · '+cats[0].n+' 段'):'—';
+  box.innerHTML=
+    '<div class="fp-sec"><div class="fp-grid2">'+
+      fpCard('总时长',fpSpanTxt(agg.ms))+
+      fpCard('段数',agg.n+' 段')+
+      fpCard('日均',fpSpanTxt(Math.round(agg.ms/fpElapsed(r))))+
+      fpCard('环比上月',mom,momCls)+
+    '</div></div>'+
+    '<div class="fp-sec"><div class="fp-label">按周汇总</div>'+wRows+'</div>'+
+    '<div class="fp-sec"><div class="fp-label">两极</div>'+
+      '<div class="fp-kv"><span>最长的一天</span><b>'+longest+'</b></div>'+
+      '<div class="fp-kv"><span>最短的一天</span><b>'+shortest+'</b></div>'+
+      '<div class="fp-kv"><span>类别最多</span><b>'+topCat+'</b></div>'+
+    '</div>'+
+    '<div class="fp-actions"><button class="fp-big sm" id="fpDlMonth">下载本月 .md</button></div>';
+  var b=document.getElementById('fpDlMonth');
+  if(b)b.onclick=function(){fpOpenExport('month');};
 }
 
-/* ---------- 产出填写弹窗（新完成的一轮自动打开；点历史任一条可补写，始终保存避免输入丢失） ---------- */
-var _fpEditId=null;
-function fpOpenNote(id){
-  var rec=id?focusList.filter(function(x){return x.id===id;})[0]:focusList[focusList.length-1];
-  if(!rec)return;
-  _fpEditId=rec.id;
-  var ta=document.getElementById('fpNoteText');if(ta)ta.value=rec.text||'';
-  var ti=document.getElementById('fpNoteTitle');if(ti)ti.textContent='这 '+fpDurLabel(rec.durMs)+' 做了什么？';
-  var sub=document.getElementById('fpNoteSub');
-  if(sub)sub.textContent=fpClock(rec.start)+' 开始 · 专注 '+fpDurLabel(rec.durMs);
-  if(window.fpKbRelease)window.fpKbRelease(); // 清掉上一场景残留的位移/限高/底部留白
-  document.getElementById('fpNoteModal').classList.add('show');
-  setTimeout(function(){if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},80);
+/* ---------- 记一段：录入 / 编辑 / 删除 ---------- */
+function fpFloor5(t){var d=new Date(t);d.setSeconds(0,0);d.setMinutes(d.getMinutes()-(d.getMinutes()%5));return d.getTime();}
+function fpTimeToTs(hm,base){
+  var m=/^(\d{1,2}):(\d{2})$/.exec(hm||'');
+  if(!m)return 0;
+  var d=new Date(base||Date.now());
+  d.setHours(+m[1],+m[2],0,0);
+  return d.getTime();
 }
-function fpCloseNote(keepTyped){
-  if(keepTyped){var ta=document.getElementById('fpNoteText');if(ta&&ta.value.trim())fpSaveNote();}
-  var m=document.getElementById('fpNoteModal');if(m)m.classList.remove('show');
+function fpVal(id){var e=document.getElementById(id);return e?(''+e.value):'';}
+function fpDots(el,val){
+  if(!el)return;
+  var h='';
+  for(var i=1;i<=5;i++)h+='<i'+(i<=val?' class="f"':'')+' data-i="'+i+'"></i>';
+  el.innerHTML=h;
+}
+function fpCats(el,cur,pick){
+  if(!el)return;
+  el.innerHTML=FP_CATS.map(function(c){return '<span'+(c===cur?' class="on"':'')+' data-c="'+c+'">'+c+'</span>';}).join('');
+  el.onclick=function(ev){var t=ev.target;var c=(t&&t.getAttribute)?t.getAttribute('data-c'):'';if(c)pick(c);};
+}
+function fpDotClick(ev,key){
+  var t=ev.target;
+  var i=(t&&t.getAttribute)?+t.getAttribute('data-i'):0;
+  if(!i)return;
+  if(key==='rf'){_fpEdRf=(_fpEdRf===i?0:i);fpDots(document.getElementById('fpEdRf'),_fpEdRf);}
+  else{_fpEdRe=(_fpEdRe===i?0:i);fpDots(document.getElementById('fpEdRe'),_fpEdRe);}
+}
+function fpEdCatPick(c){
+  _fpEdCat=(_fpEdCat===c?'':c);
+  fpCats(document.getElementById('fpEdCat'),_fpEdCat,fpEdCatPick);
+}
+function fpEdSetNoTime(on){
+  _fpEdNoTime=!!on;
+  var t=document.getElementById('fpEdTimeSec');
+  if(t)t.style.display=_fpEdNoTime?'none':'';
+  var b=document.getElementById('fpEdNoTime');
+  if(b)b.textContent=_fpEdNoTime?'改成记录时间段':'随手记（不带时间段）';
+  fpEdTitleSync();
+  fpEdSyncDur();
+}
+function fpEdTitleSync(){
+  var ti=document.getElementById('fpEdTitle');
+  if(ti)ti.textContent=(_fpEdNoTime?'随手记':'记一段')+(_fpEdId?' · 编辑':'');
+}
+function fpEdSetQ(min){
+  var e0=fpFloor5(Date.now()),s0=e0-min*60000;
+  var si=document.getElementById('fpEdStart'),ei=document.getElementById('fpEdEnd');
+  if(si)si.value=fpClock(s0);
+  if(ei)ei.value=fpClock(e0);
+  fpEdSyncDur();
+}
+function fpEdQ5(){
+  var si=document.getElementById('fpEdStart'),ei=document.getElementById('fpEdEnd');
+  if(!si||!ei)return;
+  var now=Date.now();
+  var s=fpTimeToTs(si.value,now),e=fpTimeToTs(ei.value,now);
+  if(!s||!e)return;
+  e=fpFloor5(e);s=fpFloor5(s);
+  if(s>=e)s=e-25*60000;
+  si.value=fpClock(s);ei.value=fpClock(e);
+  fpEdSyncDur();
+}
+function fpEdSyncDur(){
+  var box=document.getElementById('fpEdDurTxt');
+  if(!box)return;
+  if(_fpEdNoTime){box.innerHTML='<span>只记一条文字，不占用时长统计</span>';return;}
+  var rec=_fpEdId?focusList.filter(function(x){return x.id===_fpEdId;})[0]:null;
+  var base=(rec&&+rec.created)||Date.now();
+  var s=fpTimeToTs(fpVal('fpEdStart'),base),e=fpTimeToTs(fpVal('fpEdEnd'),base);
+  if(!s||!e){box.innerHTML='<b style="color:var(--error)">请填完整的时间段</b>';return;}
+  if(e<=s)e+=86400000;
+  var d=e-s;
+  if(d>12*3600000){box.innerHTML='<b style="color:var(--error)">约 '+Math.round(d/3600000)+' 小时</b><span>· 单条超过 12 小时，请检查时间</span>';return;}
+  box.innerHTML='<b>'+fpDurTxt(d)+'</b><span>·</span><span>跨午夜会自动算作次日，归到开始那天</span>';
+}
+function fpEdOpen(id){
+  var rec=id?focusList.filter(function(x){return x.id===id;})[0]:null;
+  _fpEdId=rec?rec.id:null;
+  var hasT=rec?fpHasTime(rec):true;
+  _fpEdNoTime=rec?!hasT:false;
+  _fpEdAt=rec?fpAt(rec):Date.now();
+  var s0,e0;
+  if(rec&&hasT){s0=rec.start;e0=rec.end||(rec.start+rec.durMs);}
+  else{var now=Date.now();e0=fpFloor5(now);s0=e0-25*60000;}
+  var si=document.getElementById('fpEdStart'),ei=document.getElementById('fpEdEnd');
+  if(si)si.value=fpClock(s0);
+  if(ei)ei.value=fpClock(e0);
+  var dd=document.getElementById('fpEdDid');if(dd)dd.value=rec?fpDid(rec):'';
+  var ff=document.getElementById('fpEdFeel');if(ff)ff.value=rec?fpFeel(rec):'';
+  _fpEdCat=rec?(rec.cat||''):'';
+  _fpEdRf=rec?(+rec.rf||0):0;
+  _fpEdRe=rec?(+rec.re||0):0;
+  fpCats(document.getElementById('fpEdCat'),_fpEdCat,fpEdCatPick);
+  fpDots(document.getElementById('fpEdRf'),_fpEdRf);
+  fpDots(document.getElementById('fpEdRe'),_fpEdRe);
+  var del=document.getElementById('fpEdDel');
+  if(del)del.style.display=rec?'':'none';
+  fpEdTitleSync();
   if(window.fpKbRelease)window.fpKbRelease();
-  _fpEditId=null;
+  var pg=document.getElementById('fpEditPage');
+  if(pg){pg.classList.add('show');try{pg.scrollTop=0;}catch(e){}}
+  document.body.style.overflow='hidden';
+  fpEdSyncDur();
 }
-function fpSaveNote(){
-  var ta=document.getElementById('fpNoteText'),v=ta?ta.value.trim().slice(0,500):'';
-  var rec=focusList.filter(function(x){return x.id===_fpEditId;})[0];
-  if(rec){rec.text=v;rec.updated=Date.now();_fpHsDirty=true;saveFocus();fpRender();}
+function fpEdClose(){
+  if(window.fpKbRelease)window.fpKbRelease();
+  var pg=document.getElementById('fpEditPage');
+  if(pg)pg.classList.remove('show');
+  _fpEdId=null;
+}
+function fpEdSave(){
+  var did=fpVal('fpEdDid').trim(),feel=fpVal('fpEdFeel').trim();
+  if(!did&&!feel){showToast('先写点内容再保存');return;}
+  var isEdit=!!_fpEdId;
+  var rec=isEdit?focusList.filter(function(x){return x.id===_fpEdId;})[0]:null;
+  if(isEdit&&!rec){showToast('这条记录已不存在');fpEdClose();return;}
+  var s=0,e=0,d=0;
+  if(!_fpEdNoTime){
+    var base=(rec&&+rec.created)||Date.now();
+    s=fpTimeToTs(fpVal('fpEdStart'),base);
+    e=fpTimeToTs(fpVal('fpEdEnd'),base);
+    if(!s||!e){showToast('请填完整的时间段');return;}
+    if(e<=s)e+=86400000;            // 跨午夜 → 次日
+    d=e-s;
+    if(d>12*3600000){showToast('单条超过 12 小时，请检查时间');return;}
+  }
+  if(!rec){rec={id:'f'+Date.now()+Math.random().toString(36).slice(2,6),created:Date.now()};focusList.push(rec);}
+  if(_fpEdNoTime){rec.at=(+rec.at)||_fpEdAt||Date.now();rec.start=0;rec.end=0;rec.durMs=0;}
+  else{rec.start=s;rec.end=e;rec.durMs=d;rec.at=0;}
+  rec.did=did;rec.text=did;              // text 同步：老版本（可能还缓存着）也能显示内容
+  rec.feel=feel;rec.cat=_fpEdCat||'';
+  rec.rf=_fpEdRf||0;rec.re=_fpEdRe||0;rec.updated=Date.now();
+  if(focusList.length>FP_MAX)focusList=focusList.slice(-FP_MAX);
+  saveFocus();fpRender();fpEdClose();
+  showToast(isEdit?'已更新':'已记录');
+}
+function fpEdDelete(){
+  var id=_fpEdId;if(!id)return;
+  if(!confirm('删除这条记录？'))return;
+  focusList=focusList.filter(function(x){return x.id!==id;});
+  saveFocus();fpRender();fpEdClose();
+  showToast('已删除');
+}
+
+/* ---------- 导出 .md（汇总 + 明细） ---------- */
+function fpOpenExport(scope){
+  fpExpScope=scope||(fpView==='month'?'month':'week');
+  fpExpSync();
+  var m=document.getElementById('fpExportModal');
+  if(m)m.classList.add('show');
+}
+function fpExpClose(){var m=document.getElementById('fpExportModal');if(m)m.classList.remove('show');}
+function fpExpSync(){
+  var seg=document.getElementById('fpExpSeg');
+  if(seg)Array.prototype.forEach.call(seg.querySelectorAll('b'),function(b){b.classList.toggle('on',b.getAttribute('data-ex')===fpExpScope);});
+  var g=document.getElementById('fpExpGo');
+  if(g)g.textContent='下载 '+(fpExpScope==='week'?'本周':(fpExpScope==='month'?'本月':'全部'))+' .md';
+}
+function fpFileName(scope){
+  if(scope==='all')return '专注记录_全部_'+todayStr()+'.md';
+  if(scope==='month'){var d=new Date();return '专注记录_'+d.getFullYear()+'-'+fpPad(d.getMonth()+1)+'.md';}
+  var r=fpWeekRange(0);
+  return '专注记录_'+fpD(r.from)+'_'+fpD(r.to-86400000)+'.md';
+}
+function fpMd(scope){
+  var r,label,todayEnd=fpDayStart(Date.now())+86400000;
+  if(scope==='all'){
+    var sorted=focusList.slice().sort(function(a,b){return fpAt(a)-fpAt(b);});
+    r={from:sorted.length?fpAt(sorted[0]):fpDayStart(Date.now()),to:todayEnd};
+    label=sorted.length?(fpD(r.from)+' ~ '+fpD(Math.min(r.to-86400000,Date.now()))):'全部记录';
+  }else if(scope==='month'){
+    r=fpMonthRange(0);label=fpD(r.from)+' ~ '+fpD(Math.min(r.to-86400000,Date.now()));
+  }else{
+    r=fpWeekRange(0);label=fpD(r.from)+' ~ '+fpD(Math.min(r.to-86400000,Date.now()));
+  }
+  var recs=fpIn(focusList,r).sort(function(a,b){return fpAt(a)-fpAt(b);});
+  var agg=fpAgg(recs),L=[];
+  var daySet={};recs.forEach(function(x){daySet[fpDayKey(fpAt(x))]=1;});
+  var cvd=Object.keys(daySet).length;
+  L.push('# 工作台专注记录 · '+label);
+  L.push('');
+  L.push('## 汇总');
+  L.push('- 记录 **'+agg.n+' 段** / 合计 **'+fpSpanTxt(agg.ms)+'**'+(agg.n?(' · 平均每段 '+fpDurTxt(Math.round(agg.ms/agg.n))):''));
+  L.push('- 有记录 '+cvd+'/'+Math.max(cvd,fpElapsed(r))+' 天');
+  if(agg.n){
+    var sl={'上午':0,'下午':0,'晚上':0};
+    recs.forEach(function(x){if(fpHasTime(x))sl[fpSlot(x)]++;});
+    L.push('- 时段：上午 '+sl['上午']+' 段 · 下午 '+sl['下午']+' 段 · 晚上 '+sl['晚上']+' 段');
+    var cs=fpCatAgg(recs);
+    if(cs.length)L.push('- 类别：'+cs.map(function(c){return c.k+' '+c.n;}).join(' · '));
+    var rf=fpAvgV(recs,'rf'),re=fpAvgV(recs,'re');
+    if(rf||re)L.push('- 自评：'+(rf?('专注度均值 '+rf.toFixed(1)):'')+((rf&&re)?' · ':'')+(re?('能量均值 '+re.toFixed(1)):''));
+  }
+  if(agg.notes)L.push('- 另有 '+agg.notes+' 条随手记（无时间段，不计入时长）');
+  L.push('');
+  L.push('## 明细');
+  var byK={},ks=[];
+  recs.forEach(function(x){var k=fpDayKey(fpAt(x));if(!byK[k]){byK[k]=[];ks.push(k);}byK[k].push(x);});
+  ks.reverse();
+  ks.forEach(function(k){
+    var d=new Date(k+'T00:00:00');
+    L.push('');
+    L.push('### '+(d.getMonth()+1)+'月'+d.getDate()+'日 周'+'日一二三四五六'.charAt(d.getDay()));
+    byK[k].forEach(function(x){
+      var head;
+      if(fpHasTime(x)){
+        head='- '+fpClock(x.start)+'–'+fpClock(x.end||(x.start+x.durMs))+' · '+fpDurTxt(x.durMs);
+        if(x.cat)head+=' · '+x.cat;
+        var rt=[];
+        if(+x.rf)rt.push('专注'+x.rf);
+        if(+x.re)rt.push('能量'+x.re);
+        if(rt.length)head+=' · '+rt.join(' ');
+      }else{
+        head='- '+fpClock(fpAt(x))+' · 随手记';
+      }
+      L.push(head);
+      if(fpDid(x))L.push('  做了什么：'+fpDid(x).replace(/\s*\n\s*/g,' '));
+      if(fpFeel(x))L.push('  感受：'+fpFeel(x).replace(/\s*\n\s*/g,' '));
+    });
+  });
+  return L.join('\n')+'\n';
+}
+function fpExpGo(){
+  var md='';
+  try{md=fpMd(fpExpScope);}catch(e){md='';}
+  if(!md){showToast('没有可导出的内容');return;}
+  try{download(md,fpFileName(fpExpScope),'text/markdown;charset=utf-8');}catch(e){}
+  fpExpClose();
+  showToast('已导出 .md');
 }
 
 /* ---------- 独立页面开关 ---------- */
 function fpOpenPage(silent){
   var pg=document.getElementById('fpPage');if(!pg)return;
-  _fpHsDirty=true;
-  if(!silent){fpPrimeAudio();fpLoadRing();} // 进专注页就是一次用户手势：解锁音频 + 预解码铃声（刷新恢复时无手势，跳过避免硬建 AudioContext）
-  pg.classList.add('show');pg.scrollTop=0;
-  document.body.style.overflow='hidden'; // 专注页自己滚，防止背后列表跟着动
+  pg.classList.add('show');
+  try{pg.scrollTop=0;}catch(e){}
+  document.body.style.overflow='hidden';
   var e=document.getElementById('fpEntry');if(e)e.classList.add('active');
   fpRender();
   try{lsSet(FP_PAGEKEY,'fp');}catch(_){}
 }
 function fpClosePage(){
   var pg=document.getElementById('fpPage');if(!pg)return;
+  fpExpClose();fpEdClose();
   pg.classList.remove('show');
   document.body.style.overflow='';
   var e=document.getElementById('fpEntry');if(e)e.classList.remove('active');
@@ -4384,98 +4261,55 @@ function fpClosePage(){
 
 /* ---------- 初始化 ---------- */
 function initFocusPage(){
-  // 自动播放策略要求"至少发生过一次用户手势"，而铃声是定时器触发的 → 第一次点屏幕就把票据拿到
-  document.addEventListener('pointerdown',function(){fpPrimeAudio();fpLoadRing();},{capture:true,once:true});
-  document.getElementById('fpEntry').onclick=function(){fpOpenPage();closeSidebar();};
-  document.getElementById('fpCloseBtn').onclick=fpClosePage;
-  document.getElementById('fpStart').onclick=fpToggle;
-  document.getElementById('fpStop').onclick=function(){ if(this.dataset.mode==='break')fpStartBreak(); else fpEnd(); };
-  document.getElementById('fpSoundBtn').onclick=function(){
-    fpSound=!fpSound;lsSet(FP_SNDKEY,fpSound?'1':'0');fpSoundUI();
-    if(fpSound)fpPreview(); // 打开时试听 3 秒（同时完成解锁与预解码）
+  var el;
+  el=document.getElementById('fpEntry');
+  if(el)el.onclick=function(){fpOpenPage();closeSidebar();};
+  el=document.getElementById('fpCloseBtn');if(el)el.onclick=fpClosePage;
+  el=document.getElementById('fpDlBtn');if(el)el.onclick=function(){fpOpenExport();};
+  el=document.getElementById('fpSeg');
+  if(el)el.onclick=function(ev){
+    var t=ev.target,v=(t&&t.getAttribute)?t.getAttribute('data-fv'):'';
+    if(!v)return;fpView=v;fpRender();
   };
-  fpSoundUI();
-  var chips=document.getElementById('fpChips');
-  if(chips)Array.prototype.forEach.call(chips.querySelectorAll('.fp-chip'),function(c){
-    var _s=c.getAttribute('data-sec'),_m=c.getAttribute('data-min');
-    if(_s!=null)c.onclick=function(){fpSetDurSec(+_s);};
-    else if(_m!=null)c.onclick=function(){fpSetDuration(+_m);};
-  });
-  var inp=document.getElementById('fpMinInput');
-  if(inp){
-    var commit=function(){if(!fpSetDuration(inp.value))inp.value=fpDurMin;};
-    inp.onchange=commit;inp.onblur=commit;
-    inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();inp.blur();}});
-  }
-  var rg=document.getElementById('fpRange');
-  if(rg)rg.oninput=function(){fpSetDuration(rg.value);};
-  document.getElementById('fpMinus').onclick=function(){fpSetDuration(fpDurMin-FP_MIN_STEP);};
-  document.getElementById('fpPlus').onclick=function(){fpSetDuration(fpDurMin+FP_MIN_STEP);};
-  document.getElementById('fpNoteSave').onclick=function(){fpSaveNote();fpCloseNote(false);};
-  document.getElementById('fpNoteSkip').onclick=function(){fpCloseNote(false);};
-  document.getElementById('fpAlertOk').onclick=fpAlertClose;
-  document.getElementById('fpAlertModal').addEventListener('click',function(e){if(e.target.id==='fpAlertModal')fpAlertClose();});
-  // 手机端切后台/锁屏时定时器可能被冻结：回到前台立刻补算，保证到点一定弹窗
-  document.addEventListener('visibilitychange',function(){
-    if(document.hidden)return;
-    fpResync();
-    if(fp.running)fpWakeLockGet(); // v68：回前台重新拿一次唤醒锁（切走时系统会把它收回去）
-    if(fp.running)fpKeepAliveStart(); // v69：同样补回被系统打断的保活播放与媒体会话（幂等）
-    fpDiagRender();
-  });
-  window.addEventListener('focus',fpResync);
-  window.addEventListener('pageshow',fpResync);
-  document.getElementById('fpNoteModal').addEventListener('click',function(e){if(e.target.id==='fpNoteModal')fpCloseNote(true);});
-  document.getElementById('fpNoteText').addEventListener('keydown',function(e){
-    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();fpSaveNote();fpCloseNote(false);}
-    if(e.key==='Escape'){e.preventDefault();fpCloseNote(true);}
-  });
-  document.addEventListener('keydown',function(e){
-    if(e.key!=='Escape')return;
-    var note=document.getElementById('fpNoteModal');
-    if(note&&note.classList.contains('show'))return;
-    var al=document.getElementById('fpAlertModal');
-    if(al&&al.classList.contains('show'))return;
-    if(document.getElementById('fpPage').classList.contains('show'))fpClosePage();
-  });
-  /* v68：从系统通知点回来时带回来的指令（稍后 / 知道了） */
-  fpHandleUrlCmd();
-  fpDiagRender();
-  setInterval(fpDiagRender,4000);
-  var nb2=document.getElementById('fpNotifBtn');
-  if(nb2)nb2.onclick=function(){
-    fpNotifyAsk(function(p){
-      fpDiagRender();
-      if(p==='granted')fpNotify('测试提醒','到点时就是这样出现的，锁屏状态下也会显示。');
-      else {try{if(typeof toast==='function')toast('未授权：请到系统「设置 → 通知」允许本站点');}catch(e){}}
-    });
+  el=document.getElementById('fpAddBtn');if(el)el.onclick=function(){fpEdOpen(null);};
+  el=document.getElementById('fpEdClose');if(el)el.onclick=fpEdClose;
+  el=document.getElementById('fpEdCancel');if(el)el.onclick=fpEdClose;
+  el=document.getElementById('fpEdSave');if(el)el.onclick=fpEdSave;
+  el=document.getElementById('fpEdDel');if(el)el.onclick=fpEdDelete;
+  el=document.getElementById('fpEdNoTime');if(el)el.onclick=function(){fpEdSetNoTime(!_fpEdNoTime);};
+  el=document.getElementById('fpEdStart');if(el)el.onchange=fpEdSyncDur;
+  el=document.getElementById('fpEdEnd');if(el)el.onchange=fpEdSyncDur;
+  el=document.getElementById('fpQ25');if(el)el.onclick=function(){fpEdSetQ(25);};
+  el=document.getElementById('fpQ60');if(el)el.onclick=function(){fpEdSetQ(60);};
+  el=document.getElementById('fpQ5');if(el)el.onclick=fpEdQ5;
+  el=document.getElementById('fpEdRf');if(el)el.onclick=function(ev){fpDotClick(ev,'rf');};
+  el=document.getElementById('fpEdRe');if(el)el.onclick=function(ev){fpDotClick(ev,'re');};
+  fpDots(document.getElementById('fpEdRf'),0);
+  fpDots(document.getElementById('fpEdRe'),0);
+  fpCats(document.getElementById('fpEdCat'),'',fpEdCatPick);
+  el=document.getElementById('fpExpSeg');
+  if(el)el.onclick=function(ev){
+    var t=ev.target,v=(t&&t.getAttribute)?t.getAttribute('data-ex'):'';
+    if(!v)return;fpExpScope=v;fpExpSync();
   };
-  var tb2=document.getElementById('fpTestBtn');
-  if(tb2)tb2.onclick=function(){
-    fpPrimeAudio();fpKeepAliveStart();fpWakeLockGet();
-    var ok=fpNotify('测试提醒','点「稍后 5 分钟」可验证延时提醒，点通知本体可回到应用。');
-    fpRingPlay();
-    fpDiagRender();
-    if(!ok){try{if(typeof toast==='function')toast('通知未授权：先点上面的「开启系统通知」');}catch(e){}}
-  };
-
-  /* 恢复上次运行状态：仍在计时则续走；页面关闭期间已走完的那轮补记一条并请用户补写 */
-  if(fp.running){
-    var left=fp.endAt-Date.now();
-    if(left>0){fp.remain=left;clearInterval(fp._t);fp._t=setInterval(fpTick,250);fpRender();
-      fpKeepAliveStart();fpWakeLockGet(); // v68：刷新恢复的计时也要补上保活，否则后台被冻结后只能在回前台时补算
-      return;}
-    var wasPhase=fp.phase, st=fp.startedAt||(Date.now()-(fp.total||0)), tt=fp.total||0;
-    fp.running=false;
-    fp.phase='focus';fp.total=fpBaseMs();fp.remain=fp.total;fp.endAt=0;fp.startedAt=0;
-    if(wasPhase==='focus')fpAddRecord(st,tt);
-    saveFpState();fpRender();
-    fpRingPlay(); // 补算也要响：旧代码这里不响铃，是"有时候没声音"的三大来源之一
-    fpNotify('专注时间到','离开的这段时间里本轮专注已结束。');
-    if(wasPhase==='focus')fpAlert('时间到','离开的这段时间里本轮专注已结束。写一句做了什么吧。',function(){fpOpenNote();});
-    else fpAlert('休息结束','5 分钟休息已结束，开始下一轮专注吧。');
-    return;
-  }
+  el=document.getElementById('fpExpGo');if(el)el.onclick=fpExpGo;
+  el=document.getElementById('fpExpCancel');if(el)el.onclick=fpExpClose;
+  el=document.getElementById('fpExportModal');
+  if(el)el.addEventListener('click',function(ev){if(ev.target.id==='fpExportModal')fpExpClose();});
+  el=document.getElementById('fpEditPage');
+  if(el)el.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape'){ev.preventDefault();fpEdClose();}
+    else if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ev.preventDefault();fpEdSave();}
+  });
+  document.addEventListener('keydown',function(ev){
+    if(ev.key!=='Escape')return;
+    var x=document.getElementById('fpExportModal');
+    if(x&&x.classList.contains('show'))return;
+    var p=document.getElementById('fpEditPage');
+    if(p&&p.classList.contains('show')){fpEdClose();return;}
+    var f=document.getElementById('fpPage');
+    if(f&&f.classList.contains('show'))fpClosePage();
+  });
   fpRender();
 }
 
