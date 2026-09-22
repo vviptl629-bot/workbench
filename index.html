@@ -429,6 +429,11 @@
   .ovr-bar{display:flex;align-items:center;gap:8px;padding:10px 4px;cursor:pointer;user-select:none;border-radius:10px;transition:.15s;margin-top:6px}
   .ovr-bar:hover{background:var(--card-2)}
   .ovr-bar .ovr-cnt{background:var(--warning-soft);color:var(--warning);font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px}
+/* v73：首页（今日）不再列任务，只留一行入口指向「全日总览」 */
+.hp-bridge{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:10px;box-shadow:var(--shadow);cursor:pointer;transition:.15s}
+.hp-bridge:hover{background:var(--card-2)}
+.hp-bridge .hp-t{flex:1;font-size:13.5px;color:var(--muted);font-weight:600;line-height:1.5}
+.hp-bridge .hp-go{font-size:13.5px;font-weight:700;color:var(--accent);white-space:nowrap}
   .done-collapsed{display:none}
   .empty{text-align:center;color:var(--muted);padding:32px 16px;font-size:13px}
   .empty .big{font-size:28px;margin-bottom:6px}
@@ -831,12 +836,7 @@
   .fp-cat span{padding:8px 15px;border-radius:999px;border:1px solid var(--border);background:var(--card);
     font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;user-select:none;transition:.15s}
   .fp-cat span.on{background:var(--btn-primary);border-color:transparent;color:#fff}
-  .fp-rrow{display:flex;align-items:center;gap:11px}
-  .fp-rk{width:52px;flex:none;font-size:12.5px;color:var(--muted)}
-  .fp-dots{display:flex;gap:6px}
-  .fp-dots i{display:block;width:17px;height:17px;border-radius:50%;background:var(--card-2);
-    border:1px solid var(--border);cursor:pointer;transition:.12s}
-  .fp-dots i.f{background:var(--accent);border-color:transparent}
+
   /* 记录列表：按日折叠 */
   .fp-hist{display:flex;flex-direction:column}
   .fp-day{display:flex;align-items:baseline;gap:6px;font-size:11.5px;color:var(--muted);letter-spacing:.04em;
@@ -860,8 +860,7 @@
     word-break:break-word}
   .fp-rec .feel{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:5px;white-space:pre-wrap;
     word-break:break-word}
-  .fp-rec .rate{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;
-    border-top:1px dashed var(--border);font-variant-numeric:tabular-nums}
+
   .fp-empty{font-size:13px;color:var(--muted);text-align:center;padding:34px 0;line-height:1.9}
   /* 周 / 月 分析 */
   .fp-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -1292,11 +1291,6 @@
         <div class="fp-cat" id="fpEdCat"></div>
       </div>
 
-      <div class="fp-sec" style="margin-top:16px">
-        <div class="fp-label">自评（可不填）</div>
-        <div class="fp-rrow"><span class="fp-rk">专注度</span><span class="fp-dots" id="fpEdRf"></span></div>
-        <div class="fp-rrow" style="margin-top:10px"><span class="fp-rk">能量</span><span class="fp-dots" id="fpEdRe"></span></div>
-      </div>
 
       <div class="fp-actions" id="fpEdActs" style="margin-top:20px">
         <button class="fp-big danger" id="fpEdDel" style="display:none">删除</button>
@@ -2253,6 +2247,18 @@ function updateStoreStatus(){
   const e2=document.getElementById('stExportHtml');if(e2&&!e2.dataset.bound){e2.dataset.bound='1';e2.onclick=exportFile;}
 }
 
+/* v73：首页（今日）只留 问候 + 进度环 + 添加任务 + 一行入口；任务列表撤到「全日总览」/分类页 */
+function renderHome(){
+  const area=document.getElementById('listArea');
+  const n=ovwSplit(todayStr()).pending.length; // 「待完成」与「全日总览」同一套口径（ovwSplit），数字永远一致
+  area.innerHTML='<div class="hp-bridge" id="hpBridge">'+
+    '<span class="hp-t">全日总览 · 待完成 '+n+'</span>'+
+    '<span class="hp-go">›</span>'+
+  '</div>';
+  const b=document.getElementById('hpBridge');
+  if(b)b.onclick=()=>setView('overview');
+}
+
 function renderTasks(isTodayMode,focusDate){
   if(tlMode){renderTimeline(isTodayMode,focusDate);return;}
   const area=document.getElementById('listArea');
@@ -2330,12 +2336,8 @@ function fmtHM(ts){if(!ts)return '';const d=new Date(ts),p=n=>String(n).padStart
 // 取任务完成时间戳（非重复读 completedAt；重复读当日 checksAt）
 function doneAtOf(t){if(t.repeat&&t.repeat!=='none'){const d=todayStr();return (t.checksAt&&t.checksAt[d])||null;}return (t.done&&t.completedAt)?t.completedAt:null;}
 // 全日总览：默认展示当日未完成（待完成 + 逾期单独归类），已完成折叠可展开，并提供按状态分类统计
-function renderOverviewView(){
-  const area=document.getElementById('listArea');
-  document.getElementById('taskAddBox').style.display='none';
-  document.getElementById('dayNav').style.display='none';
-  const today=todayStr();
-  const focus=selDate||today;
+/* v73b：全日总览的当日口径抽成共用函数 —— 首页入口行的「待完成 N」也用它，两处数字永远一致 */
+function ovwSplit(focus){
   const dstr=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
   // 以参照日 focus 判定当日任务归属（focus=今天时即「当日」语义）
   const dueOn=t=>t.due===focus;
@@ -2350,10 +2352,20 @@ function renderOverviewView(){
   const isOvr=t=>!!t.overdueMark||overdueOn(t);
   const relevant=t=>isOvr(t)||doneToday(t)||(openTask(t)&&(dueOn(t)||!t.due||isRepeatActive(t)));
   const all=tasks.filter(relevant);
-  if(!all.length){area.innerHTML='<div class="empty"><div class="big"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
   const done=all.filter(doneToday).sort((a,b)=>(doneAtOf(b)||0)-(doneAtOf(a)||0));
   const overdue=all.filter(isOvr).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
   const pending=all.filter(t=>!doneToday(t)&&!isOvr(t)).sort((a,b)=>toMin(a.start)-toMin(b.start)||(a.text||'').localeCompare(b.text||''));
+  return {all,done,overdue,pending};
+}
+function renderOverviewView(){
+  const area=document.getElementById('listArea');
+  document.getElementById('taskAddBox').style.display='none';
+  document.getElementById('dayNav').style.display='none';
+  const today=todayStr();
+  const focus=selDate||today;
+  const ovw=ovwSplit(focus),all=ovw.all;
+  if(!all.length){area.innerHTML='<div class="empty"><div class="big"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>今天还没有任务</div>'+renderTrashHtml();wireTrash();return;}
+  const {done,overdue,pending}=ovw;
   const totalToday=pending.length+done.length;
   const pct=totalToday?Math.round(done.length/totalToday*100):0;
   let html='';
@@ -2715,7 +2727,8 @@ function render(){
   document.getElementById('ringCard').style.display=(view==='today')?'flex':'none';
   renderImpCard();
   document.getElementById('taskAddBox').style.display=taskView?'flex':'none';
-  document.getElementById('dayNav').style.display=taskView?'flex':'none';
+  // v73：首页不再显示日期条（任务列表已撤到「全日总览」）；分类页照旧可翻日期
+  document.getElementById('dayNav').style.display=(taskView&&view!=='today')?'flex':'none';
   // 「回到今天」按钮仅首页显示，其他视图（分类/统计/总览）不显示
   const bt=document.getElementById('dayToday');
   if(bt)bt.style.display=(view==='today')?'':'none';
@@ -2747,7 +2760,9 @@ function render(){
   if(stDoneEl&&!stDoneEl.dataset.bound){
     stDoneEl.classList.add('clickable');
     stDoneEl.onclick=()=>{
-      if(!showDone){const bar=document.getElementById('doneBar');if(bar)bar.click();}
+      const bar=document.getElementById('doneBar');
+      if(!bar){setView('overview');return;} // v73：首页已无「已完成」条，直接去「全日总览」
+      if(!showDone)bar.click();
       setTimeout(()=>{const dl=document.getElementById('doneList');if(dl)dl.scrollIntoView({behavior:'smooth',block:'start'});},100);
     };
     stDoneEl.dataset.bound='1';
@@ -2757,13 +2772,15 @@ function render(){
     stOverEl.classList.add('clickable');
     stOverEl.onclick=()=>{
       const bar=document.getElementById('ovrBar');
+      if(!bar){setView('overview');return;} // v73：首页已无「已逾期」条，直接去「全日总览」
       if(bar){if(!showOvr)bar.click();
       setTimeout(()=>{const ol=document.getElementById('ovrList');if(ol)ol.scrollIntoView({behavior:'smooth',block:'start'});},100);}
     };
     stOverEl.dataset.bound='1';
   }
   updateDayNav();
-  renderTasks(isTodayMode,focusDate);
+  // v73：首页只渲染入口行，不再列任务（列表去「全日总览」/分类页）
+  if(view==='today')renderHome();else renderTasks(isTodayMode,focusDate);
 }
 
 /* ---------- 目标管理数据层（UI 已移除，保留以便 Gist 同步兼容） ---------- */
@@ -3687,11 +3704,11 @@ if(document.readyState!=='loading')init();else document.addEventListener('DOMCon
    入口：侧栏「专注」→ 独立页面。结构：记录（按日折叠）/ 周 / 月 三档 + 「＋ 记一段」+ 导出 .md。
    背景（用户 2026-09-22 决定）：倒计时与响铃全部砍掉 —— 计时改用其他 app，专注页只负责
    「记录我专注的这段时间具体做了什么」，在 25 分钟后的 5 分钟休息里顺手补记。
-   分析只做【行为统计 + 自评刻度】：前者是纯算术（本地算、离线可用、结果稳定），
-   后者把「心理状态」变成一个可统计的数字（自评选填，不填就跳过这条）。
+   分析只做【行为统计】：纯算术（本地算、离线可用、结果稳定），不含任何主观评分。
+   没写内容的条目（did 与 feel 都空）视为没记完：不显示、不进统计、不导出。
    数据模型（沿用 workbench_focus_v1，向后兼容旧数据）：
      id / start(开始 ms) / end(结束 ms) / durMs(时长 ms) / did(做了什么) / feel(一句感受)
-     / cat(类别，选填) / rf(专注度 0-5，选填) / re(能量 0-5，选填) / created / updated
+     / cat(类别，选填) / created / updated
    兼容：旧字段 text→did；无 end 由 start+durMs 补；无 durMs 由 end-start 算。
    归日：按 start 归日（跨午夜那条算前一天）。随手记（无时间段）只有 at，不进任何数值统计。 */
 var FP_KEY='workbench_focus_v1', FP_PAGEKEY='workbench_page_v1';
@@ -3701,7 +3718,7 @@ var focusList=[];
 var fpOpenDays={};                 // 记录按日折叠的展开态
 var fpView='rec';                  // rec | week | month
 var fpExpScope='week';             // week | month | all
-var _fpEdId=null,_fpEdNoTime=false,_fpEdCat='',_fpEdRf=0,_fpEdRe=0,_fpEdAt=0;
+var _fpEdId=null,_fpEdNoTime=false,_fpEdCat='',_fpEdAt=0;
 try{focusList=JSON.parse(lsGet(FP_KEY)||'[]');if(!Array.isArray(focusList))focusList=[];}catch(e){focusList=[];}
 
 /* ---------- 归一化 / 存取 ---------- */
@@ -3712,8 +3729,6 @@ function fpNorm(r){
   if(r.did==null)r.did=(r.text==null?'':''+r.text);
   if(r.feel==null)r.feel='';
   if(r.cat==null)r.cat='';
-  r.rf=Math.max(0,Math.min(5,Math.round(+r.rf||0)));
-  r.re=Math.max(0,Math.min(5,Math.round(+r.re||0)));
   if(s>0){
     if(!d&&e>s)d=e-s;
     if(!e&&d>0)e=s+d;
@@ -3731,6 +3746,9 @@ function saveFocus(){lsSet(FP_KEY,JSON.stringify(focusList));schedulePush();}
 /* ---------- 基础取值 / 格式化 ---------- */
 function fpDid(r){return (''+((r&&(r.did!=null?r.did:r.text))||'')).trim();}
 function fpFeel(r){return (''+((r&&r.feel)||'')).trim();}
+/* 「没记完」= did 与 feel 都空：这类条目不显示、不进统计、不导出（老缓存里可能有） */
+function fpFilled(r){return !!(fpDid(r)||fpFeel(r));}
+function fpList(){return focusList.filter(fpFilled);}
 function fpStart(r){return +(r&&r.start)||0;}
 function fpEnd(r){return +(r&&r.end)||0;}
 function fpAt(r){return +(r&&(r.at||r.start))||0;}
@@ -3775,7 +3793,6 @@ function fpSpanShort(ms){
   var h=Math.floor(m/60),mm=m%60;
   return h+' 时'+(mm?' '+mm+' 分':'');
 }
-function fpDotTxt(n){var a='',b='';for(var i=1;i<=5;i++){if(i<=n)a+='●';else b+='○';}return a+b;}
 
 /* ---------- 区间 / 聚合（全部本地算） ---------- */
 function fpDayStart(ts){var d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();}
@@ -3804,27 +3821,13 @@ function fpCatAgg(recs){
   recs.forEach(function(x){if(fpHasTime(x)){var c=(x.cat||'未分类');m[c]=(m[c]||0)+1;}});
   return Object.keys(m).map(function(k){return {k:k,n:m[k]};}).sort(function(a,b){return b.n-a.n;});
 }
-function fpAvgV(recs,key){
-  var a=recs.filter(function(x){return (+x[key]||0)>0;});
-  if(!a.length)return 0;
-  return a.reduce(function(s,x){return s+(+x[key]||0);},0)/a.length;
-}
-function fpLowDay(recs){
-  var m={};
-  recs.forEach(function(x){var v=+x.rf||0;if(v>0){var k=fpDayKey(fpAt(x));if(!m[k])m[k]={s:0,n:0};m[k].s+=v;m[k].n++;}});
-  var ks=Object.keys(m);
-  if(!ks.length)return '';
-  ks.sort(function(a,b){return (m[a].s/m[a].n)-(m[b].s/m[b].n);});
-  var k=ks[0];
-  return fpDayShort(k)+' · 专注度 '+(m[k].s/m[k].n).toFixed(1);
-}
 function fpElapsed(r){   // 区间内「到今天为止」的天数（分母用，避免把未来几天算成没记录）
   var todayEnd=fpDayStart(Date.now())+86400000;
   return Math.max(1,Math.round((Math.min(r.to,todayEnd)-r.from)/86400000));
 }
 function fpCoverDays(r){
   var set={};
-  fpIn(focusList,r).forEach(function(x){set[fpDayKey(fpAt(x))]=1;});
+  fpIn(fpList(),r).forEach(function(x){set[fpDayKey(fpAt(x))]=1;});
   return Object.keys(set).length+'/'+fpElapsed(r);
 }
 
@@ -3842,7 +3845,7 @@ function fpRender(){
   var sum=document.getElementById('fpSumRow');
   if(sum){
     if(fpView==='rec'){
-      var ta=fpAgg(fpIn(focusList,fpTodayRange())),wa=fpAgg(fpIn(focusList,fpWeekRange(0)));
+      var ta=fpAgg(fpIn(fpList(),fpTodayRange())),wa=fpAgg(fpIn(fpList(),fpWeekRange(0)));
       sum.innerHTML='<span>今日 <b>'+ta.n+'</b> 段 · <b>'+fpSpanTxt(ta.ms)+'</b></span>'+
         '<span>本周 <b>'+wa.n+'</b> 段 · <b>'+fpSpanTxt(wa.ms)+'</b></span>';
     }else{
@@ -3855,29 +3858,25 @@ function fpRender(){
   else if(fpView==='week')fpWeekRender();
   else fpMonthRender();
   var cb=document.getElementById('c-focus');
-  if(cb)cb.textContent=String(fpAgg(fpIn(focusList,fpTodayRange())).n);
+  if(cb)cb.textContent=String(fpAgg(fpIn(fpList(),fpTodayRange())).n);
 }
 /* 记录列表：按日倒序分组、按日折叠（最近一天默认展开）；点条目进编辑页 */
 function fpRecHtml(r){
   var hasT=fpHasTime(r),did=fpDid(r),feel=fpFeel(r);
   var time=hasT?(fpClock(r.start)+'–'+fpClock(r.end||(r.start+r.durMs))+' · '+fpDurTxt(r.durMs))
               :('随手记 · '+fpClock(fpAt(r)));
-  var rate='';
-  if((+r.rf||0)>0||(+r.re||0)>0){
-    rate='<div class="rate">'+((+r.rf||0)>0?('<span>专注度 '+fpDotTxt(+r.rf)+'</span>'):'')+
-      ((+r.re||0)>0?('<span>能量 '+fpDotTxt(+r.re)+'</span>'):'')+'</div>';
-  }
   return '<div class="fp-rec" data-fid="'+r.id+'" role="button" tabindex="0">'+
     '<div class="rd"><span class="rg">'+time+'</span>'+(r.cat?('<span class="tag">'+escapeHtml(r.cat)+'</span>'):'')+'</div>'+
     (did?('<div class="did">'+escapeHtml(did)+'</div>'):'')+
     (feel?('<div class="feel">'+escapeHtml(feel)+'</div>'):'')+
-    rate+'</div>';
+    '</div>';
 }
 function fpListRender(){
   var box=document.getElementById('fpList');if(!box)return;
-  var list=focusList.slice().sort(function(a,b){return fpAt(b)-fpAt(a);});
+  var list=fpList().slice().sort(function(a,b){return fpAt(b)-fpAt(a);});
   if(!list.length){
-    box.innerHTML='<div class="fp-empty">还没有记录。<br>点上面的「＋ 记一段」，<br>把这些分钟里做的事写下来。</div>';
+    var hid=focusList.length;
+    box.innerHTML='<div class="fp-empty">'+(hid?('有 '+hid+' 条没写内容的记录，已隐藏。<br>点上面的「＋ 记一段」补上内容。'):('还没有记录。<br>点上面的「＋ 记一段」，<br>把这些分钟里做的事写下来。'))+'</div>';
     return;
   }
   var byK={},keys=[];
@@ -3910,10 +3909,10 @@ function fpListRender(){
     el.onclick=function(){fpEdOpen(el.getAttribute('data-fid'));};
   });
 }
-/* 周：总时长 / 段数 / 日均 / 平均每段 + 每天柱状 + 时段分布 + 类别占比 + 自评趋势 */
+/* 周：总时长 / 段数 / 日均 / 平均每段 + 每天柱状 + 时段分布 + 类别占比 */
 function fpWeekRender(){
   var box=document.getElementById('fpViewWeek');if(!box)return;
-  var r=fpWeekRange(0),recs=fpIn(focusList,r),agg=fpAgg(recs);
+  var r=fpWeekRange(0),recs=fpIn(fpList(),r),agg=fpAgg(recs);
   var days=[],maxMs=1,i;
   for(i=0;i<7;i++){
     var d0=r.from+i*86400000,d1=d0+86400000,ms=0;
@@ -3940,7 +3939,6 @@ function fpWeekRender(){
       '<span class="fl" style="width:'+Math.round(c.n/cats[0].n*100)+'%"></span></span>'+
       '<span class="vv">'+c.n+' 段</span></div>';
   }).join(''):'<div class="fp-empty" style="padding:14px 0">本周还没有带类别的记录</div>';
-  var rf=fpAvgV(recs,'rf'),re=fpAvgV(recs,'re'),low=fpLowDay(recs);
   box.innerHTML=
     '<div class="fp-sec"><div class="fp-grid2">'+
       fpCard('总时长',fpSpanTxt(agg.ms))+
@@ -3951,11 +3949,6 @@ function fpWeekRender(){
     '<div class="fp-sec"><div class="fp-label">每天</div><div class="fp-bars">'+bars+'</div></div>'+
     '<div class="fp-sec"><div class="fp-label">时段分布</div>'+slotRows+'</div>'+
     '<div class="fp-sec"><div class="fp-label">类别占比</div>'+catRows+'</div>'+
-    '<div class="fp-sec"><div class="fp-label">自评趋势</div>'+
-      '<div class="fp-kv"><span>专注度均值</span><b>'+(rf?rf.toFixed(1):'—')+'</b></div>'+
-      '<div class="fp-kv"><span>能量均值</span><b>'+(re?re.toFixed(1):'—')+'</b></div>'+
-      '<div class="fp-kv"><span>最低那天</span><b>'+(low||'—')+'</b></div>'+
-    '</div>'+
     '<div class="fp-actions"><button class="fp-big sm" id="fpDlWeek">下载本周 .md</button></div>';
   var b=document.getElementById('fpDlWeek');
   if(b)b.onclick=function(){fpOpenExport('week');};
@@ -3963,8 +3956,8 @@ function fpWeekRender(){
 /* 月：按周汇总 + 环比上月 + 两极 */
 function fpMonthRender(){
   var box=document.getElementById('fpViewMonth');if(!box)return;
-  var r=fpMonthRange(0),recs=fpIn(focusList,r),agg=fpAgg(recs);
-  var pag=fpAgg(fpIn(focusList,fpMonthRange(-1)));
+  var r=fpMonthRange(0),recs=fpIn(fpList(),r),agg=fpAgg(recs);
+  var pag=fpAgg(fpIn(fpList(),fpMonthRange(-1)));
   var mom='—',momCls='';
   if(pag.ms>0){var pct=Math.round((agg.ms-pag.ms)/pag.ms*100);mom=(pct>=0?'↑ ':'↓ ')+Math.abs(pct)+'%';momCls=pct>=0?'up':'dn';}
   else if(agg.ms>0){mom='↑ 新增';momCls='up';}
@@ -4017,23 +4010,10 @@ function fpTimeToTs(hm,base){
   return d.getTime();
 }
 function fpVal(id){var e=document.getElementById(id);return e?(''+e.value):'';}
-function fpDots(el,val){
-  if(!el)return;
-  var h='';
-  for(var i=1;i<=5;i++)h+='<i'+(i<=val?' class="f"':'')+' data-i="'+i+'"></i>';
-  el.innerHTML=h;
-}
 function fpCats(el,cur,pick){
   if(!el)return;
   el.innerHTML=FP_CATS.map(function(c){return '<span'+(c===cur?' class="on"':'')+' data-c="'+c+'">'+c+'</span>';}).join('');
   el.onclick=function(ev){var t=ev.target;var c=(t&&t.getAttribute)?t.getAttribute('data-c'):'';if(c)pick(c);};
-}
-function fpDotClick(ev,key){
-  var t=ev.target;
-  var i=(t&&t.getAttribute)?+t.getAttribute('data-i'):0;
-  if(!i)return;
-  if(key==='rf'){_fpEdRf=(_fpEdRf===i?0:i);fpDots(document.getElementById('fpEdRf'),_fpEdRf);}
-  else{_fpEdRe=(_fpEdRe===i?0:i);fpDots(document.getElementById('fpEdRe'),_fpEdRe);}
 }
 function fpEdCatPick(c){
   _fpEdCat=(_fpEdCat===c?'':c);
@@ -4098,11 +4078,7 @@ function fpEdOpen(id){
   var dd=document.getElementById('fpEdDid');if(dd)dd.value=rec?fpDid(rec):'';
   var ff=document.getElementById('fpEdFeel');if(ff)ff.value=rec?fpFeel(rec):'';
   _fpEdCat=rec?(rec.cat||''):'';
-  _fpEdRf=rec?(+rec.rf||0):0;
-  _fpEdRe=rec?(+rec.re||0):0;
   fpCats(document.getElementById('fpEdCat'),_fpEdCat,fpEdCatPick);
-  fpDots(document.getElementById('fpEdRf'),_fpEdRf);
-  fpDots(document.getElementById('fpEdRe'),_fpEdRe);
   var del=document.getElementById('fpEdDel');
   if(del)del.style.display=rec?'':'none';
   fpEdTitleSync();
@@ -4139,7 +4115,7 @@ function fpEdSave(){
   else{rec.start=s;rec.end=e;rec.durMs=d;rec.at=0;}
   rec.did=did;rec.text=did;              // text 同步：老版本（可能还缓存着）也能显示内容
   rec.feel=feel;rec.cat=_fpEdCat||'';
-  rec.rf=_fpEdRf||0;rec.re=_fpEdRe||0;rec.updated=Date.now();
+  rec.updated=Date.now();
   if(focusList.length>FP_MAX)focusList=focusList.slice(-FP_MAX);
   saveFocus();fpRender();fpEdClose();
   showToast(isEdit?'已更新':'已记录');
@@ -4175,7 +4151,7 @@ function fpFileName(scope){
 function fpMd(scope){
   var r,label,todayEnd=fpDayStart(Date.now())+86400000;
   if(scope==='all'){
-    var sorted=focusList.slice().sort(function(a,b){return fpAt(a)-fpAt(b);});
+    var sorted=fpList().slice().sort(function(a,b){return fpAt(a)-fpAt(b);});
     r={from:sorted.length?fpAt(sorted[0]):fpDayStart(Date.now()),to:todayEnd};
     label=sorted.length?(fpD(r.from)+' ~ '+fpD(Math.min(r.to-86400000,Date.now()))):'全部记录';
   }else if(scope==='month'){
@@ -4183,7 +4159,7 @@ function fpMd(scope){
   }else{
     r=fpWeekRange(0);label=fpD(r.from)+' ~ '+fpD(Math.min(r.to-86400000,Date.now()));
   }
-  var recs=fpIn(focusList,r).sort(function(a,b){return fpAt(a)-fpAt(b);});
+  var recs=fpIn(fpList(),r).sort(function(a,b){return fpAt(a)-fpAt(b);});
   var agg=fpAgg(recs),L=[];
   var daySet={};recs.forEach(function(x){daySet[fpDayKey(fpAt(x))]=1;});
   var cvd=Object.keys(daySet).length;
@@ -4198,8 +4174,6 @@ function fpMd(scope){
     L.push('- 时段：上午 '+sl['上午']+' 段 · 下午 '+sl['下午']+' 段 · 晚上 '+sl['晚上']+' 段');
     var cs=fpCatAgg(recs);
     if(cs.length)L.push('- 类别：'+cs.map(function(c){return c.k+' '+c.n;}).join(' · '));
-    var rf=fpAvgV(recs,'rf'),re=fpAvgV(recs,'re');
-    if(rf||re)L.push('- 自评：'+(rf?('专注度均值 '+rf.toFixed(1)):'')+((rf&&re)?' · ':'')+(re?('能量均值 '+re.toFixed(1)):''));
   }
   if(agg.notes)L.push('- 另有 '+agg.notes+' 条随手记（无时间段，不计入时长）');
   L.push('');
@@ -4216,10 +4190,6 @@ function fpMd(scope){
       if(fpHasTime(x)){
         head='- '+fpClock(x.start)+'–'+fpClock(x.end||(x.start+x.durMs))+' · '+fpDurTxt(x.durMs);
         if(x.cat)head+=' · '+x.cat;
-        var rt=[];
-        if(+x.rf)rt.push('专注'+x.rf);
-        if(+x.re)rt.push('能量'+x.re);
-        if(rt.length)head+=' · '+rt.join(' ');
       }else{
         head='- '+fpClock(fpAt(x))+' · 随手记';
       }
@@ -4282,10 +4252,6 @@ function initFocusPage(){
   el=document.getElementById('fpQ25');if(el)el.onclick=function(){fpEdSetQ(25);};
   el=document.getElementById('fpQ60');if(el)el.onclick=function(){fpEdSetQ(60);};
   el=document.getElementById('fpQ5');if(el)el.onclick=fpEdQ5;
-  el=document.getElementById('fpEdRf');if(el)el.onclick=function(ev){fpDotClick(ev,'rf');};
-  el=document.getElementById('fpEdRe');if(el)el.onclick=function(ev){fpDotClick(ev,'re');};
-  fpDots(document.getElementById('fpEdRf'),0);
-  fpDots(document.getElementById('fpEdRe'),0);
   fpCats(document.getElementById('fpEdCat'),'',fpEdCatPick);
   el=document.getElementById('fpExpSeg');
   if(el)el.onclick=function(ev){
