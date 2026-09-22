@@ -3695,6 +3695,73 @@ var _fpKAElem=null,_fpNoiseUrl=null,_fpWatchT=null; // v69：媒体元素保活�
 var _fpKAErr='',_fpLastTickAt=0,_fpTickLag=0,_fpAmbStopT=null; // v70：保活失败原因 / 相邻 tick 真实间隔（判断后台是否被节流）/ 延后收保活 timer
 var FP_PREVIEW_MS=3000; // 「试听」播放时长
 var FP_RING_GAIN=1;     // 实测 mp3 峰值 0.86 / RMS 0.147，属正常母带响度，不再加增益
+/* ---------- v71：并发响铃（照搬 rockfocus v18-v20 已验证架构）----------
+   根因修复：「开始后随机响 / 关了还响 / 试听异常」三件套来自旧版的三套 hack —— 保活粉噪 loop、
+   唤醒锁、以及「下一拍 tap 补响」。它们互相踩，且粉噪 loop 关不掉就一直响。
+   v71 全删：到点只靠下面这套【<audio> 元素 + Web Audio 解码 mp3 两路并发】，两路都失败才合成音。
+   后台/锁屏时元素 play() 是【异步 reject】，故不能只看 play() 返回值；前台 600ms 回看 currentTime 补一路。
+   play() 返回值不可信 —— 这一条与 rockfocus v18 同一教训。 */
+var RING_SEC=10;        // happy-stroll.mp3 实际长度（秒），loopEnd 用它避免超出缓冲
+function getRingEl(){
+  try{
+    if(!_fpElem){
+      _fpElem=document.createElement('audio');
+      _fpElem.src=FP_RING_SRC;_fpElem.preload='auto';_fpElem.loop=true;_fpElem.volume=1;
+      _fpElem.setAttribute('playsinline','');_fpElem.setAttribute('webkit-playsinline','');
+      fpAttachMedia(_fpElem);   // 必须挂进 DOM：部分安卓内核 / iOS 只给文档内媒体元素后台播放名额
+    }
+  }catch(e){}
+  return _fpElem;
+}
+function preloadRingBuf(){ fpLoadRing(); }                 // 解码 mp3 → _fpBuf（FP_RING_SRC 随 SW 离线缓存）
+function stopRingBuf(){ try{if(_fpRingSrc){_fpRingSrc.stop(0);}}catch(e){} _fpRingSrc=null; }
+function playRingBuf(ms){                                   // 第二通道：Web Audio 播解码好的 mp3 缓冲
+  if(!_fpBuf)return false;
+  var ctx=fpAudio();if(!ctx)return false;
+  try{
+    if(ctx.state==='suspended'){try{ctx.resume();}catch(e){}}
+    stopRingBuf();
+    var g=ctx.createGain();g.gain.value=1;g.connect(ctx.destination);
+    var s=ctx.createBufferSource();s.buffer=_fpBuf;s.loop=true;
+    try{if(_fpBuf.duration)s.loopEnd=Math.min(_fpBuf.duration,RING_SEC);}catch(e){}
+    s.connect(g);s.start(0);
+    try{s.stop(ctx.currentTime+ms/1000);}catch(e){}
+    _fpRingSrc=s;
+    setTimeout(function(){if(_fpRingSrc===s)stopRingBuf();},ms+400);  // 墙钟兜底：音频时钟被冻也别无限 loop
+    return true;
+  }catch(e){return false;}
+}
+function stopRing(){                                        // 统一停：元素 + 缓冲 + 振动
+  try{if(_fpElem){clearTimeout(_fpElem._t);_fpElem.pause();_fpElem.currentTime=0;}}catch(e){}
+  stopRingBuf();
+  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
+}
+function playAlert(ms){                                     // 并发发射：元素 + Web Audio 缓冲；仅两路都失败才合成音
+  if(!fpSound)return;
+  ms=ms||FP_RING_MS;
+  stopRing();
+  fpAudioSession();
+  fpVibrate();
+  var el=getRingEl(), ok=false, webOn=false;
+  var webOrSynth=function(){ if(webOn)return; webOn=playRingBuf(ms); if(!webOn)fpSynth(fpAudio(),ms,0.3,false); };
+  if(el){
+    try{
+      el.currentTime=0; el.volume=1;
+      var pr=el.play();
+      if(pr&&pr.catch)pr.catch(function(){clearTimeout(el._t);webOrSynth();});   // 异步被拒（后台/锁屏）→ Web Audio 播 mp3
+      clearTimeout(el._t);
+      el._t=setTimeout(function(){try{el.pause();el.currentTime=0;}catch(e){}},ms);
+      ok=true;
+    }catch(e){}
+  }
+  if(!ok){webOrSynth();return;}                             // 同步异常（元素都建不出）→ 降级链
+  try{                                                      // 前台复查：素材排上了却没真出声 → 补一路
+    clearTimeout(el._chk);
+    el._chk=setTimeout(function(){
+      try{var alive=el&&!el.paused&&el.currentTime>0.05; if(!alive)webOrSynth();}catch(e){}
+    },600);
+  }catch(e){}
+}
 function fpAudio(){
   try{if(!_fpAC)_fpAC=new (window.AudioContext||window.webkitAudioContext)();return _fpAC;}catch(e){return null;}
 }
@@ -3716,15 +3783,8 @@ function fpAttachMedia(el){
   return el;
 }
 function fpInitRing(){
-  fpPrimeAudio();fpLoadRing();
-  try{
-    if(!_fpElem){_fpElem=new Audio(FP_RING_SRC);_fpElem.loop=true;_fpElem.preload='auto';}
-    fpAttachMedia(_fpElem); // v70：手势里就挂进 DOM，后面无手势 play 才有底
-    _fpElem.volume=1;
-    var pr=_fpElem.play();
-    if(pr&&pr.then)pr.then(function(){try{_fpElem.pause();}catch(e){}},function(){});
-    else {try{_fpElem.pause();}catch(e){}}
-  }catch(e){}
+  getRingEl();   // v71：只创建并挂 DOM + 预解码，绝不 play —— 开始必须静音
+  fpLoadRing();
 }
 /* 在用户手势里唤醒上下文 + 播一帧静音 buffer（经典 unlock），同时尝试拉起被系统挂起的 AC。返回上下文或 null。 */
 function fpPrimeAudio(){
@@ -3813,81 +3873,12 @@ function fpVibrate(){
     navigator.vibrate(p);
   }catch(e){}
 }
-function fpRingStop(){
-  try{if(_fpRingSrc){_fpRingSrc.stop();_fpRingSrc.disconnect();}}catch(e){}
-  _fpRingSrc=null;
-  try{if(_fpElem)_fpElem.pause();}catch(e){}
-  try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}
-}
+function fpRingStop(){ stopRing(); }   // v71：统一停（元素 + 缓冲 + 振动）
 /* 万一声音被策略拦下：留一个"下一拍补响"，用户第一次点屏幕就把这声铃补上（60 秒内有效） */
-function fpArmUnlock(){
-  _fpRingWant=true;
-  if(_fpUnlockArmed)return;_fpUnlockArmed=true;
-  var go=function(){
-    document.removeEventListener('pointerdown',go,true);_fpUnlockArmed=false;
-    if(!_fpRingWant||Date.now()-_fpWantAt>60000){_fpRingWant=false;return;}
-    fpRingPlay();
-  };
-  document.addEventListener('pointerdown',go,true);
-}
-function fpRingPlay(){
-  if(!fpSound)return;
-  fpAudioSession();     // 到点这一刻再声明一次"这是媒体播放"（iOS 静音开关唯一可能的绕法）
-  fpRingStop();         // 先清上一次的（缓冲源/audio 元素/振动），避免两条音源叠着播
-  fpVibrate();          // 静音下最可靠的一条通道：先起振，它不依赖任何手势
-  fpLoadRing();         // 顺手预热，下次到点无需等解码（若已解码则直接命中）
-  _fpWantAt=Date.now();_fpRingWant=true;   // 标记"本声铃需要被听到"，供 tap 补响兜底
-  var ac=fpAudio(), played=false;
-  /* v64 关键修复：不再依赖 ac.resume() 的 promise —— 无用户手势时它永远 pending，会让"等 450ms 才换 audio"
-     且 audio 又是代码新建（非手势创建）→ iOS 静音策略直接拒 → 完全没声（25/45/60 分钟必现）。
-     改法：① ac 此刻已是 running（开始已解锁，大概率）→ 直接播 mp3 buffer；
-           ② 否则优先用"开始时已由用户手势创建并预加载"的 audio 元素（对无手势最宽容）；
-           ③ 都没有才合成音。三条路径统一在末尾收口。 */
-  /* v69：到点这一声必须优先走「媒体元素」通道 —— 后台/锁屏时 Web Audio 的 AudioContext 会被挂起，
-     Android 上更麻烦：它仍报 running，但输出已被系统掐掉，结果就是"代码到了点、声音全无"。
-     <audio> 属于真正的媒体会话，后台允许继续发声；只有它失败时才退回 Web Audio（合成音兜底）。 */
-  played=fpElemRing(FP_RING_MS);
-  var playedWeb=false;
-  var _hidden=false;try{_hidden=!!document.hidden;}catch(e){}
-  var fpWebShot=function(){
-    var ac2=fpAudio();if(!ac2||!fpSound)return false;
-    if(ac2.state==='running'&&fpPlayBuf(ac2,FP_RING_MS))return true;
-    try{fpSynth(ac2,FP_RING_MS,0.3,false);return true;}catch(e){return false;}
-  };
-  /* v70 关键修复（后台不响的首因）：
-     v69 把响铃改成「元素优先、Web Audio 兜底」，可 fpElemRing() 只要 play() 没抛同步异常就 return true。
-     后台里 play() 恰恰是【异步 reject】（NotAllowedError —— 自动播放策略不给，或元素后台不许发声），
-     返回值仍是 true → 这条兜底永远不被执行：元素被拒、合成音又不发，彻底哑。
-     同一部手机上 rockfocus（纯 Web Audio 合成音）反而能响 —— 活证据说明这设备的 Web Audio 后台是通的，
-     是工作台自己的判定把它堵死了。
-     后台/锁屏：两条通道同时发排，谁落地谁响，来不及也不需要事先探测；
-     前台：元素优先，1.2 秒后回看 currentTime 有没有真的往前走，没走就补一声。 */
-  if(_hidden){
-    playedWeb=fpWebShot();
-  }else{
-    setTimeout(function(){
-      try{
-        var a=_fpElem,alive=false;
-        try{alive=a&&!a.paused&&a.currentTime>0.05;}catch(e){}
-        if(!alive)fpWebShot();
-      }catch(e){}
-    },1200);
-  }
-  played=played||playedWeb;
-  _fpRingWant=!played;  // 真出声了就不再补响；万一全失败，仍允许 tap 补一声
-  if(ac)try{ac.resume();}catch(e){} // fire-and-forget：拉回 running，供下一声或 tap 补响
-  fpArmUnlock();        // 挂"下一拍补响"兜底（窗口 60s）
-}
+function fpArmUnlock(){}   // v71：去掉「下一拍 tap 补响」—— 它是「点一下随机响」的元凶
+function fpRingPlay(){ playAlert(FP_RING_MS); }   // v71：并发响铃（元素 + Web Audio 缓冲，两路都失败才合成音）
 /* 「试听」：在用户手势里播 3 秒，同时完成解锁与预解码 */
-function fpPreview(){
-  if(!fpSound)return;
-  if(_fpRingSrc)fpRingStop();
-  var ac=fpPrimeAudio();
-  fpLoadRing(function(){
-    if(!ac)fpElemRing(FP_PREVIEW_MS);
-    else if(!fpPlayBuf(ac,FP_PREVIEW_MS))fpSynth(ac,FP_PREVIEW_MS,0.25,false);
-  });
-}
+function fpPreview(){ if(!fpSound)return; fpPrimeAudio(); fpLoadRing(function(){ playAlert(FP_PREVIEW_MS); }); }   // v71：试听走同一套并发响铃
 var _fpAlertCb=null;
 function fpAlert(title,sub,cb){
   var t=document.getElementById('fpAlertTitle');if(t)t.textContent=title;
@@ -4041,45 +4032,12 @@ function fpWatchdog(){
     }catch(e){}
   },8000);
 }
-function fpWakeLockGet(){
-  try{
-    if(!navigator.wakeLock||!navigator.wakeLock.request)return;
-    navigator.wakeLock.request('screen').then(function(l){
-      _fpWakeLock=l;
-      try{l.addEventListener('release',function(){_fpWakeLock=null;});}catch(e){}
-    }).catch(function(){});
-  }catch(e){}
-}
-function fpWakeLockRelease(){
-  try{if(_fpWakeLock&&_fpWakeLock.release)_fpWakeLock.release();}catch(e){}
-  _fpWakeLock=null;
-}
+function fpWakeLockGet(){}     // v71：唤醒锁对锁屏无效（用户按电源键即失效），移除避免副作用
+function fpWakeLockRelease(){}
 /* 后台保活（v69 重写）：媒体元素为主 + Web Audio 为辅。
    ① <audio loop> 播低电平噪声 —— 移动端后台唯一认的"正在播放媒体"通道，冰冻结/掐音频这两件事都靠它挡；
    ② Web Audio loop —— 桌面环境或某些内核里它是唯一能跑的，留作第二层，两层互不冲突。 */
-function fpKeepAliveStart(){
-  try{
-    if(!_fpKAElem){
-      var u=fpNoiseUrl();
-      if(u){
-        var a=new Audio();
-        a.src=u;a.loop=true;a.preload='auto';a.volume=1;
-        a.setAttribute('playsinline','');a.setAttribute('webkit-playsinline','');
-        fpAttachMedia(a); // 挂到 DOM：部分内核只认文档里的媒体元素
-        _fpKAElem=a;
-      }
-    }
-    if(_fpKAElem){
-      var pr=_fpKAElem.play();
-      // v70：把失败原因记下来。以前一句 .catch(function(){}) 全吞掉，用户看到「后台不响」却查不出其实是保活没起来。
-      if(pr&&pr.catch)pr.catch(function(err){_fpKAErr=(err&&err.name)||'play rejected';});
-      if(pr&&pr.then)pr.then(function(){_fpKAErr='';});
-    }
-  }catch(e){}
-  fpKAWebStart();
-  fpMediaSession(true);
-  fpWatchdog();
-}
+function fpKeepAliveStart(){}   // v71：保活粉噪 loop 是「关了还响」的元凶，彻底移除；锁屏靠系统通知 + 绝对 endTime 补算（同 rockfocus）
 /* 原 v68 的 Web Audio 保活，降级为辅助层 */
 function fpKAWebStart(){
   if(_fpKASrc)return;
@@ -4107,24 +4065,17 @@ function fpKeepAliveStop(){
 }
 /* 统一开关：开始/恢复计时时把三条同时拉起；结束/暂停时一起收掉 */
 function fpAmbientStart(){
-  try{clearTimeout(_fpAmbStopT);}catch(e){}_fpAmbStopT=null; // v70：新一轮计时开始前先清掉上一轮的延后收保活
   fpAudioSession();
-  fpKeepAliveStart();
-  fpWakeLockGet();
-  try{if(_fpAC&&_fpAC.state==='suspended')_fpAC.resume();}catch(e){}
   fpNotifyAsk(function(p){
     if(p==='granted'&&fp.running&&fp.endAt)fpNotifySchedule(fp.endAt,'专注时间到','本轮专注已结束，点击查看。');
   });
-  // v69：立即刷新自检面板。它平时 4 秒一刷，刚按下「开始」那几秒显示的还是旧快照，
-  // 用户照着面板排查"为什么后台不响"时会看到假的"未运行"。这里 +600ms 再补一次，等媒体元素真正进入 playing。
-  try{fpDiagRender();setTimeout(fpDiagRender,600);}catch(e){}
 }
 /* 到点先看这一声铃播完，再撤保活与媒体会话 —— 提前撤会把后台音频通道一起撤掉，铃声就成了哑的 */
 function fpAmbientStopLater(){
   try{clearTimeout(_fpAmbStopT);}catch(e){}
-  _fpAmbStopT=setTimeout(function(){_fpAmbStopT=null;if(fp.running)return;fpAmbientStop();},FP_RING_MS+2500);
+  _fpAmbStopT=setTimeout(function(){_fpAmbStopT=null;if(fp.running)return;stopRing();},FP_RING_MS+2500);
 }
-function fpAmbientStop(){try{clearTimeout(_fpAmbStopT);}catch(e){}_fpAmbStopT=null;fpKeepAliveStop();fpWakeLockRelease();try{fpDiagRender();}catch(e){}}
+function fpAmbientStop(){try{clearTimeout(_fpAmbStopT);}catch(e){}_fpAmbStopT=null;stopRing();}
 /* 通知上点「稍后 5 分钟」→ SW 打开 ./?fp=snooze → 这里起一个延后再提醒（同样带保活） */
 function fpSnoozeStart(min){
   min=min||Math.round(FP_SNOOZE_MS/60000);
