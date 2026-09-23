@@ -1311,6 +1311,7 @@
     </div>
     <div class="fp-actions" style="margin-top:14px">
       <button class="fp-big" id="fpExpCancel">取消</button>
+      <button class="fp-big" id="fpExpCopy">复制全文</button>
       <button class="fp-big pri" id="fpExpGo">下载本月 .md</button>
     </div>
   </div>
@@ -3010,7 +3011,16 @@ function closeSidebar(){
 }
 
 /* ---------- export / import ---------- */
-function download(content,name,type){const b=new Blob([content],{type:type||'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+function download(content,name,type){
+  var b=new Blob([content],{type:type||'text/plain'});
+  var u=URL.createObjectURL(b);
+  var a=document.createElement('a');
+  a.href=u;a.download=name;a.style.display='none';
+  document.body.appendChild(a);   // 移动端（尤其 PWA 独立窗口 / 小米浏览器）必须把 <a> 挂到 DOM 才触发下载
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){try{URL.revokeObjectURL(u);}catch(e){}},2000);
+}
 function exportFile(){
   lsSet(STORE_KEY,JSON.stringify(tasks)); // best effort
   document.getElementById('seed').textContent=JSON.stringify(tasks);
@@ -4208,6 +4218,26 @@ function fpExpGo(){
   fpExpClose();
   showToast('已导出 .md');
 }
+/* 复制全文：移动端 / PWA 独立窗口里浏览器可能吞掉 Blob 下载，
+   直接把 md 文本写进剪贴板，让用户去备忘录 / 聊天框粘贴保存，确保任何环境都拿得到内容 */
+function fpExpCopy(){
+  var md='';
+  try{md=fpMd(fpExpScope);}catch(e){md='';}
+  if(!md){showToast('没有可导出的内容');return;}
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(md).then(function(){showToast('已复制全文，去粘贴保存');},function(){fallbackCopy(md);});
+    }else fallbackCopy(md);
+  }catch(e){fallbackCopy(md);}
+}
+function fallbackCopy(md){
+  try{
+    var ta=document.createElement('textarea');ta.value=md;ta.style.position='fixed';ta.style.top='0';ta.style.left='0';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    var ok=document.execCommand&&document.execCommand('copy');document.body.removeChild(ta);
+    showToast(ok?'已复制全文，去粘贴保存':'复制失败，请长按选择文本');
+  }catch(e){showToast('复制失败，请长按选择文本');}
+}
 
 /* ---------- 独立页面开关 ---------- */
 function fpOpenPage(silent){
@@ -4259,6 +4289,7 @@ function initFocusPage(){
     if(!v)return;fpExpScope=v;fpExpSync();
   };
   el=document.getElementById('fpExpGo');if(el)el.onclick=fpExpGo;
+  el=document.getElementById('fpExpCopy');if(el)el.onclick=fpExpCopy;
   el=document.getElementById('fpExpCancel');if(el)el.onclick=fpExpClose;
   el=document.getElementById('fpExportModal');
   if(el)el.addEventListener('click',function(ev){if(ev.target.id==='fpExportModal')fpExpClose();});
