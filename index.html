@@ -979,6 +979,69 @@
     .fp-mcard .v{font-size:17px}
   }
 
+  /* ==================== 日历视图（v77 新增） ====================
+     入口：侧栏「日历」。数据 = 专注记录（带真实起止时间），色块高度≈时长。
+     两种模式：重要（默认，只留 ★ 或 ≥30 分钟的段）/ 全部（完整台账，供周末复盘）。 */
+  .cal-wrap{display:flex;flex-direction:column;gap:14px;width:100%}
+  .cal-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .cal-nav{display:flex;align-items:center;gap:2px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:3px}
+  .cal-nav button{border:0;background:transparent;color:var(--text);font-size:15px;font-weight:700;line-height:1;padding:6px 10px;border-radius:9px;cursor:pointer}
+  .cal-nav button:hover{background:var(--card-2)}
+  .cal-nav #calTodayBtn{font-size:12.5px;font-weight:600;color:var(--accent);padding:6px 8px}
+  .cal-range{font-size:15px;font-weight:700;color:var(--text)}
+  .cal-range em{font-style:normal;font-size:12px;font-weight:600;color:var(--muted);margin-left:6px}
+  .cal-seg{margin-left:auto;display:flex;gap:3px;background:var(--card-2);border-radius:11px;padding:3px}
+  .cal-seg .opt{padding:6px 13px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+  .cal-seg .opt.on{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.10)}
+  .cal-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+  .cal-col{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .cal-ch{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 0 3px;border-radius:9px}
+  .cal-ch .w{font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+  .cal-ch .d{font-size:14px;font-weight:800;color:var(--text);line-height:1;min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:999px}
+  .cal-ch .s{font-size:10px;font-weight:700;color:var(--warning);height:13px;line-height:13px}
+  .cal-ch.today .d{background:var(--accent);color:#fff}
+  .cal-ch.today .w{color:var(--accent)}
+  .cal-col.sel .cal-ch{background:var(--accent-soft)}
+  .cal-body{display:flex;flex-direction:column;gap:4px;min-height:190px;background:var(--card-2);border-radius:11px;padding:5px}
+  .cal-col.today .cal-body{background:var(--accent-soft)}
+  .cal-blk{border-radius:7px;padding:4px 5px;font-size:10.5px;font-weight:600;line-height:1.3;color:#fff;
+    overflow:hidden;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .cal-blk .bt{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cal-blk .bd{display:block;font-size:9.5px;font-weight:500;opacity:.88;margin-top:1px}
+  .cal-more{font-size:9.5px;color:var(--muted);text-align:center;padding:2px 0}
+  .cal-none{font-size:10px;color:var(--text-disabled);text-align:center;padding:10px 0}
+  .cal-sum{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+  .cal-sum b{display:block;font-size:10.5px;font-weight:800;color:var(--accent);text-align:center;line-height:1.5}
+  .cal-sum span{display:block;font-size:9.5px;font-weight:600;color:var(--muted);text-align:center}
+  .cal-week-tot{margin-top:9px;font-size:11.5px;color:var(--muted);text-align:right}
+  .cal-week-tot b{color:var(--text)}
+  .cal-detail{margin-top:14px;padding-top:13px;border-top:1px solid var(--border)}
+  .cal-dh{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .cal-dh .dt{font-size:14px;font-weight:700;color:var(--text)}
+  .cal-dh .dm{font-size:11.5px;color:var(--muted);margin-left:auto}
+  .cal-row{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-radius:11px;background:var(--card-2);margin-bottom:6px}
+  .cal-row .rl{font-size:11.5px;font-weight:700;color:var(--muted);flex:0 0 auto;min-width:76px;font-variant-numeric:tabular-nums}
+  .cal-row .rb{flex:1;min-width:0}
+  .cal-row .rt{display:block;font-size:13.5px;color:var(--text);line-height:1.45;word-break:break-word}
+  .cal-row .rd{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px}
+  .cal-row .rc{flex:0 0 auto;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--card);color:var(--c)}
+  .cal-empty{font-size:13px;color:var(--muted);text-align:center;padding:26px 10px;line-height:1.8}
+  .cal-empty b{color:var(--accent);cursor:pointer}
+  @media (max-width:760px){
+    .cal-card{padding:10px 9px}
+    .cal-grid,.cal-sum{gap:4px}
+    .cal-body{min-height:148px;padding:4px;gap:3px}
+    .cal-blk{padding:4px 2px;border-radius:6px}
+    .cal-blk .bt{display:none}
+    .cal-blk .bd{font-size:9.5px;text-align:center;margin-top:0;opacity:1}
+    .cal-ch .d{font-size:13px;min-width:24px;height:24px}
+    .cal-seg .opt{padding:6px 10px;font-size:12px}
+    .cal-range{font-size:14px}
+    .cal-row{flex-wrap:wrap;gap:6px}
+    .cal-row .rl{min-width:62px;font-size:11px}
+    .cal-row .rc{order:3}
+  }
 </style>
 </head>
 <body>
@@ -999,6 +1062,7 @@
     <div class="nav-item" id="fpEntry"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg> 专注 <span class="count" id="c-focus">0</span></div>
     <div class="nav-item active" data-view="today"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg> 今日待办 <span class="count" id="c-today">0</span></div>
     <div class="nav-item" data-view="overview">全日总览</div>
+    <div class="nav-item" data-view="calendar">日历</div>
     <div class="nav-label">任务分类</div>
     <div class="nav-item" data-view="temp"><span class="dot" style="background:#9A5A12"></span> 临时任务 <span class="count" id="c-temp">0</span></div>
     <div class="nav-item" data-view="work"><span class="dot" style="background:var(--accent)"></span> 工作 <span class="count" id="c-work">0</span></div>
@@ -1093,6 +1157,8 @@
     </div>
 
     <div id="listArea"></div>
+
+    <div id="calArea" style="display:none"></div>
 
     <div id="statsArea" style="display:none">
       <div class="stats-summary" id="statsSummary"></div>
@@ -2623,8 +2689,10 @@ function render(){
   renderImpCard();
   document.getElementById('taskAddBox').style.display=taskView?'flex':'none';
   document.getElementById('statsArea').style.display=(view==='stats')?'block':'none';
-  document.getElementById('listArea').style.display=(view==='stats')?'none':'';
+  document.getElementById('listArea').style.display=(view==='stats'||view==='calendar')?'none':'';
+  document.getElementById('calArea').style.display=(view==='calendar')?'block':'none';
   if(view==='stats'){renderStats();return;}
+  if(view==='calendar'){renderCalendar();return;}
   if(view==='overview'){renderOverviewView();return;}
   const todays=tasks.filter(t=>((isDueToday(t)||isOverdue(t)||!t.due||isRepeatActive(t)) && !isMarkedOverdue(t)));
   const doneTod=tasks.filter(t=>isDoneToday(t)&&(isDueToday(t)||isOverdue(t)||!t.due||isRepeatActive(t)) && !isMarkedOverdue(t)).length;
@@ -4436,6 +4504,168 @@ function initStudyPage(){
   spRender();
 }
 
+/* ==================== 日历视图（v77 新增） ====================
+   入口：侧栏「日历」。数据源 = 专注记录 workbench_focus_v1（带真实起止时间 start/end/durMs + cat）。
+   两种模式：'imp' 重要（默认，只留 ★ 或 时长≥30 分钟）/ 'all' 全部（完整台账，供周末复盘）。
+   布局：7 列周视图（色块高度≈时长，色=类目）+ 每日合计 + 选中日明细（手机上主要靠明细读内容）。
+   说明：「重要」在时长记录里没有原生字段，故采用「★ 标记 或 ≥30 分钟」双判定 —— 碎片小事自动隐去，
+        长时段投入自动留下；后续若在专注页补 ★ 开关，此处判定无需改动即可生效。 */
+var CAL_IMPORTANT_MS = 30 * 60 * 1000;
+var calWeekOff = 0, calMode = 'imp', calSelKey = '';
+var CAL_CAT_COLOR = { '工作': 'var(--accent)', '学习': '#5171AC', '生活': '#1E7A5A', '交易': '#3F6E6A', '其他': '#96681C', '未分类': '#8A93A5' };
+function calCatColor(c) { return CAL_CAT_COLOR[c] || '#8A93A5'; }
+function calShort(ms) {
+  var m = Math.round(Math.max(0, +ms || 0) / 60000);
+  if (m <= 0) return '随手记';
+  if (m < 60) return m + 'm';
+  var h = Math.floor(m / 60), mm = m % 60;
+  return h + 'h' + (mm ? mm : '');
+}
+function calShortBare(ms) {
+  var m = Math.round(Math.max(0, +ms || 0) / 60000);
+  if (m <= 0) return '—';
+  if (m < 60) return m + 'm';
+  var h = Math.floor(m / 60), mm = m % 60;
+  return h + 'h' + (mm ? mm : '');
+}
+function calDayKeys(off) {
+  var r = fpWeekRange(off), out = [], i;
+  for (i = 0; i < 7; i++) out.push(fpDayKey(r.from + i * 86400000));
+  return out;
+}
+function calIsImp(r) { return r.imp === true || fpDur(r) >= CAL_IMPORTANT_MS; }
+function calAllRecs() {
+  var r = fpWeekRange(calWeekOff), out = [];
+  fpList().forEach(function (x) {
+    var t = fpAt(x);
+    if (t >= r.from && t < r.to) out.push(x);
+  });
+  return out;
+}
+function calOffLabel(off) {
+  if (off === 0) return '本周';
+  if (off === -1) return '上周';
+  if (off === 1) return '下周';
+  return off < 0 ? (Math.abs(off) + ' 周前') : (off + ' 周后');
+}
+function renderCalendar() {
+  var box = document.getElementById('calArea');
+  if (!box) return;
+  var keys = calDayKeys(calWeekOff), todayKey = fpDayKey(Date.now());
+  var r0 = fpWeekRange(calWeekOff);
+  var m0 = new Date(r0.from), m1 = new Date(r0.to - 86400000);
+  var rangeTxt = (m0.getMonth() + 1) + '/' + m0.getDate() + ' – ' + (m1.getMonth() + 1) + '/' + m1.getDate();
+  var all = calAllRecs();
+
+  var byDay = {}; keys.forEach(function (k) { byDay[k] = []; });
+  all.forEach(function (r) { var k = fpDayKey(fpStart(r) || fpAt(r)); if (byDay[k]) byDay[k].push(r); });
+  keys.forEach(function (k) {
+    byDay[k].sort(function (a, b) { return (fpStart(a) || fpAt(a)) - (fpStart(b) || fpAt(b)); });
+  });
+  var taskImpByDay = {};
+  (typeof tasks !== 'undefined' ? tasks : []).forEach(function (t) {
+    if (t.imp && !t.done && t.due && keys.indexOf(t.due) >= 0) taskImpByDay[t.due] = (taskImpByDay[t.due] || 0) + 1;
+  });
+  if (keys.indexOf(calSelKey) < 0) calSelKey = (keys.indexOf(todayKey) >= 0 ? todayKey : keys[0]);
+
+  var shownOf = {}, hiddenN = 0, allN = 0, shownN = 0, totMs = 0;
+  keys.forEach(function (k) {
+    var list = byDay[k];
+    allN += list.length;
+    var sh = (calMode === 'imp') ? list.filter(calIsImp) : list;
+    shownOf[k] = sh;
+    hiddenN += list.length - sh.length;
+    shownN += sh.length;
+    sh.forEach(function (r) { totMs += fpDur(r); });
+  });
+
+  var head = '<div class="cal-bar">'
+    + '<div class="cal-nav"><button id="calPrev" title="上一周">‹</button>'
+    + '<button id="calTodayBtn">本周</button>'
+    + '<button id="calNext" title="下一周">›</button></div>'
+    + '<div class="cal-range">' + rangeTxt + '<em>' + calOffLabel(calWeekOff) + '</em></div>'
+    + '<div class="cal-seg">'
+    + '<div class="opt' + (calMode === 'imp' ? ' on' : '') + '" data-m="imp">只看重要</div>'
+    + '<div class="opt' + (calMode === 'all' ? ' on' : '') + '" data-m="all">全部 · 复盘</div>'
+    + '</div></div>';
+
+  if (!allN) {
+    box.innerHTML = head + '<div class="cal-card"><div class="cal-empty">这一周还没有记录。<br>'
+      + '在「<b>专注</b>」页用「＋ 记一段」记下的时段，会按类目出现在这里。</div></div>';
+    wireCalendar(box);
+    return;
+  }
+  if (!shownN) {
+    box.innerHTML = head + '<div class="cal-card"><div class="cal-empty">这一周共 ' + allN + ' 段记录，'
+      + '没有一段被标记为重要、或达到 30 分钟。<br>点右上角「<b id="calSwitchAll">全部 · 复盘</b>」查看完整台账。</div></div>';
+    wireCalendar(box);
+    return;
+  }
+
+  var cols = keys.map(function (k, i) {
+    var sh = shownOf[k], isT = (k === todayKey);
+    var dd = +(new Date(k + 'T00:00:00').getDate());
+    var star = taskImpByDay[k] || 0;
+    var blocks = '';
+    sh.slice(0, 7).forEach(function (r) {
+      var min = Math.round(fpDur(r) / 60000);
+      var h = Math.max(20, Math.min(120, Math.round(min * 0.75)));
+      var did = fpDid(r) || '(未写内容)';
+      blocks += '<div class="cal-blk" style="background:' + calCatColor(r.cat) + ';height:' + h + 'px" title="'
+        + escapeHtml(did) + '"><span class="bt">' + escapeHtml(did) + '</span>'
+        + '<span class="bd">' + calShort(fpDur(r)) + '</span></div>';
+    });
+    if (sh.length > 7) blocks += '<div class="cal-more">+' + (sh.length - 7) + '</div>';
+    if (!sh.length) blocks += '<div class="cal-none">' + (byDay[k].length ? '已隐藏' : '—') + '</div>';
+    return '<div class="cal-col' + (isT ? ' today' : '') + (k === calSelKey ? ' sel' : '') + '">'
+      + '<div class="cal-ch' + (isT ? ' today' : '') + '" data-k="' + k + '">'
+      + '<span class="w">周' + '一二三四五六日'.charAt(i) + '</span>'
+      + '<span class="d">' + dd + '</span>'
+      + '<span class="s">' + (star ? '★' + star : '') + '</span></div>'
+      + '<div class="cal-body">' + blocks + '</div></div>';
+  }).join('');
+
+  var sums = keys.map(function (k) {
+    var sh = shownOf[k], ms = 0;
+    sh.forEach(function (r) { ms += fpDur(r); });
+    return '<div><b>' + calShortBare(ms) + '</b><span>' + sh.length + ' 段</span></div>';
+  }).join('');
+
+  var dk = calSelKey, dlist = shownOf[dk] || [], dm = 0;
+  dlist.forEach(function (r) { dm += fpDur(r); });
+  var rows = dlist.length ? dlist.map(function (r) {
+    var hasT = fpHasTime(r);
+    var left = hasT ? (fpClock(fpStart(r)) + '–' + fpClock(fpEnd(r))) : '随手记';
+    return '<div class="cal-row"><span class="rl">' + left + '</span>'
+      + '<span class="rb"><span class="rt">' + escapeHtml(fpDid(r) || '(未写内容)') + '</span>'
+      + '<span class="rd">' + (hasT ? calShortBare(fpDur(r)) : '无时段 · 不计入统计')
+      + (r.imp === true ? ' · ★ 重要' : '') + '</span></span>'
+      + '<span class="rc" style="--c:' + calCatColor(r.cat) + '">' + escapeHtml(r.cat || '未分类') + '</span></div>';
+  }).join('') : '<div class="cal-none" style="padding:16px 0">这天没有' + (calMode === 'imp' ? '重要' : '') + '记录</div>';
+
+  box.innerHTML = head + '<div class="cal-card">'
+    + '<div class="cal-grid">' + cols + '</div>'
+    + '<div class="cal-sum">' + sums + '</div>'
+    + '<div class="cal-week-tot">本周 <b>' + shownN + ' 段</b> · <b>' + calShortBare(totMs) + '</b>'
+    + (calMode === 'imp' && hiddenN ? '（已隐藏 ' + hiddenN + ' 段非重要）' : '') + '</div>'
+    + '<div class="cal-detail"><div class="cal-dh"><span class="dt">' + fpDayLabel(dk) + '</span>'
+    + '<span class="dm">' + dlist.length + ' 段 · ' + calShortBare(dm) + '</span></div>' + rows + '</div>'
+    + '</div>';
+  wireCalendar(box);
+}
+function wireCalendar(box) {
+  var b;
+  b = document.getElementById('calPrev'); if (b) b.onclick = function () { calWeekOff--; renderCalendar(); };
+  b = document.getElementById('calNext'); if (b) b.onclick = function () { calWeekOff++; renderCalendar(); };
+  b = document.getElementById('calTodayBtn'); if (b) b.onclick = function () { calWeekOff = 0; calSelKey = fpDayKey(Date.now()); renderCalendar(); };
+  b = document.getElementById('calSwitchAll'); if (b) b.onclick = function () { calMode = 'all'; renderCalendar(); };
+  box.querySelectorAll('.cal-seg .opt').forEach(function (o) {
+    o.onclick = function () { calMode = o.dataset.m; renderCalendar(); };
+  });
+  box.querySelectorAll('.cal-ch').forEach(function (c) {
+    c.onclick = function () { calSelKey = c.dataset.k; renderCalendar(); };
+  });
+}
 </script>
 <div id="updateBar" class="update-bar"><span>有新版本，点击刷新</span><button class="ub-act" id="updateBtn">刷新</button><button class="ub-close" id="updateClose" title="稍后">×</button></div>
 <div id="updateBar" class="update-bar"><span>有新版本，点击刷新</span><button class="ub-act" id="updateBtn">刷新</button><button class="ub-close" id="updateClose" title="稍后">×</button></div>
