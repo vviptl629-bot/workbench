@@ -439,7 +439,6 @@
   .stats-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
   .stats-summary .sbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;box-shadow:var(--shadow)}
   .stats-summary .sbox .n{font-size:24px;font-weight:800;color:var(--text);line-height:1.1}
-  .stats-summary .sbox .n.g{color:var(--accent)}
   .stats-summary .sbox .n.r{color:var(--accent)}
   .stats-summary .sbox .n.bad{color:var(--error)}
   .stats-summary .sbox.clickable{cursor:pointer;transition:transform .15s,box-shadow .15s}
@@ -559,11 +558,6 @@
     .ring .stat .lbl{font-size:10px}
   }
 
-  /* ---- 目标管理视图 ---- */
-    /* ---------- 灵感笔记 ---------- */
-    /* ---------- 目标管理视图（改造） ---------- */
-    .gfm-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
-    .gfm-mask.show{display:flex}
   /* ---------- PWA 安装引导 ---------- */
   .install-hint{position:fixed;left:12px;right:12px;bottom:12px;z-index:300;display:none;align-items:center;gap:10px;
     background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.18);}
@@ -966,7 +960,7 @@
       </div>
       <div class="stats-card" id="ovrListCard">
         <div class="card-title">当前逾期清单（按逾期天数排序）</div>
-        <div id="ovrList"></div>
+        <div id="ovrStatsList"></div>
       </div>
       <div class="stats-card analysis">
         <div class="card-title">改进建议</div>
@@ -1460,7 +1454,7 @@ function renderStats(){
       '<div class="ovr-meta">'+(m.due?('到期 '+m.due):'未设到期日')+' · <b>已逾期 '+maxDays+' 天</b></div></div>').join('');
   }
   // 当前逾期清单：合并相同内容，按逾期天数排序
-  const ovrEl=document.getElementById('ovrList');
+  const ovrEl=document.getElementById('ovrStatsList');
   if(ovr.length===0){
     ovrEl.innerHTML='<div style="font-size:13px;color:var(--muted)">✓ 当前没有逾期任务，保持得很好！</div>';
   }else{
@@ -1675,7 +1669,7 @@ async function pullSync(silent){
       // 避免在用户正在输入或弹窗打开时重渲染打断操作
       const ae=document.activeElement;
       const typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA');
-      const modalOpen=document.querySelector('.modal-overlay.show,.gfm-mask.show');
+      const modalOpen=document.querySelector('.modal-overlay.show');
       if(!typing&&!modalOpen)render();
       else updateCounts();
     }
@@ -2536,7 +2530,6 @@ function openEdit(id){
   bindTimeTrigger('editEndTrigger','editEnd');
   document.getElementById('editNote').value=t.note||'';
   // 每次打开都彻底重置键盘避让残留（上一场景可能留下了位移 / 底部固定栏抬起 / 底部留白）
-  if(typeof kbRelease==='function')kbRelease();
   const _em=document.getElementById('editModal');
   _em.classList.remove('kb-lift');_em.style.transform='';
   const _emb=_em.querySelector('.edit-modal');
@@ -2550,7 +2543,6 @@ function closeEdit(){
   editId=null;
   const em=document.getElementById('editModal');
   em.classList.remove('show','kb-lift');em.style.transform='';
-  if(typeof kbRelease==='function')kbRelease();
 }
 function saveEdit(){
   const t=tasks.find(x=>x.id===editId);if(!t){closeEdit();return;}
@@ -2799,7 +2791,7 @@ function toggleTheme(){
 function uiSafeToReload(){
   const ae=document.activeElement;
   const typing=ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.tagName==='SELECT'||ae.isContentEditable);
-  const modal=document.querySelector('.modal-overlay.show,.gfm-mask.show');
+  const modal=document.querySelector('.modal-overlay.show');
   return !typing&&!modal;
 }
 function showUpdateBar(){
@@ -3029,7 +3021,7 @@ function init(){
     const whole=(kbBox&&kbBox.isConnected)?kbBox:kbEl;   // 容器（页面=添加框；弹窗=遮罩）
     if(!whole)return;
     // 弹窗场景：真正要抬的是内层卡片（遮罩是全屏的，抬它没有意义）
-    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box,.gfm-card,.fp-note,.fp-edcard'):null;
+    const card=(whole!==kbEl&&whole.querySelector)?whole.querySelector('.edit-modal,.tp-body,.kbd-box'):null;
     const liftEl=card||whole;
     // ⚠️ 这里绝不能无条件复位再重算：每次校正都会把卡片"变回原高度、居中、滚回顶部"再重新限高抬起，
     //    7 次调度就是 7 次抖动（用户报的"屏幕晃动"），且抖动期间点击会丢（"要长按才能编辑"）。
@@ -3067,7 +3059,7 @@ function init(){
         if(_kbFit!==card||card.style.maxHeight!==avail+'px'){
           card.style.maxHeight=avail+'px';card.style.overflowY='auto';card.classList.add('kb-fit');_kbFit=card;
         }
-        _kbActs=card.querySelector('.edit-actions,.tpl-edit-actions,.fp-actions');
+        _kbActs=card.querySelector('.edit-actions,.tpl-edit-actions');
         // ⚠️ 限高会改变卡片高度 → flex 居中位置随之变化，必须用**限高后**的 rect 重算自然顶边。
         //    沿用限高前量到的值会差一个"重排偏移"（实测 31px：卡片贴不到可视区顶边，按钮又压到键盘线上）。
         kbSetLift(card,natTopOf()-top0);
@@ -3120,7 +3112,7 @@ function init(){
   }
   function kbRelease(){
     kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
-    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['fpEditPage','.fp-edcard'],['tplModal','.edit-modal']].forEach(pair=>{
+    [['taskAddBox','.edit-modal'],['editModal','.edit-modal'],['tplModal','.edit-modal']].forEach(pair=>{
       const el=document.getElementById(pair[0]);
       kbResetKb(el);
       try{const p=el&&el.querySelector(pair[1]);if(p)kbResetKb(p);}catch(_){}
@@ -3148,16 +3140,6 @@ function init(){
   }
   kbAttach(document.getElementById('taskAddBox'),['ringCard','impCard','taskAddBox','listArea']);
   kbAttach(document.getElementById('tplModal'),[],true); // 例行任务弹窗：行内编辑落在最下面那条时，键盘会盖住输入框与「保存」
-  // 专注弹窗专用的"清残留"入口。注意**不能**顺手把 kbRelease 挂到 window 上：
-  // openEdit/closeEdit 里那句 `if(typeof kbRelease==='function')kbRelease()` 一直够不到局部函数所以是空转，
-  // 一旦挂上去就会连 window.scrollTo(0,0) 一起生效 —— 每次编辑任务都把列表滚回顶部。只清这一个弹窗更安全。
-  window.fpKbRelease=function(){
-    kbEl=null;kbBox=null;kbClearTimers();kbFitReset();
-    const el=document.getElementById('fpEditPage');
-    kbResetKb(el);
-    try{const c=el&&el.querySelector('.fp-edcard');if(c)kbResetKb(c);}catch(_){}
-    document.documentElement.style.paddingBottom='';
-  };
   // 例行任务弹窗：关闭时清掉键盘期的限高/位移，否则下次打开卡片还是被压扁的、还带着位移
   window.tplKbRelease=function(){
     if(kbBox&&kbBox.id==='tplModal'){kbEl=null;kbBox=null;kbClearTimers();}
@@ -3596,7 +3578,6 @@ function initStudyPage(){
 }
 
 </script>
-<div id="updateBar" class="update-bar"><span>有新版本，点击刷新</span><button class="ub-act" id="updateBtn">刷新</button><button class="ub-close" id="updateClose" title="稍后">×</button></div>
 <div id="updateBar" class="update-bar"><span>有新版本，点击刷新</span><button class="ub-act" id="updateBtn">刷新</button><button class="ub-close" id="updateClose" title="稍后">×</button></div>
 <div id="installHint" class="install-hint">
   <div class="ih-icon"></div>
