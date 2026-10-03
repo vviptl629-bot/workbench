@@ -1269,7 +1269,7 @@ try{enCheck=JSON.parse(lsGet('workbench_en_check')||'{}')||{};}catch(e){enCheck=
 try{goals=JSON.parse(lsGet('workbench_goals')||'[]')||[];if(!Array.isArray(goals))goals=[];}catch(e){goals=[];}
 
 /* ---------- 休息日（作息）配置 + 内置 2026 法定节假日 ---------- */
-const WB_HOLIDAYS_2026=["2026-01-01","2026-01-02","2026-01-03","2026-202602-15","2026-202602-16","2026-202602-17","2026-202602-18","2026-202602-19","2026-202602-20","2026-202602-21","2026-202602-22","2026-202602-23","2026-04-04","2026-04-05","2026-04-06","2026-202605-01","2026-202605-02","2026-202605-03","2026-202605-04","2026-202605-05","2026-06-19","2026-06-20","2026-06-21","2026-09-25","2026-09-26","2026-09-27","2026-202610-01","2026-202610-02","2026-202610-03","2026-202610-04","2026-202610-05","2026-202610-06","2026-202610-07"];
+const WB_HOLIDAYS_2026=["2026-01-01","2026-01-02","2026-01-03","2026-02-15","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-21","2026-02-22","2026-02-23","2026-04-04","2026-04-05","2026-04-06","2026-05-01","2026-05-02","2026-05-03","2026-05-04","2026-05-05","2026-06-19","2026-06-20","2026-06-21","2026-09-25","2026-09-26","2026-09-27","2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07"];
 const WB_MAKEUP_2026=["2026-01-04","2026-02-14","2026-02-28","2026-05-09","2026-09-20","2026-10-10"];
 let restCfg={waishi:{wd:[0,6],holiday:true},coffee:{wd:[3,6],holiday:false},trade:{wd:[],holiday:false}};
 function isHoliday(d){return WB_HOLIDAYS_2026.indexOf(d)>=0;}
@@ -1277,9 +1277,12 @@ function isMakeup(d){return WB_MAKEUP_2026.indexOf(d)>=0;}
 function dowOf(d){try{return new Date(d+'T00:00:00').getDay();}catch(e){return new Date().getDay();}}
 function isRestDayFor(sub,d){
   var c=restCfg[sub]; if(!c)return false;
-  if(isHoliday(d))return !!c.holiday;     // 法定节假日：按该分类是否跟随放假
-  if(isMakeup(d))return false;            // 调休补班日：即便周末也要上班
-  var wd=c.wd||[]; return wd.indexOf(dowOf(d))>=0;
+  var wd=c.wd||[];
+  var dow=dowOf(d);
+  var weekend=(dow===0||dow===6);
+  if(isMakeup(d)) return c.holiday ? false : (wd.indexOf(dow)>=0); // 调休补班：国家日历类强制上班；固定周规律类按自身 wd
+  if(c.holiday) return weekend || isHoliday(d);                     // 跟随国家日历：周末或法定节假日休
+  return wd.indexOf(dow)>=0;                                        // 固定周规律（如咖啡店三六休）：只看 wd，不被节假日/补班改变
 }
 function restOverrideActive(){try{return lsGet('workbench_rest_override_date')===todayStr();}catch(e){return false;}}
 function saveRestCfg(){try{lsSet('workbench_rest_v1',JSON.stringify(restCfg));schedulePush();}catch(e){}}
