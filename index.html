@@ -1263,6 +1263,8 @@ let showDone=false; // 已完成任务折叠：false=收起(默认)，true=展�
 let showOvr=false;  // 逾期任务折叠：false=收起(默认)，true=展开
 let showTrash=false; // 回收站折叠：false=收起(默认)，true=展开
 let ovwDoneOpen=false; // 全日总览「已完成」折叠：false=收起(默认)，true=展开
+let showHpOvr=false;   // 首页「已逾期」折叠：false=收起(默认)，true=展开
+let ovwOvrOpen=false;  // 全日总览「已逾期」折叠：false=收起(默认)，true=展开
 let enCheck={};
 let goals=[];
 try{enCheck=JSON.parse(lsGet('workbench_en_check')||'{}')||{};}catch(e){enCheck={};}
@@ -1472,6 +1474,8 @@ function isRepeatActive(t){if(!t.repeat||t.repeat==='none')return false;if(t.rep
 function repLabel(r){return r==='daily'?'每天':r==='weekday'?'工作日':r==='weekly'?'每周':r==='monthly'?'每月':'不重复';}
 function isDoneToday(t){return (t.repeat&&t.repeat!=='none')?!!(t.checks&&t.checks[todayStr()]):!!t.done;}
 function isMarkedOverdue(t){return !!t.overdueMark;}
+// 统一「已逾期」桶：自动逾期(截止日已过未完且非重复) 或 手动标记逾期，且未完成。三处列表共用此口径
+function isOverdueBucket(t){return (isOverdue(t)||isMarkedOverdue(t))&&!t.done;}
 /* 标记记录为"刚被改动"，作为双端合并的版本依据 */
 function touch(o){o.updated=Date.now();return o;}
 /* 按 id 合并本地与远端数组：冲突时保留 updated(回退 created) 较新的一方；任一方缺失则取存在的 */
@@ -1946,7 +1950,8 @@ function doSaveTplEdit(id,row){
 function isTaskView(v){return ['today','temp','work','study','life','waishi','coffee','trade'].includes(v);}
 function visibleTasks(){
   const rep=t=>isRepeatActive(t); // 重复任务每天都显示
-  const act=t=>isOverdue(t)||isDueToday(t)||!t.due||rep(t); // v75：分类页固定看「今天」
+  // 分类页口径：今天可行动 + 逾期桶（自动逾期 或 手动标记逾期）都要出现，逾期项随后被路由进「已逾期」抽屉
+  const act=t=>isOverdueBucket(t)||isDueToday(t)||!t.due||rep(t);
   let r=[];
   if(view==='today'){
     r=tasks.filter(act);
@@ -1964,7 +1969,7 @@ function visibleTasks(){
 
 function updateCounts(){
   const open=tasks.filter(t=>!t.done);
-  const act=t=>isOverdue(t)||isDueToday(t)||!t.due||isRepeatActive(t);
+  const act=t=>isDueToday(t)||!t.due||isRepeatActive(t); // 徽标只数「当天可行动」任务，逾期不计入（与首页/分类页显示一致）
   const keys=['temp','work','study','life'];
   const cnt={today:open.filter(act).length};
   keys.forEach(k=>cnt[k]=open.filter(t=>t.category===k&&act(t)).length);
@@ -2044,6 +2049,17 @@ function renderHome(){
   }else{
     html+='<div class="hp-empty">今天还没有待完成任务</div>';
   }
+  // 已逾期：折叠收纳（与分类页一致），点开才展示
+  const hpOvr=split.overdue.filter(t=>!t.done);
+  if(hpOvr.length){
+    html+='<div class="ovr-bar" id="hpOvrBar">'+
+      '<span class="db-icon"></span>'+
+      '<span class="db-text">已逾期</span>'+
+      '<span class="db-count ovr-cnt">'+hpOvr.length+'</span>'+
+      '<span class="db-arrow'+(showHpOvr?' open':'')+'">'+(showHpOvr?'▲':'▼')+'</span>'+
+    '</div>';
+    html+='<div id="hpOvrList" class="'+(showHpOvr?'':'done-collapsed')+'">'+(showHpOvr?items(hpOvr):'')+'</div>';
+  }
   html+='<div class="hp-bridge" id="hpBridge">'+
     '<span class="hp-t">全日总览'+(more>0?' · 还有 '+more+' 条':'')+'</span>'+
     '<span class="hp-go">›</span>'+
@@ -2051,16 +2067,25 @@ function renderHome(){
   area.innerHTML=restBannerHTML()+html;
   const b=document.getElementById('hpBridge');
   if(b)b.onclick=()=>setView('overview');
+  const hpOvrBar=document.getElementById('hpOvrBar');
+  if(hpOvrBar)hpOvrBar.onclick=()=>{
+    showHpOvr=!showHpOvr;
+    const listEl=document.getElementById('hpOvrList');
+    const arrow=hpOvrBar.querySelector('.db-arrow');
+    if(showHpOvr){listEl.classList.remove('done-collapsed');listEl.innerHTML=items(hpOvr);arrow.classList.add('open');arrow.textContent='▲';}
+    else{listEl.classList.add('done-collapsed');listEl.innerHTML='';arrow.classList.remove('open');arrow.textContent='▼';}
+  };
 }
 
 function renderTasks(){
   const area=document.getElementById('listArea');
   const pre=(view==='work')?workTabsHtml():'';
   const list=visibleTasks();
-  const openList=list.filter(t=>!isDoneToday(t) && !isMarkedOverdue(t));
+  const ovrList=list.filter(isOverdueBucket);
+  const openList=list.filter(t=>!isOverdueBucket(t) && !isDoneToday(t));
   const doneList=list.filter(t=>isDoneToday(t));
-  const ovrList=list.filter(isMarkedOverdue);
-  openList.sort((a,b)=>{const oa=isOverdue(a)?0:isDueToday(a)?1:2,ob=isOverdue(b)?0:isDueToday(b)?1:2;return oa-ob;});
+  // 当日列表只放「今天该动的」(今天到期 > 无截止日 > 其余)，逾期统一收进「已逾期」抽屉
+  openList.sort((a,b)=>{const oa=isDueToday(a)?0:(!a.due?1:2),ob=isDueToday(b)?0:(!b.due?1:2);return oa-ob;});
   if(!openList.length&&!doneList.length&&!ovrList.length){
     const msg='这个分类下还没有任务';
     area.innerHTML=pre+'<div class="empty"><div class="big"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>'+msg+'</div>'+renderTrashHtml();
@@ -2166,8 +2191,16 @@ function renderOverviewView(){
   // 待完成：默认展示（置顶）
   if(pending.length)html+='<div class="ovw-group"><div class="section-title"> 待完成 · '+pending.length+'</div>'+items(pending)+'</div>';
   else if(!overdue.length)html+='<div class="ovw-group"><div class="ovw-all-done">✓ 今日待办已全部完成，去加点新任务吧！</div></div>';
-  // 逾期：单独归类（红色，位于待完成下方）
-  if(overdue.length)html+='<div class="ovw-group ovr-group"><div class="section-title"> 逾期 · '+overdue.length+'</div>'+items(overdue)+'</div>';
+  // 逾期：折叠收纳（与首页/分类页一致），默认收起，点击展开
+  if(overdue.length){
+    html+='<div class="ovw-group ovr-group">'+
+      '<div class="ovw-collapsed-head" data-act="ovw-toggle-ovr">'+
+        '<span>⚠ 已逾期 · '+overdue.length+'</span>'+
+        '<span class="chev">'+(ovwOvrOpen?'▾':'▸')+'</span>'+
+      '</div>'+
+      (ovwOvrOpen?'<div class="ovw-done-list">'+items(overdue)+'</div>':'')+
+    '</div>';
+  }
   // 今日已完成：仅当天完成（默认折叠），点击展开
   if(done.length){
     html+='<div class="ovw-group">'+
@@ -2186,6 +2219,7 @@ function workTabsHtml(){
   const open=tasks.filter(t=>!t.done);
   const act=t=>isOverdue(t)||isDueToday(t)||!t.due||isRepeatActive(t);
   return '<div class="subtabs">'+(SUBS.work||[]).map(s=>{
+    const act=t=>isDueToday(t)||!t.due||isRepeatActive(t); // 与 updateCounts 同口径：逾期不计入工作子类徽标
     const c=open.filter(t=>t.category==='work'&&t.sub===s.key&&act(t)).length;
     return '<button class="subtab'+(workFilter===s.key?' active':'')+'" data-sub="'+s.key+'" style="--s:'+s.color+';--s-soft:'+s.soft+'">'+
       s.name+' <span class="subtab-cnt">'+c+'</span></button>';
@@ -2534,7 +2568,7 @@ function revealTask(id){
   var r=el.getBoundingClientRect();
   if(r.bottom>(window.innerHeight||0)-20||r.top<20){try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
 }
-function toggle(id){const t=tasks.find(x=>x.id===id);if(!t)return;const now=Date.now();if(t.repeat&&t.repeat!=='none'){t.checks=t.checks||{};const d=todayStr();if(t.checks[d]){delete t.checks[d];if(t.checksAt)delete t.checksAt[d];}else{t.checks[d]=true;t.checksAt=t.checksAt||{};t.checksAt[d]=now;}}else{if(t.done){t.done=false;delete t.completedAt;}else{t.done=true;t.completedAt=now;}}t.updated=now;saveTasks();render();checkAllDone();}
+function toggle(id){const t=tasks.find(x=>x.id===id);if(!t)return;const now=Date.now();if(t.repeat&&t.repeat!=='none'){t.checks=t.checks||{};const d=todayStr();if(t.checks[d]){delete t.checks[d];if(t.checksAt)delete t.checksAt[d];}else{t.checks[d]=true;t.checksAt=t.checksAt||{};t.checksAt[d]=now;}}else{if(t.done){t.done=false;delete t.completedAt;}else{t.done=true;t.completedAt=now;delete t.overdueMark;delete t.overdueMarkAt;}}t.updated=now;saveTasks();render();checkAllDone();}
 function toggleImp(id){const t=tasks.find(x=>x.id===id);if(t){t.imp=!t.imp;t.updated=Date.now();saveTasks();render();showToast(t.imp?'★ 已标记为重要':'已取消重要标记');}}
 /* 首页「重要任务」置顶卡（%圆环下方） */
 var IMP_OPEN_MAX=3;
@@ -3443,6 +3477,7 @@ function init(){
       if(el.dataset.act==='edit')openEdit(id);
       if(el.dataset.act==='note'){toggleNoteOpen(id);return;}
       if(el.dataset.act==='ovw-toggle-done'){ovwDoneOpen=!ovwDoneOpen;render();return;}
+      if(el.dataset.act==='ovw-toggle-ovr'){ovwOvrOpen=!ovwOvrOpen;render();return;}
       return;
     }
     const tel=e.target.closest('[data-t-act]');
