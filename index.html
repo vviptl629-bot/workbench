@@ -837,6 +837,48 @@
     .sp-wrap{padding-left:16px;padding-right:16px}
     .sp-inp.w76{flex:0 0 70px}
   }
+
+  /* ---------- 侧边栏「外观」一行 + 主题色弹出 ---------- */
+  .appear-line{display:flex;align-items:center;gap:10px;padding:8px 12px}
+  .ap-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .theme-mini{display:flex;gap:3px;padding:2px;border-radius:9px;background:var(--bg);border:1px solid var(--border)}
+  .tm-opt{flex:1;text-align:center;padding:5px 9px;border-radius:7px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
+  .tm-opt:hover{color:var(--text)}
+  .tm-opt.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+  .accent-dot{width:18px;height:18px;border-radius:50%;margin-left:auto;cursor:pointer;border:2px solid var(--border);box-shadow:var(--shadow)}
+  .accent-pop{display:none;position:absolute;left:14px;right:14px;margin-top:4px;background:var(--elev);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow);z-index:40}
+  .accent-pop.show{display:block}
+  .accent-pop .accent-presets{display:flex;flex-wrap:wrap;gap:8px}
+  .accent-pop .accent-custom{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--muted)}
+  .accent-pop .accent-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid rgba(0,0,0,.05)}
+  .accent-pop .accent-swatch.active{border-color:var(--text)}
+  /* ---------- 设置弹层 ---------- */
+  .settings-card{background:var(--elev);border-radius:16px;width:94%;max-width:440px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--border);display:flex;flex-direction:column}
+  .settings-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px}
+  .settings-title{font-size:18px;font-weight:700}
+  .ic-close{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+  .settings-tabs{display:flex;gap:6px;padding:0 18px 10px}
+  .set-tab{padding:8px 14px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);background:var(--card-2);cursor:pointer;user-select:none}
+  .set-tab.active{background:var(--btn-primary);color:#fff}
+  .set-panel{padding:6px 18px 20px;display:flex;flex-direction:column;gap:10px}
+  .set-row{display:flex;gap:10px}
+  .set-row button{flex:1;padding:11px 0;border-radius:11px;border:1px solid var(--border);background:var(--card-2);color:var(--text);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s}
+  .set-row button:hover{border-color:var(--text)}
+  .set-row .btn-add{background:var(--btn-primary);border-color:transparent;color:#fff}
+  .set-row .btn-danger{background:var(--error-soft);border-color:var(--error);color:var(--error)}
+  .set-sep{height:1px;background:var(--border);margin:4px 0}
+  .set-hint{font-size:12px;color:var(--muted);line-height:1.6}
+  .rest-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+  .rest-name{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600}
+  .rest-name .dot{width:9px;height:9px;border-radius:50%}
+  .rd-days{display:flex;gap:4px;flex-wrap:wrap}
+  .rd-day{font-size:12.5px;padding:5px 8px;border:1px solid var(--border);border-radius:7px;background:var(--card-2);color:var(--muted);cursor:pointer;user-select:none;min-width:30px;text-align:center}
+  .rd-day.on{background:var(--btn-primary);border-color:transparent;color:#fff;font-weight:600}
+  .rd-hol{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text)}
+  .toggle-line{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text)}
+  /* 首页休息日提示 */
+  .rest-banner{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .rest-chip{display:inline-flex;align-items:center;gap:5px;background:var(--card-2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -869,31 +911,22 @@
     <div class="nav-label">工具</div>
     <div class="nav-item" id="spEntry"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 19.5V6a2 2 0 0 1 2-2h13v16H6a2 2 0 0 1-2-1.5Z"/><path d="M8 8h7M8 12h7M8 16h4"/></svg> 学习计划 <span class="count" id="c-study-plan">0</span></div>
     <div class="side-btn" id="btnTpl"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 12a8 8 0 0 1 13.5-5.5L20 8M20 4v4h-4M20 12a8 8 0 0 1-13.5 5.5L4 16M4 20v-4h4"/></svg> 例行任务</div>
-    <div class="fold-head" data-fold="accent">主题颜色<span class="fold-right"><svg class="fold-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="fold-body" data-fold="accent">
-      <div class="accent-card" id="accentCard">
-        <div class="theme-seg" id="themeSeg">
-          <div class="theme-opt" data-theme-opt="light">浅色</div>
-          <div class="theme-opt" data-theme-opt="dark">深色</div>
-        </div>
-        <div class="accent-row">
-          <div class="accent-presets" id="accentPresets"></div>
-          <label class="accent-custom"><input type="color" id="accentCustom" value="#2C4B8D"><span>自定义</span></label>
-        </div>
+        <div class="appear-line">
+      <span class="ap-label">外观</span>
+      <div class="theme-mini" id="themeMini">
+        <span class="tm-opt" data-theme-opt="light">浅</span>
+        <span class="tm-opt" data-theme-opt="dark">深</span>
       </div>
+      <span class="accent-dot" id="accentDot" title="主题色"></span>
     </div>
-    <div class="fold-head" data-fold="tools" id="foldToolsHead">分析与数据<span class="fold-right"><span class="fold-badge" id="foldToolsBadge"></span><svg class="fold-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg></span></div>
-    <div class="fold-body" data-fold="tools" id="foldTools">
-    <div class="nav-item" data-view="stats"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg> 统计分析</div>
-    <div class="spacer"></div>
-    <div class="side-btn" id="btnExportFile"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14"/></svg> 导出含数据文件</div>
-    <div class="side-btn" id="btnExportJson"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 4h11l3 3v13H5zM8 4v5h7M8 14h8v6H8z"/></svg> 备份(JSON)</div>
-    <div class="side-btn" id="btnExportCsv"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M4 15h16M9 5v14M15 5v14"/></svg> 导出CSV</div>
-    <div class="side-btn" id="btnImport"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 20V10m0 0 4 4m-4-4-4 4M5 5h14"/></svg> 导入(JSON)</div>
+    <div class="accent-pop" id="accentPop">
+      <div class="accent-presets" id="accentPresets"></div>
+      <label class="accent-custom"><input type="color" id="accentCustom" value="#2C4B8D"><span>自定义</span></label>
+    </div>
+        <div class="nav-item" data-view="stats">统计分析</div>
+    <div class="side-btn" id="btnSettings">⚙ 设置</div>
+    <div class="side-btn" id="btnSync">云端同步</div>
     <div class="store-status" id="storeStatus"></div>
-    <div class="side-btn" id="btnSync"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 18 18H7Z"/></svg> 云端同步</div>
-    <div class="side-btn" id="btnClear"><svg class="sb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg> 清空全部</div>
-    </div><!-- /foldTools 折叠体 -->
   </aside>
   <div class="overlay" id="overlay"></div>
 
@@ -1180,6 +1213,32 @@
   </div>
 </div>
 
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="settings-card">
+    <div class="settings-head"><span class="settings-title">设置</span><button class="ic-close" id="settingsClose">×</button></div>
+    <div class="settings-tabs">
+      <span class="set-tab active" data-set-tab="data">数据</span>
+      <span class="set-tab" data-set-tab="rest">作息</span>
+    </div>
+    <div class="set-panel" data-set-panel="data">
+      <div class="set-hint">云端同步在侧边栏「云端同步」中管理；以下是本地留档 / 迁移用。</div>
+      <div class="set-row"><button class="btn-add" id="setExportJson">导出备份 (JSON)</button></div>
+      <div class="set-row"><button id="setImportJson">导入 (JSON)</button></div>
+      <div class="set-row"><button id="setExportCsv">导出 CSV</button></div>
+      <div class="set-row"><button id="setExportFile">导出含数据文件</button></div>
+      <div class="set-sep"></div>
+      <div class="set-row"><button class="btn-danger" id="setClear">清空全部</button></div>
+    </div>
+    <div class="set-panel" data-set-panel="rest" style="display:none">
+      <div class="set-hint">设置各分类的休息日。例行任务在休息日当天不自动生成，并在首页提示。</div>
+      <div id="restConfig"></div>
+      <div class="set-row"><label class="toggle-line"><input type="checkbox" id="restOverride"> 今天照常上班（临时覆盖休息日，当天生成全部例行任务）</label></div>
+      <div class="set-hint">法定节假日依据国务院办公厅 2026 年放假安排内置（含调休补班日）。2027 年表可在次年更新。</div>
+    </div>
+  </div>
+</div>
+
 <script id="seed" type="application/json">[]</script>
 
 <script>
@@ -1209,6 +1268,21 @@ let goals=[];
 try{enCheck=JSON.parse(lsGet('workbench_en_check')||'{}')||{};}catch(e){enCheck={};}
 try{goals=JSON.parse(lsGet('workbench_goals')||'[]')||[];if(!Array.isArray(goals))goals=[];}catch(e){goals=[];}
 
+/* ---------- 休息日（作息）配置 + 内置 2026 法定节假日 ---------- */
+const WB_HOLIDAYS_2026=["2026-01-01","2026-01-02","2026-01-03","2026-202602-15","2026-202602-16","2026-202602-17","2026-202602-18","2026-202602-19","2026-202602-20","2026-202602-21","2026-202602-22","2026-202602-23","2026-04-04","2026-04-05","2026-04-06","2026-202605-01","2026-202605-02","2026-202605-03","2026-202605-04","2026-202605-05","2026-06-19","2026-06-20","2026-06-21","2026-09-25","2026-09-26","2026-09-27","2026-202610-01","2026-202610-02","2026-202610-03","2026-202610-04","2026-202610-05","2026-202610-06","2026-202610-07"];
+const WB_MAKEUP_2026=["2026-01-04","2026-02-14","2026-02-28","2026-05-09","2026-09-20","2026-10-10"];
+let restCfg={waishi:{wd:[0,6],holiday:true},coffee:{wd:[3,6],holiday:false},trade:{wd:[],holiday:false}};
+function isHoliday(d){return WB_HOLIDAYS_2026.indexOf(d)>=0;}
+function isMakeup(d){return WB_MAKEUP_2026.indexOf(d)>=0;}
+function dowOf(d){try{return new Date(d+'T00:00:00').getDay();}catch(e){return new Date().getDay();}}
+function isRestDayFor(sub,d){
+  var c=restCfg[sub]; if(!c)return false;
+  if(isHoliday(d))return !!c.holiday;     // 法定节假日：按该分类是否跟随放假
+  if(isMakeup(d))return false;            // 调休补班日：即便周末也要上班
+  var wd=c.wd||[]; return wd.indexOf(dowOf(d))>=0;
+}
+function restOverrideActive(){try{return lsGet('workbench_rest_override_date')===todayStr();}catch(e){return false;}}
+function saveRestCfg(){try{lsSet('workbench_rest_v1',JSON.stringify(restCfg));schedulePush();}catch(e){}}
 /* ---- 英语93天计划迁移 (一次性, 旧 enCheck 数据升为目标) ---- */
 (function migrateEnPlan(){
   if(lsGet('workbench_goals_v1_migrated')==='1')return;
@@ -1517,6 +1591,8 @@ function load(){
   raw=lsGet(TPL_KEY);
   if(raw){try{templates=JSON.parse(raw)||[];}catch(e){templates=[];}}
   if(!Array.isArray(templates))templates=[];
+  raw=lsGet('workbench_rest_v1');
+  if(raw){try{restCfg=JSON.parse(raw)||restCfg;}catch(e){}}
 }
 /* 每日自动备份：当天首次保存时写入备份键，保留最近 7 天 */
 function autoBackup(){
@@ -1592,7 +1668,7 @@ function tokenAgeDays(){return sync.tokenAt?Math.floor((Date.now()-sync.tokenAt)
 function tokenExpired(){return tokenAgeDays()>=TOKEN_TTL_DAYS;}
 function clearSyncToken(){sync.token='';sync.tokenAt=0;sync.enabled=false;saveSyncCfg();syncStatus('已清除本机 Token');showGistInfo();}
 function syncStatus(msg,cls){const el=document.getElementById('syncStatus');if(!el)return;el.textContent=msg||'';el.className='sync-status'+(cls?' '+cls:'');if(cls==='err'){el.style.cursor='pointer';el.title='点击更新 Token';el.onclick=openSync;}else{el.style.cursor='';el.title='';el.onclick=null;}}
-function syncPayload(){sync.rev=(sync.rev||0)+1;return JSON.stringify({v:SYNC_VER,rev:sync.rev,baseRev:sync.lastRev||0,updatedAt:Date.now(),tasks:tasks,trash:trash,templates:templates,ideas:ideas,goals:goals,tombstones:tombstones,study:(typeof spData!=='undefined'?spData:null)});}
+function syncPayload(){sync.rev=(sync.rev||0)+1;return JSON.stringify({v:SYNC_VER,rev:sync.rev,baseRev:sync.lastRev||0,updatedAt:Date.now(),tasks:tasks,trash:trash,templates:templates,ideas:ideas,goals:goals,tombstones:tombstones,restCfg:restCfg,study:(typeof spData!=='undefined'?spData:null)});}
 async function gistReq(method,id,body){
   const url=id?('https://api.github.com/gists/'+id):'https://api.github.com/gists';
   const opt={method:method,headers:{'Authorization':'Bearer '+sync.token,'Content-Type':'application/json','Accept':'application/vnd.github+json'}};
@@ -1649,19 +1725,20 @@ async function pullSync(silent){
       const keepLocal=window.confirm('检测到其他设备也修改过数据（云端版本 '+d.rev+'，本端基于 ' + sync.lastRev + '）。\n\n【确定】保留本端改动并覆盖云端\n【取消】放弃本端改动，改用云端数据');
       if(keepLocal){sync.lastRev=d.rev;sync.dirty=false;saveSyncCfg();pushSync();return;}
     }
-    const before=JSON.stringify([tasks,trash,templates,ideas,goals,tombstones,(typeof spData!=='undefined'?spData:null)]);
+    const before=JSON.stringify([tasks,trash,templates,ideas,goals,tombstones,restCfg,(typeof spData!=='undefined'?spData:null)]);
     if(Array.isArray(d.tasks))tasks=mergeById(tasks,d.tasks);
     if(Array.isArray(d.trash))trash=mergeById(trash,d.trash);
     if(Array.isArray(d.templates))templates=mergeById(templates,d.templates);
     if(Array.isArray(d.ideas))ideas=mergeById(ideas,d.ideas);
     if(Array.isArray(d.goals))goals=mergeById(goals,d.goals);
     if(Array.isArray(d.tombstones))tombstones=mergeById(tombstones,d.tombstones,'key');
+    if(d.restCfg&&typeof d.restCfg==='object')restCfg=d.restCfg;
     if(d.study&&typeof spData!=='undefined'&&Array.isArray(d.study.plans)){
       spData.plans=mergeById(spData.plans,d.study.plans);
       spData.records=mergeById(spData.records,Array.isArray(d.study.records)?d.study.records:[]);
     }
     applyTombstones(); // 落实跨端删除：移除任务/灵感、移入回收站
-    const after=JSON.stringify([tasks,trash,templates,ideas,goals,tombstones,(typeof spData!=='undefined'?spData:null)]);
+    const after=JSON.stringify([tasks,trash,templates,ideas,goals,tombstones,restCfg,(typeof spData!=='undefined'?spData:null)]);
     if(before!==after){
       saveTasks();saveTrash();saveTpl();saveIdeas();saveGoals();saveTomb();
       if(typeof spSave==='function'){spSave();if(typeof spRender==='function')spRender();}
@@ -1708,6 +1785,7 @@ function genRoutine(){
   templates.forEach(tpl=>{
     if(tpl.paused)return;
     if(tpl.lastGen===today)return;
+    if(!restOverrideActive() && tpl.sub && isRestDayFor(tpl.sub, today))return; // 休息日不生成该分类例行任务（不记 lastGen，便于临时「照常上班」后补生成）
     // 双保险：即使 lastGen 不是今天，若今天已存在该模板的任务也不重复生成
     const exists=tasks.some(t=>t.tplId===tpl.id&&t.due===today);
     if(!exists){
@@ -1947,9 +2025,7 @@ function updateStoreStatus(){
       +'<br>占用 Top5：'+(rows.slice(0,5).map(r=>r[0].replace('workbench_','')+'('+r[1]+'KB)').join('、')||'—')
       +'<br><button class="st-btn" id="stExport">导出 JSON 备份</button> <button class="st-btn" id="stExportHtml">导出含数据文件</button></div>';
   }catch(e){}
-  el.innerHTML='本地'+(lsOK?'✓':'✗')+' · 任务'+n(tasks)+' 目标'+n(goals)+warnHTML+'<br>'+cloud+' · '+location.origin+detail;
-  const e1=document.getElementById('stExport');if(e1&&!e1.dataset.bound){e1.dataset.bound='1';e1.onclick=exportJson;}
-  const e2=document.getElementById('stExportHtml');if(e2&&!e2.dataset.bound){e2.dataset.bound='1';e2.onclick=exportFile;}
+  el.innerHTML='本地'+(lsOK?'✓':'✗')+' · 任务'+n(tasks)+' · 模板'+n(templates)+(warnHTML?'<br>'+warnHTML:'')+'<br>'+cloud;
 }
 
 /* v76(A方案)：首页展示「今日待完成」列表（可直接勾完成）+ 底部「全日总览 ›」入口；添加卡按钮收窄，主页比例更和谐 */
@@ -1969,7 +2045,7 @@ function renderHome(){
     '<span class="hp-t">全日总览'+(more>0?' · 还有 '+more+' 条':'')+'</span>'+
     '<span class="hp-go">›</span>'+
   '</div>';
-  area.innerHTML=html;
+  area.innerHTML=restBannerHTML()+html;
   const b=document.getElementById('hpBridge');
   if(b)b.onclick=()=>setView('overview');
 }
@@ -2660,7 +2736,7 @@ function exportFile(){
   area.innerHTML=snap;render();
   download(html,'我的工作台.html','text/html');
 }
-function exportJson(){download(JSON.stringify({tasks,trash,templates,ideas,goals,study:(typeof spData!=='undefined'?spData:null)},null,2),'工作台备份_'+todayStr()+'.json','application/json');}
+function exportJson(){download(JSON.stringify({tasks,trash,templates,ideas,goals,restCfg,study:(typeof spData!=='undefined'?spData:null)},null,2),'工作台备份_'+todayStr()+'.json','application/json');}
 function exportCsv(){
   const rows=[['日期','分类','内容','状态','时间','备注']];
   tasks.forEach(t=>{
@@ -2679,6 +2755,7 @@ function importJson(){
       if(Array.isArray(d.templates)){templates=d.templates;saveTpl();}
       if(Array.isArray(d.ideas)){ideas=d.ideas;saveIdeas();}
       if(Array.isArray(d.goals)){goals=d.goals;saveGoals();}
+      if(d.restCfg&&typeof d.restCfg==='object'){restCfg=d.restCfg;saveRestCfg();}
       if(d.study&&typeof spData!=='undefined'&&Array.isArray(d.study.plans)){spData.plans=d.study.plans;spData.records=Array.isArray(d.study.records)?d.study.records:[];spSave();if(typeof spRender==='function')spRender();}
       render();alert('导入成功');}catch(e){alert('解析失败');}};
     r.readAsText(f);};
@@ -2756,16 +2833,17 @@ function buildAccentUI(){
     var s=document.createElement('div');
     s.className='accent-swatch'+(p.hex.toLowerCase()===cur?' active':'');
     s.style.background=p.hex;s.title=p.name;
-    s.onclick=function(){setAccent(p.hex);buildAccentUI();};
+    s.onclick=function(){setAccent(p.hex);buildAccentUI();var pp=document.getElementById('accentPop');if(pp)pp.classList.remove('show');};
     box.appendChild(s);
   });
   var ci=document.getElementById('accentCustom');
-  if(ci){ci.value=currentAccent();ci.oninput=function(){setAccent(ci.value);};ci.onchange=function(){setAccent(ci.value);buildAccentUI();};}
+  if(ci){ci.value=currentAccent();ci.oninput=function(){setAccent(ci.value);var dot=document.getElementById('accentDot');if(dot)dot.style.background=ci.value;};ci.onchange=function(){setAccent(ci.value);buildAccentUI();};}
+  var dot=document.getElementById('accentDot');if(dot)dot.style.background=currentAccent();
 }
 /* 「主题颜色」组内的 浅色/深色 切换：与快捷键 D 共用同一份偏好（workbench_theme） */
 function markThemeSeg(){
   var dark=document.documentElement.getAttribute('data-theme')==='dark';
-  Array.prototype.forEach.call(document.querySelectorAll('#themeSeg .theme-opt'),function(o){
+  Array.prototype.forEach.call(document.querySelectorAll('#themeSeg .theme-opt, #themeMini .tm-opt'),function(o){
     o.classList.toggle('active',(o.getAttribute('data-theme-opt')==='dark')===dark);
   });
 }
@@ -2779,7 +2857,7 @@ function setThemeMode(wantDark){
   syncThemeColor(); // 状态栏颜色跟随 --btn-primary
 }
 function buildThemeSeg(){
-  Array.prototype.forEach.call(document.querySelectorAll('#themeSeg .theme-opt'),function(o){
+  Array.prototype.forEach.call(document.querySelectorAll('#themeSeg .theme-opt, #themeMini .tm-opt'),function(o){
     o.onclick=function(){setThemeMode(o.getAttribute('data-theme-opt')==='dark');};
   });
   markThemeSeg();
@@ -2824,6 +2902,87 @@ function hideBoot(){
   setTimeout(()=>{const x=document.getElementById('bootScreen');if(x)x.remove();},600);
 }
 
+
+/* ---------- 休息日 UI + 设置页 绑定 ---------- */
+function restBannerHTML(){
+  if(restOverrideActive())return '';
+  var today=todayStr();
+  var subs=['waishi','coffee','trade'];
+  var resting=subs.filter(function(s){return isRestDayFor(s,today);});
+  if(!resting.length)return '';
+  var names={waishi:'外事办',coffee:'咖啡店',trade:'自营交易'};
+  return '<div class="rest-banner">'+resting.map(function(s){return '<span class="rest-chip">'+names[s]+' 今日休息</span>';}).join('')+'</div>';
+}
+function renderRestConfig(){
+  var box=document.getElementById('restConfig'); if(!box)return;
+  var defs=[['waishi','外事办','var(--accent)'],['coffee','咖啡店','#96681C'],['trade','自营交易','#3F6E6A']];
+  var labels='一二三四五六日';
+  box.innerHTML=defs.map(function(d){
+    var cfg=restCfg[d[0]]||{wd:[],holiday:false};
+    var wd=cfg.wd||[];
+    var dayBtns=labels.split('').map(function(ch,i){
+      var dow=(i===6?0:i+1);
+      var on=wd.indexOf(dow)>=0;
+      return '<span class="rd-day'+(on?' on':'')+'" data-rest-sub="'+d[0]+'" data-rest-dow="'+dow+'">'+ch+'</span>';
+    }).join('');
+    return '<div class="rest-row"><div class="rest-name"><span class="dot" style="background:'+d[2]+'"></span>'+d[1]+'</div>'+
+      '<div class="rd-days">'+dayBtns+'</div>'+
+      '<label class="rd-hol"><input type="checkbox" data-rest-hol="'+d[0]+'"'+(cfg.holiday?' checked':'')+'> 法定节假日休息</label></div>';
+  }).join('');
+}
+function toggleRestDay(sub,dow){
+  restCfg[sub]=restCfg[sub]||{wd:[],holiday:false};
+  var wd=restCfg[sub].wd||[];
+  var i=wd.indexOf(dow);
+  if(i>=0)wd.splice(i,1);else wd.push(dow);
+  restCfg[sub].wd=wd;
+  saveRestCfg(); renderRestConfig(); render();
+}
+function setRestOverride(on){
+  try{ lsSet('workbench_rest_override_date', on?todayStr():''); }catch(e){}
+  renderRestConfig(); render();
+}
+function openSettings(tab){
+  var m=document.getElementById('settingsModal'); if(!m)return;
+  m.classList.add('show'); setSettingsTab(tab||'data');
+}
+function setSettingsTab(tab){
+  document.querySelectorAll('.set-tab').forEach(function(t){t.classList.toggle('active',t.getAttribute('data-set-tab')===tab);});
+  document.querySelectorAll('.set-panel').forEach(function(p){p.style.display=(p.getAttribute('data-set-panel')===tab)?'block':'none';});
+  if(tab==='rest')renderRestConfig();
+}
+function closeSettings(){var m=document.getElementById('settingsModal');if(m)m.classList.remove('show');}
+function toggleAccentPop(){var p=document.getElementById('accentPop');if(p)p.classList.toggle('show');}
+function bindSettings(){
+  var bs=document.getElementById('btnSettings'); if(bs)bs.onclick=function(){openSettings('data');closeSidebar();};
+  var ad=document.getElementById('accentDot'); if(ad)ad.onclick=function(e){e.stopPropagation();toggleAccentPop();};
+  document.querySelectorAll('.set-tab').forEach(function(t){t.onclick=function(){setSettingsTab(t.getAttribute('data-set-tab'));};});
+  var ex=document.getElementById('setExportJson'); if(ex)ex.onclick=exportJson;
+  var im=document.getElementById('setImportJson'); if(im)im.onclick=function(){importJson();closeSettings();};
+  var cs=document.getElementById('setExportCsv'); if(cs)cs.onclick=exportCsv;
+  var ef=document.getElementById('setExportFile'); if(ef)ef.onclick=exportFile;
+  var cl=document.getElementById('setClear'); if(cl)cl.onclick=function(){clearAll();};
+  var ov=document.getElementById('restOverride'); if(ov)ov.onchange=function(e){setRestOverride(e.target.checked);};
+  var sc=document.getElementById('settingsClose'); if(sc)sc.onclick=closeSettings;
+  var sm=document.getElementById('settingsModal');
+  if(sm)sm.addEventListener('click',function(e){if(e.target.id==='settingsModal'){closeSettings();}});
+  var rc=document.getElementById('restConfig');
+  if(rc){
+    rc.addEventListener('click',function(e){
+      var day=e.target.closest('[data-rest-dow]');
+      if(day){toggleRestDay(day.getAttribute('data-rest-sub'),parseInt(day.getAttribute('data-rest-dow'),10));return;}
+    });
+    rc.addEventListener('change',function(e){
+      var hc=e.target.closest('[data-rest-hol]');
+      if(hc){var sub=hc.getAttribute('data-rest-hol');restCfg[sub]=restCfg[sub]||{wd:[],holiday:false};restCfg[sub].holiday=hc.checked;saveRestCfg();render();return;}
+    });
+  }
+  document.addEventListener('click',function(e){
+    var p=document.getElementById('accentPop');
+    if(p&&p.classList.contains('show')&&!p.contains(e.target)&&e.target.id!=='accentDot')p.classList.remove('show');
+  });
+}
+
 function init(){
   // 初始化自定义时间选择器
   initTimePicker();
@@ -2832,7 +2991,7 @@ function init(){
   bindTimeTrigger('timeStartTrigger','timeStart');
   // PWA: 注册离线缓存 + 安装引导
   if('serviceWorker' in navigator){
-    try{navigator.serviceWorker.register('./sw.js');}catch(e){}
+    try{navigator.serviceWorker.register('./sw.js').catch(function(){});}catch(e){}
     // D2：新版本就绪后由页面决定是否刷新，Service Worker 不再强制 reload
     try{
       navigator.serviceWorker.addEventListener('message',function(e){
@@ -3205,12 +3364,8 @@ function init(){
     };
   });
   document.querySelectorAll('.bn').forEach(n=>n.onclick=()=>setView(n.dataset.view));
-  document.getElementById('btnExportFile').onclick=exportFile;
-  document.getElementById('btnExportJson').onclick=exportJson;
-  document.getElementById('btnExportCsv').onclick=exportCsv;
-  document.getElementById('btnImport').onclick=importJson;
-  document.getElementById('btnClear').onclick=clearAll;
   document.getElementById('btnSync').onclick=openSync;
+  bindSettings();
   document.getElementById('btnTpl').onclick=()=>{openTpl();closeSidebar();};
   const tplCloseFn=()=>{document.getElementById('tplModal').classList.remove('show');if(window.tplKbRelease)window.tplKbRelease();};
   document.getElementById('tplClose').onclick=tplCloseFn;
