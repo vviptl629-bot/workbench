@@ -1740,7 +1740,7 @@ async function pullSync(silent){
     applyTombstones(); // 落实跨端删除：移除任务/灵感、移入回收站
     const after=JSON.stringify([tasks,trash,templates,ideas,goals,tombstones,restCfg,(typeof spData!=='undefined'?spData:null)]);
     if(before!==after){
-      saveTasks();saveTrash();saveTpl();saveIdeas();saveGoals();saveTomb();
+      saveTasks();saveTrash();saveTpl();saveIdeas();saveGoals();saveTomb();saveRestCfg();
       if(typeof spSave==='function'){spSave();if(typeof spRender==='function')spRender();}
       genRoutine(); // 拉取到的新模板若今天还没生成任务，立即补生成
       // 避免在用户正在输入或弹窗打开时重渲染打断操作
